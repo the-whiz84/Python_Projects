@@ -26,16 +26,19 @@ timmy.shape("turtle")
 timmy.speed("fast")
 colormode(255)
 
-x = 0
-y = 0
-timmy.setpos(x, y)
+x = -225
+y = -225
 
 def draw_dots(y_coordinate):
+    timmy.penup()
+    timmy.setpos(x, y)
+    timmy.pendown()
     for _ in range(10):
         color = random.choice(rgb_colors)
         timmy.dot(20, color)
         timmy.penup()
         timmy.fd(50)
+
 
 for _ in range(10):
     draw_dots(y)
