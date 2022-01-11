@@ -22,9 +22,9 @@ import random
 from turtle import Turtle, Screen, colormode
 
 timmy = Turtle()
-timmy.shape("turtle")
 timmy.speed("fast")
 colormode(255)
+timmy.hideturtle()
 
 x = -225
 y = -225
