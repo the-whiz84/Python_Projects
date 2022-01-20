@@ -12,15 +12,18 @@ class Scoreboard(Turtle):
 
     def update_scoreboard(self):
         self.clear()
-        self.goto(-50, 200)
-        self.write(self.l_score, align="center", font=("Courier", 24, "normal"))
-        self.goto(50, 200)
-        self.write(self.r_score, align="center", font=("Courier", 24, "normal"))
+        self.goto(-50, 350)
+        self.write(self.l_score, align="center", font=("Courier", 32, "normal"))
+        self.goto(50, 350)
+        self.write(self.r_score, align="center", font=("Courier", 32, "normal"))
 
     def game_over(self):
         self.home()
-        self.write("GAME OVER", align="center", font=("Courier", 36, "normal"))
-
+        if self.l_score > self.r_score:
+            self.write("LEFT PLAYER WINS", align="center", font=("Courier", 36, "normal"))
+        else:
+            self.write("RIGHT PLAYER WINS", align="center", font=("Courier", 36, "normal"))
+            
     def l_point(self):
         self.l_score += 1
         self.update_scoreboard()
