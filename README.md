@@ -18,5 +18,5 @@ I use VS Code but you can use either PyCharm, VIM or your favorite one.
 
 3. In Linux you can also run them directly from the Terminal by launching them with Python:
 /bin/python /path-to-file/main.py
-# On some distros you might need to type
+ On some distros you might need to type
 python3 /path-to-file/main.py
