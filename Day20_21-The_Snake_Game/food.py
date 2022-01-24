@@ -10,7 +10,7 @@ class Food(Turtle):
         self.shape("turtle")
         self.penup()
         self.shapesize(stretch_len=0.75, stretch_wid=0.75)
-        self.color("red")
+        self.color("limegreen")
         self.speed("fastest")
         self.refresh()
 
