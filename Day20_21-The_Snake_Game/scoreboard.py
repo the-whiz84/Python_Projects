@@ -13,19 +13,30 @@ class Scoreboard(Turtle):
         self.penup()
         self.color("white")
         self.goto(0, 460)
+        self.get_high_score()
         self.update_scoreboard()
 
     def update_scoreboard(self):
         '''Write the current score on the screen. You can customize the alignment and font used.'''
-        self.write(arg=f"Score: {self.score}", align=ALIGNMENT, font=FONT)
+        self.clear()
+        self.write(arg=f"Score: {self.score}. High Score: {self.high_score}", align=ALIGNMENT, font=FONT)
 
     def increase_score(self):
         '''Increase the score by 1 each time the snake collides with the food.'''
-        self.clear()
         self.score += 1
         self.update_scoreboard()
 
-    def game_over(self):
-        '''Signal when it is game over and display the message on the screen.'''
-        self.goto(0, 0)
-        self.write(arg="GAME OVER", align=ALIGNMENT, font=FONT)
+    def get_high_score(self):
+        with open("data.txt", mode="r") as data:
+            self.high_score = int(data.read())
+
+    def save_high_score(self):
+        with open("data.txt", mode='w') as data:
+            data.write(f"{self.high_score}")
+
+    def reset(self):
+        if self.score > self.high_score:
+            self.high_score = self.score
+            self.save_high_score()
+        self.score = 0
+        self.update_scoreboard()
