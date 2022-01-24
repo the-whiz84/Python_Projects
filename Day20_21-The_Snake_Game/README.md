@@ -8,5 +8,6 @@ You cannot switch the snake head direction to the opposite side. For eg, if the 
 Each time the Snake eats a turtle, it's size increases and a point is added to the scoreboard.
 
 Game Over occurs when the snake hits the edges of the screen or it's own tail.
+When this happens, you can choose to continue playing or to quit and close the window.
 
-See how high a score you can achieve!
+High Score is saved and kept between sessions.
