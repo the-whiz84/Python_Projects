@@ -11,21 +11,25 @@ screen.bgcolor("black")
 screen.title("Wizard's Snake Game")
 screen.tracer(0)
 
-
 snake = Snake()
 food = Food()
 scoreboard = Scoreboard()
 
-screen.listen()
-screen.onkey(snake.up, "Up")
-screen.onkey(snake.down, "Down")
-screen.onkey(snake.left, "Left")
-screen.onkey(snake.right, "Right")
-
+# screen.listen()
+# screen.onkey(snake.up, "Up")
+# screen.onkey(snake.down, "Down")
+# screen.onkey(snake.left, "Left")
+# screen.onkey(snake.right, "Right")
 
 game_is_on = True
 
 while game_is_on:
+    screen.listen()
+    screen.onkey(snake.up, "Up")
+    screen.onkey(snake.down, "Down")
+    screen.onkey(snake.left, "Left")
+    screen.onkey(snake.right, "Right")
+
     screen.update()
     time.sleep(0.1)
     snake.move()
@@ -36,13 +40,18 @@ while game_is_on:
         scoreboard.increase_score()
 
     if snake.head.xcor() > 480 or snake.head.xcor() < -480 or snake.head.ycor() > 480 or snake.head.ycor() < -480:
-        scoreboard.reset()
-        snake.reset()
+        continue_game = screen.textinput("Continue game", "Do you want to play again? Type 'y' or 'n'")
+        if continue_game.lower() == "y":
+            scoreboard.refresh()
+            snake.restart()
+        else:
+            screen.bye()
 
     for segment in snake.segments[1:]:
         if snake.head.distance(segment) < 10:
-            scoreboard.reset()
-            snake.reset()
-
-
-screen.exitonclick()
+            continue_game = screen.textinput("Continue game", "Do you want to play again? Type 'y' or 'n'")
+            if continue_game.lower() == "y":
+                scoreboard.refresh()          
+                snake.restart()
+            else:
+                screen.bye()
