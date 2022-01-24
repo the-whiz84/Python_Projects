@@ -18,7 +18,7 @@ class Snake:
         '''This method creates the Snake on screen from 3 different Turtle segments.'''
         for position in STARTING_POSITIONS:
             self.add_segment(position)
-         
+   
     def add_segment(self, position):
         '''Add a new segment to the snake's tail.'''
         new_segment = Turtle("square")
@@ -27,16 +27,16 @@ class Snake:
         new_segment.goto(position)
         self.segments.append(new_segment)
 
-    def extend(self):
-        '''Extend the snake's tail by a segment.'''
-        self.add_segment(self.segments[-1].position())
-
-    def reset(self):
+    def restart(self):
         for seg in self.segments:
             seg.goto(1500, 1500)
         self.segments.clear()
         self.create_snake()
         self.head = self.segments[0]
+
+    def extend(self):
+        '''Extend the snake's tail by a segment.'''
+        self.add_segment(self.segments[-1].position())
 
     def move(self):
         '''The snake continues to move forward when initialized.'''

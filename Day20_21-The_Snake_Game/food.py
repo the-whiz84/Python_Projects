@@ -17,5 +17,5 @@ class Food(Turtle):
     def refresh(self):
         '''The refresh method will place the food randomly within the screen boundaries'''
         random_x = random.randint(-480, 480)
-        random_y = random.randint(-480, 480)
+        random_y = random.randint(-480, 450)
         self.goto(random_x, random_y)
