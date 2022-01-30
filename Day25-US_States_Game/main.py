@@ -29,21 +29,26 @@ data = pandas.read_csv("./50_states.csv")
 states_list = data["state"].to_list()
 
 
-score = 0
+guessed_states = []
+states_to_learn = []
 x_position = 0
 y_position = 0
 
-while score <= 50:
-    answer = screen.textinput(title=f"{score}/50 States Guessed", prompt="What's a state's name?")
+while len(guessed_states) < 50:
+    answer = screen.textinput(title=f"{len(guessed_states)}/50 States Guessed", prompt="What's a state's name?")
     answer_state = answer.title()
 
+    if answer_state == "Exit":
+        for state_name in states_list:
+            if state_name not in guessed_states:
+                states_to_learn.append(state_name)
+        output = pandas.DataFrame(states_to_learn)
+        output.to_csv("./states_to_learn.csv")
+        break
+    
     if answer_state in states_list:
+        guessed_states.append(answer_state)
         x_position = int(data[data.state == answer_state].x)
         y_position = int(data[data.state == answer_state].y)
         turtle.goto(x_position, y_position)
         turtle.write(f"{answer_state}", align="left", font=FONT)
-        score += 1
-
-
-screen.exitonclick()
-
