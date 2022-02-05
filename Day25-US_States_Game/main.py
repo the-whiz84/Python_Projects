@@ -30,7 +30,7 @@ states_list = data["state"].to_list()
 
 
 guessed_states = []
-states_to_learn = []
+# states_to_learn = []
 x_position = 0
 y_position = 0
 
@@ -39,9 +39,11 @@ while len(guessed_states) < 50:
     answer_state = answer.title()
 
     if answer_state == "Exit":
-        for state_name in states_list:
-            if state_name not in guessed_states:
-                states_to_learn.append(state_name)
+    #     for state_name in states_list:
+    #         if state_name not in guessed_states:
+    #             states_to_learn.append(state_name)
+    # Alternative way using Day 26 lesson, List Comprehension
+        states_to_learn = [name for name in states_list if name not in guessed_states]
         output = pandas.DataFrame(states_to_learn)
         output.to_csv("./states_to_learn.csv")
         break
