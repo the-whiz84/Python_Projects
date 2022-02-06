@@ -9,11 +9,15 @@ with open("./nato_phonetic_alphabet.csv") as data_file:
 nato_dict = {row.letter:row.code for (index, row) in alphabet_df.iterrows()}
 
 #TODO 2. Create a list of the phonetic code words from a word that the user inputs.
+# Initial code
 
-user_word = input("Please type a word to get the NATO phonetic spelling:\n")
+# user_word = input("Please type a word to get the NATO phonetic spelling:\n")
+# word_letters = [letter.upper() for letter in user_word]
+# nato_letters = [nato_dict[letter] for letter in word_letters]
 
-word_letters = [letter.upper() for letter in user_word]
+# Optimized code
 
-nato_letters = [nato_dict[letter] for letter in word_letters]
+user_word = input("Please type a word to get the NATO phonetic spelling:\n").upper()
+nato_letters = [nato_dict[letter] for letter in user_word]
 
 print(f"\n{nato_letters}")
