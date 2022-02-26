@@ -30,8 +30,8 @@ km_label.grid(column=2, row=1)
 def calculate():
     """Summary: Converts the number provided from miles to km and displays the result.
     """
-    miles = input_number.get()
-    km = int(miles) * 1.609344
+    miles = float(input_number.get())
+    km = miles * 1.609
     result_label.config(text=round(km, 2))
 
 calc_button = Button(text="Convert", padx=10, pady=10, command=calculate, bg="white", activebackground="lime")
