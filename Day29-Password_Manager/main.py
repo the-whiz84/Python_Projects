@@ -69,21 +69,21 @@ username_label.grid(row=2, column=0)
 password_label = Label(text="Password:", bg="teal", fg="white", font=("Consolas", 12, "bold"))
 password_label.grid(row=3, column=0)
 
-website_entry = Entry(width=52)
-website_entry.grid(row=1, column=1, columnspan=2)
+website_entry = Entry()
+website_entry.grid(row=1, column=1, columnspan=2, sticky="EW")
 website_entry.focus()
 
-username_entry = Entry(width=52)
-username_entry.grid(row=2, column=1, columnspan=2)
+username_entry = Entry()
+username_entry.grid(row=2, column=1, columnspan=2, sticky="EW")
 username_entry.insert(0, "example@mailinator.com")
 
-password_entry = Entry(width=33)
-password_entry.grid(row=3, column=1)
+password_entry = Entry()
+password_entry.grid(row=3, column=1, sticky="EW")
 
-gen_pass_button = Button(text="Generate Password", fg="red", font=("Consolas", 8, "bold"), command=generate_password)
-gen_pass_button.grid(row=3, column=2)
+gen_pass_button = Button(text="Generate Password", highlightthickness=1, fg="red", font=("Consolas", 8, "bold"), command=generate_password)
+gen_pass_button.grid(row=3, column=2, sticky="EW")
 
-add_button = Button(text="Add", width=44, fg="red", font=("Consolas", 10, "bold"), command=save)
-add_button.grid(row=4, column=1, columnspan=2)
+add_button = Button(text="Add", width=36, fg="red", font=("Consolas", 10, "bold"), command=save)
+add_button.grid(row=4, column=1, columnspan=2, sticky="EW")
 
 window.mainloop()
