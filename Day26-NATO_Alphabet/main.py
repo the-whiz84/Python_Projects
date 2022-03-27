@@ -1,26 +1,24 @@
-from operator import index
 import pandas
-
-#TODO 1. Create a dictionary in this format:
-# {"A": "Alfa", "B": "Bravo"}
 
 data_frame = pandas.read_csv("./nato_phonetic_alphabet.csv")
 nato_dict = {row.letter:row.code for (index, row) in data_frame.iterrows()}
 
-# Alternative way to create the dictionary using built in methods set_index() and to_dict()
-# https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.set_index.html
+# user_word = input("Please type a word to get the NATO phonetic spelling:\n").upper()
+# nato_letters = [nato_dict[letter] for letter in user_word]
 
-# nato_dict = data_frame.set_index("letter")["code"].to_dict()
+# Updated code
+# Catch the KeyError when a user enters a character that is not a letter.
+# Provide feedback to the user when an incorrect character was entered.
 
-#TODO 2. Create a list of the phonetic code words from a word that the user inputs.
+invalid_char = True
 
-# Initial code
-# user_word = input("Please type a word to get the NATO phonetic spelling:\n")
-# word_letters = [letter.upper() for letter in user_word]
-# nato_letters = [nato_dict[letter] for letter in word_letters]
+while invalid_char:
+    user_word = input("Please type a word to get the NATO phonetic spelling:\n").upper()
 
-# Optimized code
-user_word = input("Please type a word to get the NATO phonetic spelling:\n").upper()
-nato_letters = [nato_dict[letter] for letter in user_word]
-
-print(f"\n{nato_letters}")
+    try:
+        nato_letters = [nato_dict[letter] for letter in user_word]
+    except KeyError:
+        print("Please enter only letters from the alphabet.\n")
+    else:
+        print(f"\n{nato_letters}")
+        invalid_char = False
