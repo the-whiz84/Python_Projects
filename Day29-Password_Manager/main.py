@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
+import json
 import pyperclip
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
@@ -28,26 +29,87 @@ def generate_password():
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 def save():
-    """Save the Website, Username and Password in a data.txt file in the same folder.
+    """Save the Website, Username and Password in a data.json file in the same folder. Entries are case sensitive.
 
     If one of the fields is empty, a pop-up window will show an error. After clicking Add a pop-up confirmation box will appear before saving to file.
+    If there is already an entry for the website, a popup window will ask if you want to overwrite the existing entry.
 
     WARNING! All data is saved in clear text in the file!
     """
     password = password_entry.get()
     username = username_entry.get()
     website = website_entry.get()
+    new_data = {
+        website: {
+            "email": username,
+            "password": password,
+        }
+    }
 
     if len(website) == 0 or len(username) == 0 or len(password) == 0:
         messagebox.showerror(title="OOPS", message="Please fill in all the fields before clicking Add")
-    else: 
-        is_ok = messagebox.askokcancel(title=website, message=f"These are the details entered: \nEmail: {username} \nPassword: {password} \nIs it ok to save?")
-        if is_ok:
-            with open("data.txt", "a") as save_file:
-                save_file.write(f"{website} | {username} | {password}\n")
+
+    else:
+        try:
+            with open("data.json", "r") as save_file:
+                data = json.load(save_file)
+                if website in data:
+                    update = messagebox.askyesno("Warning", f"There is already a password saved for {website}.\nWould you like to overwrite?")
+                    if update:
+                        pass
+                    else:
+                        return
+
+        except FileNotFoundError:
+            with open("data.json", "w") as save_file:
+                json.dump(new_data, save_file, indent=4)
+
+        else:
+            data.update(new_data)
+
+            with open("data.json", "w") as save_file:
+                json.dump(data, save_file, indent=4)
+
+        finally:
             website_entry.delete(0, END)
             username_entry.delete(0, END)
             password_entry.delete(0, END)
+
+
+# ---------------------------- SEARCH WEBSITE ------------------------------- #
+
+def find_password():
+    """Search for a website entry in data.json file and show the username and password in a popup window.
+    If there is no entry with the given name, an error message will be displayed.
+    If you try to search for an entry before data.json was generated, an error message will be displayed.
+
+    Search is case sensitive.
+    """
+    website_name = website_entry.get()
+
+    if len(website_name) == 0:
+        messagebox.showerror(title="Error", message="Please enter a valid website name to search.")
+
+    else:
+        try:
+            with open("data.json", "r") as save_file:
+                data = json.load(save_file)
+
+        except FileNotFoundError:
+            messagebox.showerror(title="Error", message="No Data File Found.")
+
+        else:
+            if website_name in data:
+                password = data[website_name]["password"]
+                username = data[website_name]["email"]
+                messagebox.showinfo(title=website_name, message=f"Username: {username}\nPassword: {password}")
+            
+            else:
+                messagebox.showerror(title="Error", message=f"No details for {website_name} exist.")
+        
+        finally:
+            website_entry.delete(0, END)
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 
@@ -70,7 +132,7 @@ password_label = Label(text="Password:", bg="teal", fg="white", font=("Consolas"
 password_label.grid(row=3, column=0)
 
 website_entry = Entry()
-website_entry.grid(row=1, column=1, columnspan=2, sticky="EW")
+website_entry.grid(row=1, column=1, sticky="EW")
 website_entry.focus()
 
 username_entry = Entry()
@@ -80,10 +142,13 @@ username_entry.insert(0, "example@mailinator.com")
 password_entry = Entry()
 password_entry.grid(row=3, column=1, sticky="EW")
 
-gen_pass_button = Button(text="Generate Password", highlightthickness=1, fg="red", font=("Consolas", 8, "bold"), command=generate_password)
+gen_pass_button = Button(text="Generate Password", highlightthickness=0, fg="red", font=("Consolas", 8, "bold"), command=generate_password)
 gen_pass_button.grid(row=3, column=2, sticky="EW")
 
 add_button = Button(text="Add", width=36, fg="red", font=("Consolas", 10, "bold"), command=save)
 add_button.grid(row=4, column=1, columnspan=2, sticky="EW")
+
+search_button = Button(text="Search", highlightthickness=0, fg="red", font=("Consolas", 8, "bold"), command=find_password)
+search_button.grid(row=1, column=2, sticky="EW")
 
 window.mainloop()
