@@ -13,6 +13,8 @@ Please use a real password manager that encrypts the data to store your password
 - click 'Generate Password' to generate a random password that contains letters, numbers and special characters;
 - if you are not satisfied with the generated password, you can click again on the button to get a new one;
 - click 'Add' to save the data to a file called data.txt in the same folder. Each entry will be a separate line.
+- you will get a popup window if you enter a duplicate website name (case sensitive) asking you if you want to overwrite the existing entry.
+- you can enter a website name and click 'Search' to show you a popup window with the username and password.
 
 If you leave any of the fields empty, you will get an error.
 After you click on 'Add'. you will get a confirmation window to verify the data before saving it to file.
