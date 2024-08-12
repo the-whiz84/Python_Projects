@@ -43,7 +43,6 @@ word_list = [
 'embezzle', 
 'equip', 
 'espionage', 
-'euouae', 
 'exodus', 
 'faking',
 'fantasy', 
