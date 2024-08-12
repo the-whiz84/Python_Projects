@@ -12,7 +12,7 @@ end_of_game = False
 lives = 6
 
 print(logo)
-
+# print(chosen_word)
 display = []
 for _ in range(len(chosen_word)):
     display.append("_")
@@ -21,6 +21,7 @@ print(stages[6])
 print(f"{' '.join(display)}\n")
 
 while not end_of_game:
+    print(f"**************************** {lives}/6 LIVES LEFT ****************************")
     guess = input("Please guess a letter: ").lower()
     clear()
 
@@ -34,17 +35,16 @@ while not end_of_game:
 
     if guess not in chosen_word:
         lives -= 1
-        print(f"Your guessed letter {guess} is not in the word. You lost a life")
+        print(f"Your guessed letter {guess}. This is not in the word. You lost a life")
         if lives == 0:
             end_of_game = True
-            print("You lost!")
+            print(f"\n***********************YOU LOSE**********************")
+            print(f"Correct word: {chosen_word}")
 
     print(f"{' '.join(display)}")
 
     if "_" not in display:
         end_of_game = True
-        print("You win!")
+        print("\n****************************YOU WIN****************************")
     
     print(stages[lives])
-
-
