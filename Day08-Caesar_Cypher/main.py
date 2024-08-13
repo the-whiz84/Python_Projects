@@ -1,42 +1,37 @@
-alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-
-def caesar(start_text, shift_amount, cipher_direction):
-  end_text = ""
-  if cipher_direction == "decode":
-    shift_amount *= -1
-  for char in start_text:
-    #TODO-3: What happens if the user enters a number/symbol/space?
-    #Can you fix the code to keep the number/symbol/space when the text is encoded/decoded?
-    #e.g. start_text = "meet me at 3"
-    #end_text = "•••• •• •• 3"
-    if char in alphabet:
-        position = alphabet.index(char)
-        new_position = position + shift_amount
-        end_text += alphabet[new_position]
-    else:
-        end_text += char
-    
-  print(f"Here's the {cipher_direction}d result: {end_text}")
-
-#TODO-1: Import and print the logo from art.py when the program starts.
 from art import logo
 print(logo)
-#TODO-4: Can you figure out a way to ask the user if they want to restart the cipher program?
-#e.g. Type 'yes' if you want to go again. Otherwise type 'no'.
-#If they type 'yes' then ask them for the direction/text/shift again and call the caesar() function again?
-#Hint: Try creating a while loop that continues to execute the program if the user types 'yes'. 
-restart = "yes"
 
-while restart == "yes":
-    direction = input("Type 'encode' to encrypt, type 'decode' to decrypt:\n")
+alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+            'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+
+def caesar(original_text, shift_amount, encode_or_decode):
+    output_text = ""
+
+    if encode_or_decode == "decode":
+        shift_amount *= -1
+
+    for letter in original_text:
+        if letter not in alphabet:
+            output_text += letter
+        else:
+            shifted_position = alphabet.index(letter) + shift_amount
+            shifted_position %= len(alphabet)
+            output_text += alphabet[shifted_position]
+    print(f"Here is the {encode_or_decode}d result: {output_text}")
+
+
+game_over = False
+
+while not game_over:
+
+    direction = input("Type 'encode' to encrypt, type 'decode' to decrypt:\n").lower()
     text = input("Type your message:\n").lower()
     shift = int(input("Type the shift number:\n"))
 
-    #TODO-2: What if the user enters a shift that is greater than the number of letters in the alphabet?
-    #Try running the program and entering a shift number of 45.
-    #Add some code so that the program continues to work even if the user enters a shift number greater than 26. 
-    #Hint: Think about how you can use the modulus (%).
-    shift = shift % 26
-    caesar(start_text=text, shift_amount=shift, cipher_direction=direction)
-    restart = input("Do you want to go again? Type 'yes' or 'no': ").lower()
+    caesar(original_text=text, shift_amount=shift, encode_or_decode=direction)
 
+    want_continue = input("Do you want to continue? Type 'yes' if you want to go again or 'no' to exit.\n")
+
+    if want_continue == "no":
+        game_over = True
