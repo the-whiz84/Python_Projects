@@ -11,92 +11,84 @@
 ## The cards in the list have equal probability of being drawn.
 ## Cards are not removed from the deck as they are drawn.
 ## The computer is the dealer.
-
 import random
 from art import logo
-import os
 
-def clear():
-    os.system('cls' if os.name == "nt" else 'clear')
 
 def deal_card():
-    """Returns a random card from the deck."""
-    cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
-    card = random.choice(cards)
-    return card
+	"""Returns a random card from the deck."""
+	cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+	card = random.choice(cards)
+	return card
 
-def calculate_score(dealt_cards):
-    """Take a list of cards and return the score calculated from the cards"""
-    score = sum(dealt_cards)
-    if len(dealt_cards) == 2 and score == 21:
-        return 0      
-    if 11 in dealt_cards and score > 21:
-        dealt_cards.remove(11)
-        dealt_cards.append(1)
-    return score
 
-def compare_scores(player_score, pc_score):
-    """Take both the player and the computer's scores and compare them to establish the winner"""
-    if player_score > 21:
-        return "You lose!"
-    elif pc_score > 21:
-        return "You win!"
-    elif player_score == 0 and pc_score == 0:
-        return "You have Blackjack and computer has Blackjack. You lose!"
-    elif player_score == pc_score:
-        return f"Your score is {player_score} and computer's score is {pc_score}. It's a draw!"
-    elif player_score == 0:
-        return "Blackjack! You win!"
-    elif pc_score == 0:
-        return "Computer has Blackjack. You lose!"
-    elif player_score > pc_score:
-        return f"Your score is {player_score} and computer's score is {pc_score}. You win!"
-    else:
-        return f"Your score is {player_score} and computer's score is {pc_score}. You lose!"
- 
-def blackjack():
-    print(logo)   
-    player_cards = []
-    ai_cards = []
-    player_cards.extend([deal_card(), deal_card()])
-    ai_cards.extend([deal_card(), deal_card()])
+def calculate_score(card_list):
+	"""Takes a list of cards and returns the score calculated."""
+	score = sum(card_list)
+	if score == 21 and len(card_list) == 2:
+		return 0
 
-    print(f"Computer draws {ai_cards[0]}, X]")
-    print(f"You draw {player_cards}")
+	if score > 21 and 11 in card_list:
+		card_list.remove(11)
+		card_list.append(1)
 
-    end_game = False
-    
-    while end_game == False:
-        user_score = calculate_score(player_cards)
-        ai_score = calculate_score(ai_cards)
-        if user_score == 0 or ai_score == 0 or user_score > 21:
-            end_game = True
-        else:
-            draw_card = input("Do you want to draw another card? Type 'y' or 'n': ")
-            if draw_card == "y":
-                player_cards.append(deal_card())
-                print(f"You now have {player_cards}")
-            elif draw_card == "n":
-                end_game = True
-            else:
-                print("Invalid option selected, please try again.")
-                end_game = True
-    print(f"Computer has {ai_cards}")
-    while ai_score != 0 and ai_score < 17:
-        ai_cards.append(deal_card())
-        ai_score = calculate_score(ai_cards)
-        print("Computer draws a card")
-        print(f"Computer now has {ai_cards}")
+	return score
 
-    print(compare_scores(user_score, ai_score))
-    
-    play_again = input("Do you want to play again? Type 'y' or 'n': ")
-    if play_again == 'n':
-        return
-    elif play_again == 'y':
-        clear()
-        blackjack()
-    else:
-        print("Invalid option selected")
-        return
-blackjack()
+
+def compare(u_score, c_score):
+	"""Get the score of user and computer and return the winner"""
+	if c_score == 0:
+		return "Computer has Blackjack. You lose!"
+	elif u_score == 0:
+		return "You have Blackjack. You win!"
+	elif c_score == u_score:
+		return "It's a Draw"
+	elif u_score > 21:
+		return "You went over. You lose!"
+	elif c_score > 21:
+		return "Computer went over. You win!"
+	elif u_score > c_score:
+		return "You win!"
+	else:
+		return "You lose!"
+
+
+def play_game():
+	print(logo)
+	user_hand = []
+	pc_hand = []
+	pc_score = -1
+	user_score = -1
+	end_game = False
+
+	for _ in range(2):
+		user_hand.append(deal_card())
+		pc_hand.append(deal_card())
+
+	while not end_game:
+		user_score = calculate_score(user_hand)
+		pc_score = calculate_score(pc_hand)
+		print(f"Your cards: {user_hand}, current score: {user_score}")
+		print(f"Computer's first card: {pc_hand[0]}")
+
+		if pc_score == 0 or user_score == 0 or user_score > 21:
+			end_game = True
+		else:
+			draw_card = input("Type 'y' to get another card, type 'n' to pass: ").lower()
+			if draw_card == "y":
+				user_hand.append(deal_card())
+			else:
+				end_game = True
+
+	while pc_score != 0 and pc_score < 17:
+		pc_hand.append(deal_card())
+		pc_score = calculate_score(pc_hand)
+
+	print(f"Your final hand is: {user_hand}, final score: {user_score}")
+	print(f"Computer final hand is: {pc_hand}, final score: {pc_score}")
+	print(compare(user_score, pc_score))
+
+
+while input("Do you want to play a game of Blackjack? Type 'y' or 'n': ") == "y":
+	print("\n" * 50)
+	play_game()
