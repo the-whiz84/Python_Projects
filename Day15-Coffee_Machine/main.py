@@ -19,7 +19,7 @@ def report():
 
 
 def check_resources(order_ingredients):
-    """Checks if there are suficient resources for the selected drink and returns True if enough
+    """Checks if there are sufficient resources for the selected drink and returns True if enough
     resources"""
     for item in order_ingredients:
         if order_ingredients[item] >= resources[item]:
@@ -38,22 +38,18 @@ def insert_coins():
     return total
 
 
-def is_transaction_succesful(coins_inserted, drink):
-    """Checks if enough money was inserted and returns True, provides change and adds the money
-    to the resources"""
-    global money
-    coins_needed = float(drink["cost"])
-    if coins_inserted < coins_needed:
-        print("Sorry that's not enough money. Money refunded.")
-        return False
-    elif coins_inserted == coins_needed:
-        money += coins_inserted
+def transaction_successful(money_inserted, drink_price):
+    """Returns True when payment is accepted or False if money is insufficient."""
+    if money_inserted >= drink_price:
+        change = round(money_inserted - drink_price, 2)
+        global money
+        money += drink_price
+        print(f"Here is ${change} in change.")
         return True
     else:
-        change = coins_inserted - coins_needed
-        money += coins_inserted - change
-        print(f"Here is your change: €{change:.2f}")
-        return True
+        print("Sorry, that's not enough money. Money refunded.")
+        return False
+
 
 def serve_coffee(order_ingredients, inventory):
     """Subtracts the drink resources from the total inventory"""
@@ -73,12 +69,11 @@ while power_on:
     elif order == "report":
         print(report())
     elif order in ("espresso", "latte", "cappuccino"):
-    # elif order == "espresso" or order == "latte" or order == "cappuccino":
         drink = MENU[order]
         if check_resources(drink["ingredients"]):
             cls()
             amount = insert_coins()
-            if is_transaction_succesful(amount, drink):
+            if transaction_successful(amount, drink["cost"]):
                 serve_coffee(drink["ingredients"], resources)
                 print(f"Here is your ☕{order}. Enjoy!")
     else:
