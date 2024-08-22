@@ -13,16 +13,23 @@ class Snake:
         self.segments = []
         self.create_snake()
         self.head = self.segments[0]
+        self.head_mod()
 
     def create_snake(self):
         '''This method creates the Snake on screen from 3 different Turtle segments.'''
         for position in STARTING_POSITIONS:
             self.add_segment(position)
    
+    def head_mod(self):
+        self.head.color("cyan")
+        self.head.shape("circle")
+        self.head.shapesize(0.6, 0.8)
+
     def add_segment(self, position):
         '''Add a new segment to the snake's tail.'''
         new_segment = Turtle("square")
-        new_segment.color("white")
+        new_segment.color("orange")
+        new_segment.shapesize(0.5, 0.5)
         new_segment.penup()
         new_segment.goto(position)
         self.segments.append(new_segment)
@@ -33,6 +40,7 @@ class Snake:
         self.segments.clear()
         self.create_snake()
         self.head = self.segments[0]
+        self.head_mod()
 
     def extend(self):
         '''Extend the snake's tail by a segment.'''

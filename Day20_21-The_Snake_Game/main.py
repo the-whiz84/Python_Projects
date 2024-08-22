@@ -45,6 +45,7 @@ while game_is_on:
             scoreboard.refresh()
             snake.restart()
         else:
+            scoreboard.refresh()
             screen.bye()
 
     for segment in snake.segments[1:]:
@@ -54,4 +55,5 @@ while game_is_on:
                 scoreboard.refresh()          
                 snake.restart()
             else:
+                scoreboard.refresh()
                 screen.bye()
