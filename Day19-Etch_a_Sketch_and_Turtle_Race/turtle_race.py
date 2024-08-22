@@ -18,6 +18,7 @@ for index in range(0, 6):
     new_turtle = Turtle(shape="turtle")
     new_turtle.color(colors[index])
     new_turtle.shapesize(2, 2, 7)
+    new_turtle.speed("fast")
     new_turtle.penup()
     y_axis += 100
     new_turtle.goto(x=-780, y=y_axis)
@@ -39,7 +40,7 @@ while is_race_on:
             else:
                 print(f"You've lost! The {winning_color} turtle won the race.")
 
-        rand_distance = random.randint(0, 10)
+        rand_distance = random.randint(0, 20)
         turtle.forward(rand_distance)
 
 screen.exitonclick()
