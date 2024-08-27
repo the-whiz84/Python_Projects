@@ -2,7 +2,7 @@ from turtle import Turtle, Screen
 import pandas
 
 IMAGE = "./blank_states_img.gif"
-FONT = ("Arial", 8, "normal")
+FONT = ("Courier", 10, "normal")
 
 # Enlarged GIF from about 800x500 to 1200x900 for better visibility
 screen = Screen()
