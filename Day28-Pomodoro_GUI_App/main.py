@@ -99,10 +99,10 @@ canvas.grid(column=1, row=1)
 title_label = Label(text="Timer", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 36, "normal"))
 title_label.grid(column=1, row=0)
 
-start_button = Button(text="Start", font=(FONT_NAME, 16, "normal"), highlightthickness=0, command=start_timer)
+start_button = Button(text="Start", font=(FONT_NAME, 16, "normal"), highlightthickness=0, borderwidth=0, command=start_timer)
 start_button.grid(column=0, row=2)
 
-reset_button = Button(text="Reset", font=(FONT_NAME, 16, "normal"), highlightthickness=0, command=reset_timer)
+reset_button = Button(text="Reset", font=(FONT_NAME, 16, "normal"), highlightthickness=0, borderwidth=0, command=reset_timer)
 reset_button.grid(column=2, row=2)
 
 checkmark_label = Label(fg=GREEN, bg=YELLOW)
