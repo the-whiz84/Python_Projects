@@ -1,7 +1,11 @@
 {
     "editor.defaultFormatter": "ms-python.autopep8",
     "cSpell.words": [
+        "borderwidth",
         "colorgram",
-        "exitonclick"
+        "columnspan",
+        "exitonclick",
+        "padx",
+        "pady"
     ]
 }
