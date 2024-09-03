@@ -2,12 +2,14 @@
     "editor.defaultFormatter": "ms-python.autopep8",
     "cSpell.words": [
         "borderwidth",
+        "Chiriac",
         "colorgram",
         "columnspan",
         "exitonclick",
         "Hotmail",
         "interrows",
         "padx",
-        "pady"
+        "pady",
+        "Radu"
     ]
 }
