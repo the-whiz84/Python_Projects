@@ -10,6 +10,9 @@
         "interrows",
         "padx",
         "pady",
-        "Radu"
+        "PIXELA",
+        "Radu",
+        "selectmode",
+        "tkcalendar"
     ]
 }
