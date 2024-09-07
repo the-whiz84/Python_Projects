@@ -105,7 +105,7 @@ class FlightSearch:
             print(f"check_flights() response code: {response.status_code}")
             print("There was a problem with the flight search.\n"
                   "For details on status codes, check the API documentation:\n"
-                  "https://developers.amadeus.com/self-service/category/flights/api-doc/flight-cheapest-date-search/api-reference"
+                  "https://developers.amadeus.com/self-service/category/flights/api-doc/flight-cheapest-date-search/api-reference")
             print("Response body:", response.text)
             return None
 
