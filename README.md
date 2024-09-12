@@ -15,8 +15,9 @@ https://www.python.org/downloads/
 I use VS Code but you can use either PyCharm, VIM or your favorite one.
 
 3. In Linux or MacOS you can also run them directly from the Terminal by launching them with Python:
-`/bin/python /path-to-file/main.py`.
-On some distros you might need to type:
-`python3 /path-to-file/main.py`
+`/bin/python /path-to-file/main.py`. On some distros you might need to type: `python3 /path-to-file/main.py`
 
-# Updated in 2024
+
+# Module Requirements
+
+Some of the projects use modules that don't come preinstalled with Python. You can install them by running 'pip install module-name' in the terminal or manage them with Conda.
