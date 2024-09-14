@@ -2,7 +2,7 @@
 ************************************************************
 *    Course: 100 Days of Code - Dr. Angela Yu              *
 *    Author: Radu Chiriac                                  *
-*    Day: 48 - Automated Cookie Clicker Bo                 *
+*    Day: 48 - Automated Cookie Clicker Bot                *
 *    Subject: Web Scrapping, Selenium, browser automation  *
 *    Date: 2024-09-13                                      *
 ************************************************************
