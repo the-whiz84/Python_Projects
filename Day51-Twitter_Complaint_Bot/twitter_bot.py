@@ -55,7 +55,7 @@ class InternetSpeedTwitterBot:
         message_input.send_keys(tweet)
         
         # Wait a few seconds and then press the Post button
-        time.sleep(10)
+        time.sleep(3)
         self.driver.find_element(By.XPATH, value='//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div[2]/div/div/div/button/div/span/span').click()
         
         time.sleep(2)
