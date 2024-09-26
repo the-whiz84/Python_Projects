@@ -13,6 +13,9 @@
         "PIXELA",
         "Radu",
         "selectmode",
-        "tkcalendar"
+        "sqlalchemy",
+        "SQLALCHEMY",
+        "tkcalendar",
+        "wtforms"
     ]
 }
