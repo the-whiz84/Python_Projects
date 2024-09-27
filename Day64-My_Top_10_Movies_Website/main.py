@@ -20,7 +20,7 @@ tmdb_headers = {
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6942ohtF0"D|jbSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = 'Your Secret Key'
 Bootstrap5(app)
 
 # CREATE DB
