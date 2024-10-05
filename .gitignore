@@ -1,9 +1,9 @@
 # General
-__pycache__/
+__pycache__
 .venv
 *.pyc
-.git/
-venv/
+.git
+.env
 
 # VsCode Specific
 .vscode/*
