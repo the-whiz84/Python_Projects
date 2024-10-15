@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 56 - Personal Website using Flask                *
-*    Subject: HTML, CSS, Flask                             *
-*    Date: 2024-09-16                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 56 - Personal Website using Flask                
+*    Subject: HTML, CSS, Flask                             
+*    Date: 2024-09-16                                      
 ************************************************************
 
 

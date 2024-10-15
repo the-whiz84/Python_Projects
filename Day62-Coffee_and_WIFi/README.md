@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 62 - Coffee and Wifi website                     *
-*    Subject: Bootstrap-Flask, Jinja, Flask, WTForms       *
-*    Date: 2024-09-25                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 62 - Coffee and Wifi website                     
+*    Subject: Bootstrap-Flask, Jinja, Flask, WTForms       
+*    Date: 2024-09-25                                      
 ************************************************************
 
 

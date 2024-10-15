@@ -1,10 +1,10 @@
 
 **********************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu                        *
-*    Author: Radu Chiriac                                            *
-*    Day: 80 - t-Tests and Distributions                             *
-*    Subject: Jupyter Notebook, Matplotlib, Seaborn, Plotly, NumPy   *
-*    Date: 2024-10-10                                                *
+*    Course: 100 Days of Code - Dr. Angela Yu                        
+*    Author: Radu Chiriac                                            
+*    Day: 80 - t-Tests and Distributions                             
+*    Subject: Jupyter Notebook, Matplotlib, Seaborn, Plotly, NumPy   
+*    Date: 2024-10-10                                                
 **********************************************************************
 
 

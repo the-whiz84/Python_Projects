@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 46 - Music Tracks Time Machine                   *
-*    Subject: BeautifulSoup, API token, spotipy, requests  *
-*    Date: 2024-09-11                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 46 - Music Tracks Time Machine                   
+*    Subject: BeautifulSoup, API token, spotipy, requests  
+*    Date: 2024-09-11                                      
 ************************************************************
 
 

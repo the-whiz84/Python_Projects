@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 56 - Identity Card website using Flask           *
-*    Subject: HTML, CSS, Flask, HTML5 template             *
-*    Date: 2024-09-17                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 56 - Identity Card website using Flask           
+*    Subject: HTML, CSS, Flask, HTML5 template             
+*    Date: 2024-09-17                                      
 ************************************************************
 
 

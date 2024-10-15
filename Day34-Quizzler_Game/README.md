@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 34 - Quizzler - Quiz Game 2.0                    *
-*    Subject: API, tkinter, CLasses etc.                   *
-*    Date: 2024-09-02                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 34 - Quizzler - Quiz Game 2.0                    
+*    Subject: API, tkinter, CLasses etc.                   
+*    Date: 2024-09-02                                      
 ************************************************************
 
 

@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 38 - Workout Tracker using Google Sheets         *
-*    Subject: API, HTTP Post, Authorization Headers        *
-*    Date: 2024-09-06                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 38 - Workout Tracker using Google Sheets         
+*    Subject: API, HTTP Post, Authorization Headers        
+*    Date: 2024-09-06                                      
 ************************************************************
 
 

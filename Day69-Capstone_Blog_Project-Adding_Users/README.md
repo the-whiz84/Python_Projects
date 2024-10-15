@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 69 - Capstone Project - Blog with Users          *
-*    Subject: Flask, WTForms, SQLAlchemy, Relational DB    *
-*    Date: 2024-10-02                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 69 - Capstone Project - Blog with Users          
+*    Subject: Flask, WTForms, SQLAlchemy, Relational DB    
+*    Date: 2024-10-02                                      
 ************************************************************
 
 

@@ -1,10 +1,10 @@
 
 **********************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu                        *
-*    Author: Radu Chiriac                                            *
-*    Day: 79 - Analyzing Nobel Prize Date                            *
-*    Subject: Jupyter Notebook, Matplotlib, Seaborn, Plotly          *
-*    Date: 2024-10-09                                                *
+*    Course: 100 Days of Code - Dr. Angela Yu                        
+*    Author: Radu Chiriac                                            
+*    Day: 79 - Analyzing Nobel Prize Date                            
+*    Subject: Jupyter Notebook, Matplotlib, Seaborn, Plotly          
+*    Date: 2024-10-09                                                
 **********************************************************************
 
 

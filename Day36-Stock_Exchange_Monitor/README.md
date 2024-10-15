@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 36 - Stock Exchange Alerts                       *
-*    Subject: API, Env Variables, Whatsapp alerts          *
-*    Date: 2024-09-04                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 36 - Stock Exchange Alerts                       
+*    Subject: API, Env Variables, Whatsapp alerts          
+*    Date: 2024-09-04                                      
 ************************************************************
 
 

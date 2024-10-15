@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 47 - Amazon Price Tracker                        *
-*    Subject: BeautifulSoup, Web Scrapping, smtplib        *
-*    Date: 2024-09-12                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 47 - Amazon Price Tracker                        
+*    Subject: BeautifulSoup, Web Scrapping, smtplib        
+*    Date: 2024-09-12                                      
 ************************************************************
 
 

@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 73 - Data Visualization with Matplotlib          *
-*    Subject: Pandas, Jupyter Notebook, Matplotlib         *
-*    Date: 2024-10-04                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 73 - Data Visualization with Matplotlib          
+*    Subject: Pandas, Jupyter Notebook, Matplotlib         
+*    Date: 2024-10-04                                      
 ************************************************************
 
 

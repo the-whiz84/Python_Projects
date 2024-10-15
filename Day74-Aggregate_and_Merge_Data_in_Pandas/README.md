@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 74 - Data Aggregation and Merging with Pandas    *
-*    Subject: Pandas, Jupyter Notebook, Matplotlib         *
-*    Date: 2024-10-05                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 74 - Data Aggregation and Merging with Pandas    
+*    Subject: Pandas, Jupyter Notebook, Matplotlib         
+*    Date: 2024-10-05                                      
 ************************************************************
 
 

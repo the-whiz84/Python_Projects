@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 37 - Pixela Habit Tracker with UI                *
-*    Subject: API, tkinter, UI, HTTP headers               *
-*    Date: 2024-09-05                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 37 - Pixela Habit Tracker with UI                
+*    Subject: API, tkinter, UI, HTTP headers               
+*    Date: 2024-09-05                                      
 ************************************************************
 
 

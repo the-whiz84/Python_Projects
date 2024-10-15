@@ -1,10 +1,10 @@
 
 *****************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu                   *
-*    Author: Radu Chiriac                                       *
-*    Day: 77 - Computations with NumPy and N-Dimensional Arrays *
-*    Subject: Jupyter Notebook, Numpy, Matplotlib, scipy        *
-*    Date: 2024-10-07                                           *
+*    Course: 100 Days of Code - Dr. Angela Yu                   
+*    Author: Radu Chiriac                                       
+*    Day: 77 - Computations with NumPy and N-Dimensional Arrays 
+*    Subject: Jupyter Notebook, Numpy, Matplotlib, scipy        
+*    Date: 2024-10-07                                           
 *****************************************************************
 
 

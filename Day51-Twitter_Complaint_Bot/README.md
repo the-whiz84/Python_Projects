@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 51 - Twitter/X Complaint Bot                     *
-*    Subject: Web Scrapping, Selenium, browser automation  *
-*    Date: 2024-09-14                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 51 - Twitter/X Complaint Bot                     
+*    Subject: Web Scrapping, Selenium, browser automation  
+*    Date: 2024-09-14                                      
 ************************************************************
 
 

@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 63 - Virtual Bookshelf Website                   *
-*    Subject: Flask, WTForms, Flask, SQLAlchemy, SQLite    *
-*    Date: 2024-09-26                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 63 - Virtual Bookshelf Website                   
+*    Subject: Flask, WTForms, Flask, SQLAlchemy, SQLite    
+*    Date: 2024-09-26                                      
 ************************************************************
 
 
