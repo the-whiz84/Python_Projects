@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 39/40 - Flight Deal Finder                       *
-*    Subject: API, HTTP GET and POST, SMTP, SMS, Email     *
-*    Date: 2024-09-07                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 39/40 - Flight Deal Finder                       
+*    Subject: API, HTTP GET and POST, SMTP, SMS, Email     
+*    Date: 2024-09-07                                      
 ************************************************************
 
 

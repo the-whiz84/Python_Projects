@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 67 - RESTful API Blog with Editing Features      *
-*    Subject: Flask, WTForms, SQLAlchemy, REST API         *
-*    Date: 2024-09-30                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 67 - RESTful API Blog with Editing Features      
+*    Subject: Flask, WTForms, SQLAlchemy, REST API         
+*    Date: 2024-09-30                                      
 ************************************************************
 
 

@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 32 - Automated BirthDay - Send Email             *
-*    Subject: Email SMTP, datetime, pandas, etc            *
-*    Date: 2024-09-01                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 32 - Automated BirthDay - Send Email             
+*    Subject: Email SMTP, datetime, pandas, etc            
+*    Date: 2024-09-01                                      
 ************************************************************
 
 # WARNING

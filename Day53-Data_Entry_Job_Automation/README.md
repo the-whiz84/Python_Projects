@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 53 - Data Entry Job Automation with Google Form  *
-*    Subject: BeautifulSoup, Selenium, browser automation  *
-*    Date: 2024-09-14                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 53 - Data Entry Job Automation with Google Form  
+*    Subject: BeautifulSoup, Selenium, browser automation  
+*    Date: 2024-09-14                                      
 ************************************************************
 
 

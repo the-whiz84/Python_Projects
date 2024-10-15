@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 57 - Blog Project                                *
-*    Subject: HTML, CSS, Jinja, Flask                      *
-*    Date: 2024-09-24                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 57 - Blog Project                                
+*    Subject: HTML, CSS, Jinja, Flask                      
+*    Date: 2024-09-24                                      
 ************************************************************
 
 

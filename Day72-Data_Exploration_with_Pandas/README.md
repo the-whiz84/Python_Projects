@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 72 - Data Exploration with Pandas                *
-*    Subject: Pandas, Jupyter Notebook                     *
-*    Date: 2024-10-03                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 72 - Data Exploration with Pandas                
+*    Subject: Pandas, Jupyter Notebook                     
+*    Date: 2024-10-03                                      
 ************************************************************
 
 

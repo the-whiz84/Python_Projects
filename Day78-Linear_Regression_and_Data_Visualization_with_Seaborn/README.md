@@ -1,10 +1,10 @@
 
 **********************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu                        *
-*    Author: Radu Chiriac                                            *
-*    Day: 78 - Linear Regression and Data Visualization with Seaborn *
-*    Subject: Jupyter Notebook, Matplotlib, Seaborn, Scikit-Learn    *
-*    Date: 2024-10-08                                                *
+*    Course: 100 Days of Code - Dr. Angela Yu                        
+*    Author: Radu Chiriac                                            
+*    Day: 78 - Linear Regression and Data Visualization with Seaborn 
+*    Subject: Jupyter Notebook, Matplotlib, Seaborn, Scikit-Learn    
+*    Date: 2024-10-08                                                
 **********************************************************************
 
 

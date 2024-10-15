@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 64 - My Top 10 Movies Website                    *
-*    Subject: Flask, WTForms, SQLAlchemy, SQLite, Bootstrap*
-*    Date: 2024-09-27                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 64 - My Top 10 Movies Website                    
+*    Subject: Flask, WTForms, SQLAlchemy, SQLite, Bootstrap
+*    Date: 2024-09-27                                      
 ************************************************************
 
 

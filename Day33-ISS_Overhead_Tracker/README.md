@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 33 - ISS Tracker - Send Email                    *
-*    Subject: API, Email SMTP, datetime                    *
-*    Date: 2024-09-01                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 33 - ISS Tracker - Send Email                    
+*    Subject: API, Email SMTP, datetime                    
+*    Date: 2024-09-01                                      
 ************************************************************
 
 # WARNING

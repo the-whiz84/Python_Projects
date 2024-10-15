@@ -23,5 +23,6 @@ You can install them by running `pip install module-name` in the terminal or man
 
 ### Notes
 Some days are not included either because they had no projects or because the projects cannot be done in 2024 due to changes to the websites involved in web-scrapping.
+Larger projects were also moved to separate repositories, like <a href='https://github.com/the-whiz84/Capstone_Blog_Project'>Capstone Blog Website</a> and <a href='https://github.com/the-whiz84/Flask-ToDo-App'>ToDo App Website</a>.
 
 In the second part of the course, I added **README** files in each folder in Markdown format with additional instructions.

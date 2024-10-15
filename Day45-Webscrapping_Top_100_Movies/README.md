@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 45 - Empire's Top 100 Movies - 2024              *
-*    Subject: BeautifulSoup, Web-scrapping, HTML Parsing   *
-*    Date: 2024-09-10                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu             
+*    Author: Radu Chiriac                                 
+*    Day: 45 - Empire's Top 100 Movies - 2024              
+*    Subject: BeautifulSoup, Web-scrapping, HTML Parsing  
+*    Date: 2024-09-10                                      
 ************************************************************
 
 

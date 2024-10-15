@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 35 - Rain Alert SMS/Whatsapp                     *
-*    Subject: API security, Environment Variables, SMS     *
-*    Date: 2024-09-03                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 35 - Rain Alert SMS/Whatsapp                     
+*    Subject: API security, Environment Variables, SMS     
+*    Date: 2024-09-03                                      
 ************************************************************
 
 

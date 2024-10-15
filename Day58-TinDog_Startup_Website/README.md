@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 58 - TinDog Startup Website with Bootstrap       *
-*    Subject: HTML, CSS, Bootstrap                         *
-*    Date: 2024-09-23                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 58 - TinDog Startup Website with Bootstrap       
+*    Subject: HTML, CSS, Bootstrap                         
+*    Date: 2024-09-23                                      
 ************************************************************
 
 

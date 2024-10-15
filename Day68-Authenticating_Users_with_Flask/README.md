@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 68 - Authenticating Users with Flask             *
-*    Subject: Flask, SQLAlchemy, Flask-Login, Werkzeug     *
-*    Date: 2024-10-01                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 68 - Authenticating Users with Flask             
+*    Subject: Flask, SQLAlchemy, Flask-Login, Werkzeug     
+*    Date: 2024-10-01                                      
 ************************************************************
 
 

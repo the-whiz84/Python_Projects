@@ -1,10 +1,10 @@
 
 ************************************************************
-*    Course: 100 Days of Code - Dr. Angela Yu              *
-*    Author: Radu Chiriac                                  *
-*    Day: 76 - Charting Google Play Store data with Plotly *
-*    Subject: Pandas, Jupyter Notebook, Plotly             *
-*    Date: 2024-10-06                                      *
+*    Course: 100 Days of Code - Dr. Angela Yu              
+*    Author: Radu Chiriac                                  
+*    Day: 76 - Charting Google Play Store data with Plotly 
+*    Subject: Pandas, Jupyter Notebook, Plotly             
+*    Date: 2024-10-06                                      
 ************************************************************
 
 
