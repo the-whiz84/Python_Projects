@@ -1,8 +1,8 @@
 import boto3
-import PyPDF2
+import pypdf
 import os
 
-pdf_path = "./Privacy-Policy.pdf"
+pdf_path = "/path-to-file.pdf"
 
 # Access AWS credentials from environment variables
 aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
@@ -22,7 +22,7 @@ def pdf_to_text(pdf_path):
         str: The extracted text from the PDF.
     """
     with open(pdf_path, "rb") as file:
-        reader = PyPDF2.PdfReader(file)
+        reader = pypdf.PdfReader(file)
         text = ""
         for page_num in range(len(reader.pages)):
             text += reader.pages[page_num].extract_text()
