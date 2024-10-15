@@ -32,10 +32,10 @@ def upload_file():
     filename = None
     if request.method == "POST":
         if "file" not in request.files:
-            return redirect(request.url)
+            return redirect(url_for("upload_file"))
         file = request.files["file"]
         if file.filename == "":
-            return redirect(request.url)
+            return redirect(url_for("upload_file"))
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
