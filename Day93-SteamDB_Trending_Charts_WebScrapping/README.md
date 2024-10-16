@@ -3,7 +3,7 @@
 *    Course: 100 Days of Code - Dr. Angela Yu
 *    Author: Radu Chiriac
 *    Day: 93 - Portfolio Projects - SteamDB Trending Charts Webscrapping
-*    Subject: Flask, Bootstrap5, ColorThief
+*    Subject: BeautifulSoup, Selenium, WebDriver, Pandas
 *    Date: 2024-10-16
 ************************************************************************
 
