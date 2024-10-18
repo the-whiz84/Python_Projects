@@ -17,5 +17,8 @@
         "SQLALCHEMY",
         "tkcalendar",
         "wtforms"
-    ]
+    ],
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }
