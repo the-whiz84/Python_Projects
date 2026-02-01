@@ -58,6 +58,7 @@ python "Day XX - Project Title/main.py"
 ## 🔗 Project Links
 - [Capstone Blog Project](https://github.com/the-whiz84/Capstone_Blog_Project)
 - [Flask ToDo App](https://github.com/the-whiz84/Flask-ToDo-App)
+- [E-Shop Demo](https://github.com/the-whiz84/E-Shop-demo)
 
 ---
 *Built with ❤️ while learning Python.*
