@@ -1,4 +1,0 @@
-bs4==4.12.3
-selenium==4.25.0
-webdriver_manager==4.0.2
-pandas==2.2.3
