@@ -1,28 +1,63 @@
-# Python_Projects
+# 🐍 Python 100 Days of Code: The Complete Bootcamp
 
-Repo for my Python Projects created during the **100 Days of Code** course on <a href="https://www.udemy.com/course/100-days-of-code/">Udemy.</a>
+Welcome to my personal journey through Dr. Angela Yu's [100 Days of Code: The Complete Python Pro Bootcamp](https://www.udemy.com/course/100-days-of-code/). This repository contains a collection of projects, scripts, and applications developed over 100 days of intensive learning.
 
-They were initially created in VS Code running on Linux (Fedora 35). 
-From Day 15, I switched to MacOS and also used PyCharm for the first 30 Days.
+## 🚀 Key Highlights
 
-## Installation Guide
+This repository covers a wide range of Python applications:
+- **Web Development**: Flask, Bootstrap, RESTful APIs, and User Authentication.
+- **Data Science & Visualization**: Pandas, Matplotlib, Seaborn, Plotly, and NumPy.
+- **Automation & Web Scraping**: Beautiful Soup, Selenium, and API-driven automation.
+- **GUIs & Games**: Tkinter, Turtle, and classic games like Pong and Snake.
+- **Professional Skills**: OOP, Version Control (Git), and Exception Handling.
 
-1. You will need Python installed in order to run the `.py` files. 
-You can get the latest version for all OS versions from <a href="https://www.python.org/downloads/">here</a>.
+## 📂 Project Structure
 
-2. You then need either a text editor or IDE to run them or play around with the code.
-I use VS Code but you can use either PyCharm, VIM or your favorite one.
+Folders are organized chronologically and by topic:
+- `Day 01 - 14`: Python Foundations (CLI tools, logic, and base syntax).
+- `Day 15 - 31`: Intermediate GUI and OOP (Games and Desktop apps).
+- `Day 32 - 40`: Intermediate+ Web APIs and JSON handling.
+- `Day 41 - 58`: Web Development Fundamentals (HTML, CSS, Flask).
+- `Day 59 - 71`: Advanced Web Development (Databases, REST, Auth).
+- `Day 72 - 81`: Data Science and Professional Analysis.
+- `Day 82 - 100`: Capstone Projects and Advanced Automation.
 
-3. In Linux or MacOS you can also run them directly from the Terminal by launching them with Python:
-`/bin/python /path-to-file/main.py`. On some distros you might need to type: `python3 /path-to-file/main.py`
+## ⚙️ How to Run These Projects
 
-## Module Requirements
+### Prerequisites
+- **Python 3.x**: [Download here](https://www.python.org/downloads/)
+- **Virtual Environment** (Recommended):
+  ```bash
+  python -m venv .venv
+  source .venv/bin/activate  # MacOS/Linux
+  .venv\Scripts\activate     # Windows
+  ```
 
-Some of the projects use modules that don't come preinstalled with Python. 
-You can install them by running `pip install module-name` in the terminal or manage them with Anaconda.
+### Installation
+Cloning the repository and installing dependencies (where applicable):
+```bash
+git clone https://github.com/the-whiz84/Python_100_Days_of_Code.git
+cd Python_100_Days_of_Code
+# Check individual day folders for specific requirements.txt files
+```
 
-### Notes
-Some days are not included either because they had no projects or because the projects cannot be done in 2024 due to changes to the websites involved in web-scrapping.
-Larger projects were also moved to separate repositories, like <a href='https://github.com/the-whiz84/Capstone_Blog_Project'>Capstone Blog Website</a> and <a href='https://github.com/the-whiz84/Flask-ToDo-App'>ToDo App Website</a>.
+### Running a Project
+Most projects can be launched from the terminal:
+```bash
+python "Day XX - Project Title/main.py"
+```
 
-In the second part of the course, I added **README** files in each folder in Markdown format with additional instructions.
+---
+
+## 📝 Learning Journey Notes
+
+- **Multi-OS Development**: Started on Linux (Fedora), transitioned to MacOS from Day 15.
+- **IDE Evolution**: Utilized both VS Code and PyCharm throughout the course.
+- **Consolidated Progress**: Multi-part projects have been merged into single "Day" folders for better organization.
+
+## 🔗 Project Links
+- [Capstone Blog Project](https://github.com/the-whiz84/Capstone_Blog_Project)
+- [Flask ToDo App](https://github.com/the-whiz84/Flask-ToDo-App)
+
+---
+*Built with ❤️ while learning Python.*
