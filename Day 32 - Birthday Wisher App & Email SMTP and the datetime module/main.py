@@ -50,11 +50,11 @@ if (today_month, today_day) in birthdays_dict:
 		send_email(recipient_email, new_text)
 
 # Email received
-HAPPY BIRTHDAY
-Hey Radu,
+# HAPPY BIRTHDAY
+# Hey Radu,
 
-Happy birthday! Have a wonderful time today and eat lots of cake!
+# Happy birthday! Have a wonderful time today and eat lots of cake!
 
-Lots of love,
+# Lots of love,
 
-Angela
+# Angela
