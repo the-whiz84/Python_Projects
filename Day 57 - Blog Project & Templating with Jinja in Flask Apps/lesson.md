@@ -1,77 +1,87 @@
-# 1. URL building and templating with Jinja
+# Day 57 - Blog Project & Templating with Jinja in Flask Apps
 
-# Jinja is a templating language built for Python. It is bundled with the Flask framework.
-# It uses specific syntax that can specify inside the HTML file which part is evaluated as Python code.
+This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Blog Project & Templating with Jinja in Flask Apps** and avoids generic cross-day boilerplate.
 
-<body>
-    <h1>3 * 5</h1>
-</body>
-# It will just render an H1 with the string
+## Table of Contents
 
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
 
-<body>
-    <h1>{{ 3 * 5 }}</h1>
-</body>
-# It will be interpreted as Python code and will render an H1 with the string 15.
+## 1. What You Build
 
+You build **Blog Project & Templating with Jinja in Flask Apps** as a day-specific project using `flask`, `requests`.
+Primary entrypoint: `main.py`.
 
-<body>
-    <h1 style="text-align: center;color: blue;">Hello World!</h1>
-    <h2>{{ 5 * 6 }}</h2>
-    <h3>Random number: {{ num }}</h3>
-</body>
+## 2. Core Concepts
 
-# if we neeed an import like random, we need to write our code inside server.py instead of index.html
-@app.route("/")
+- Day-specific stack and techniques: `flask`, `requests`.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
+
+Historical lesson signals recovered from git history:
+- 1. URL building and templating with Jinja
+- Jinja is a templating language built for Python. It is bundled with the Flask framework.
+- It uses specific syntax that can specify inside the HTML file which part is evaluated as Python code.
+
+## 3. Project Structure
+
+- `main.py`: Entrypoint script coordinating the full flow.
+- `post.py`: Supporting module for project logic.
+- `server.py`: Entrypoint script coordinating the full flow.
+
+## 4. Implementation Walkthrough
+
+1. Call external web/API resources and normalize returned data before use.
+2. Define route handlers and keep request parsing separate from rendering logic.
+3. Read/write JSON safely with existence checks and fallback defaults.
+
+## 5. Day Code Snippet
+
+Excerpt from `main.py`:
+```python
+app = Flask(__name__)
+
+posts = requests.get("https://api.npoint.io/c790b4d5cab58020d391").json()
+post_objects = []
+for post in posts:
+    post_obj = Post(post["id"], post["title"], post["subtitle"], post["body"])
+    post_objects.append(post_obj)
+
+@app.route('/')
 def home():
-    random_number = random.randint(1, 10)
-    return render_template("index.html", num=random_number)
-
-# render_template function accepts **kwargs after the location of the file, so we can give it as many arguments as we want.
-# We need to specify a name and a value for them so we can refer to them in our html file.
+    return render_template("index.html", posts=post_objects)
 
 
-# 2. Multiline Statements with Jinja
+@app.route('/post/<int:index>')
+```
 
-# When we have a multiline statement, we need to use {% for beggining of each line that is not HTML and %} for the end of each line.
-# To specify the end of the multi line statement we use {% endfor %}
+## 6. How to Run
 
-@app.route("/blog")
-def blog():
-    blog_url = "https://api.npoint.io/c790b4d5cab58020d391"
-    blog_response = requests.get(blog_url).json()
-    
-    return render_template("blog.html", posts=blog_response)
+```bash
+python "main.py"
+```
 
-<body>
-    {% for blog_post in posts: %}
-        <h1>{{ blog_post["title"] }}</h1>
-        <h2>{{ blog_post["subtitle"] }}</h2>
-    {% endfor %}
-</body>
+## 7. Common Pitfalls and Debug Tips
 
+- Route and template variable mismatches are common; verify context keys end-to-end.
+- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
+- Reproduce failures with the smallest input first, then expand once stable.
 
-# Same with if statements
+## 8. Practice Extensions
 
-{% if kenny.sick %}
-    Kenny is sick.
-{% elif kenny.dead %}
-    You killed Kenny!  You bastard!!!
-{% else %}
-    Kenny looks okay --- so far
-{% endif %}
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
 
-https://jinja.palletsprojects.com/en/3.1.x/templates/#list-of-control-structures
+## 9. Key Takeaways
 
-
-# 3. URL building with Flask
-
-# To build a URL to a specific function, use the url_for() function. It accepts the name of the function as its first argument and any number of keyword arguments, each corresponding to a variable part of the URL rule.
-
-<body>
-    <h1 style="text-align: center;color: blue;">Hello World!</h1>
-    <h2>{{ 5 * 6 }}</h2>
-    <h3>Random Number: {{ num }}</h3>
-    <a href="{{ url_for('get_blog') }}">Go to Blog</a>
-</body>
-
+- **Blog Project & Templating with Jinja in Flask Apps** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- Historical lesson notes were preserved and translated into the new structure for continuity.

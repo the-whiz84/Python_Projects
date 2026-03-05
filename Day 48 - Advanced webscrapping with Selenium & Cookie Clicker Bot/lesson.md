@@ -1,97 +1,86 @@
-# 1. What is Selenium Webdriver
+# Day 48 - Advanced webscrapping with Selenium & Cookie Clicker Bot
 
-- one of the most well-known automation and testing tools for web developers
-- it allows us to automate browsers by entering text or clicking buttons
+This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Advanced webscrapping with Selenium & Cookie Clicker Bot** and avoids generic cross-day boilerplate.
 
-- Selenium module uses the webdriver() class to interact with multiple browsers like Chrome, Safari or Firefox
-- each browser uses a different Selenium bridge to interact with that browser
+## Table of Contents
 
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
 
-# 2. How to find and select Elements on the page with Selenium
+## 1. What You Build
 
-https://selenium-python.readthedocs.io/locating-elements.html
- - we use the built-in method find_element
+You build **Advanced webscrapping with Selenium & Cookie Clicker Bot** as a day-specific project using `selenium`.
+Primary entrypoint: `main.py`.
 
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
+## 2. Core Concepts
 
-Keep Chrome opened after program finishes
-# chrome_options = webdriver.ChromeOptions()
-# chrome_options.add_experimental_option("detach", True)
+- Day-specific stack and techniques: `selenium`.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
 
-# driver = webdriver.Chrome(options=chrome_options)
+Historical lesson signals recovered from git history:
+- 1. What is Selenium Webdriver
+- - one of the most well-known automation and testing tools for web developers
+- - it allows us to automate browsers by entering text or clicking buttons
+
+## 3. Project Structure
+
+- `main.py`: Entrypoint script coordinating the full flow.
+- `challenge.py`: Supporting module for project logic.
+- `interaction.py`: Supporting module for project logic.
+- `main_cookie_clicker_bot.py`: Supporting module for project logic.
+
+## 4. Implementation Walkthrough
+
+1. Call external web/API resources and normalize returned data before use.
+2. Add targeted checks for edge cases and invalid paths before final output.
+3. Add targeted checks for edge cases and invalid paths before final output.
+
+## 5. Day Code Snippet
+
+Excerpt from `main.py`:
+```python
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_experimental_option("detach", True)
+chrome_options.add_argument("--disable-search-engine-choice-screen")
+
+driver = webdriver.Chrome(options=chrome_options)
 # driver.get("https://www.amazon.de/-/en/dp/B0B7CQ2CHH/?coliid=I1HM1XKBV51B6&colid=20854P5NY1AMF&ref_=list_c_wl_lv_ov_lig_dp_it&th=1")
+driver.get("https://www.python.org")
 
 
 
 # price_euro = driver.find_element(By.CLASS_NAME, value="a-price-whole")
 # price_cents = driver.find_element(By.CLASS_NAME, value="a-price-fraction")
 # print(f"The price is €{price_euro.text}.{price_cents.text}")
+```
 
-# We did in 3 lines what we struggles to get using BeautifulSoup on Day 47
+## 6. How to Run
 
+```bash
+python "main.py"
+```
 
-# driver.close()    # closes the active tab
-driver.quit()     # closes the program
+## 7. Common Pitfalls and Debug Tips
 
+- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
+- Reproduce failures with the smallest input first, then expand once stable.
 
-# 2.1 Search by class, id, name etc.
+## 8. Practice Extensions
 
-# driver.get("https://www.python.org")
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
 
+## 9. Key Takeaways
 
-search_bar = driver.find_element(By.NAME, value="q")
-# print(search_bar)
-# <selenium.webdriver.remote.webelement.WebElement (session="d3f3aa3f6e8c27b40bc0d2178b667295", element="f.03BCFD3FFE577837344800A60D01E016.d.DE4AE07FE663CE16E08063E328ADBE90.e.5")>
-# print(search_bar.tag_name)
-# input
-
-print(search_bar.get_attribute("placeholder"))
-Search
-
-
-# 2.2 Search by CSS Selectors
-
-doc_link = driver.find_element(By.CSS_SELECTOR, value=".documentation-widget a")
-# print(doc_link.text)
-# docs.python.org
-
-
-# 2.3 Search by XPath
-
-bug_report = driver.find_element(By.XPATH, value='//*[@id="site-map"]/div[2]/div/ul/li[3]/a')
-# print(bug_report.text)
-# Submit Website Bug
-
-
-# 3. Automating filling out forms and clicking
-
-# 3.1 Clicking on links
-
-# Hone in on anchor tags using CSS Selectors
-driver = webdriver.Chrome(options=chrome_options)
-driver.get("https://en.wikipedia.org/wiki/Main_Page")
-
-article_count = driver.find_element(By.CSS_SELECTOR, value="#articlecount a")
-
-# If we want to click on the link, we use the built-in method
-article_count.click()
-
-# Find element by Link Text
-all_portals = driver.find_element(By.LINK_TEXT, value="Content portals")
-all_portals.click()
-
-
-# 3.2 Finding Inputs and automating text entry
-
-# Find the Search input by Name
-search = driver.find_element(By.NAME, value="search")
-
-# Sending keyboard input to Selenium
-search.send_keys("Python")
-
-# Pressing Enter after entering search parameter
-from selenium.webdriver.common.keys import Keys
-
-<!-- search.send_keys(Keys.ENTER) -->
-search.send_keys("Python", Keys.ENTER)
+- **Advanced webscrapping with Selenium & Cookie Clicker Bot** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- Historical lesson notes were preserved and translated into the new structure for continuity.

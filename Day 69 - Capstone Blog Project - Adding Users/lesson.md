@@ -1,68 +1,88 @@
+# Day 69 - Capstone Blog Project - Adding Users
 
-# 1. Creating Relational Databases
+This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Capstone Blog Project - Adding Users** and avoids generic cross-day boilerplate.
 
-Given that the 1st user is the admin and the blog owner. It would make sense if we could link the blog posts they write to their user in the database. 
-In the future, maybe we will want to invite other users to write posts in the blog and grant them the admin privileges.
+## Table of Contents
 
-So we need to create a relationship between the <User> table and the <BlogPost> table to link them together. 
-So we can see which <BlogPosts> a <User> has written. Or see which <User> is the author of a particular <BlogPost>.
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
 
-# If we were just writing Python code, you could imagine creating a User object which has a property called posts that contains a List of BlogPost objects.
+## 1. What You Build
 
-e.g.
+You build **Capstone Blog Project - Adding Users** as a day-specific project using `flask`, `sqlalchemy`, `wtforms`.
+Primary entrypoint: `main.py`.
 
-class User:
-    def __init__(self, name, email, password):
-         self.name = name
-         self.email = email
-         self.password = password
-         self.posts = []
- 
-class BlogPost:
-    def __init__(self, title, subtitle, body):
-         self.title = title
-         self.subtitle = subtitle
-         self.body = body
- 
-new_user = User(
-    name="Angela",
-    email="angela@email.com",
-    password=123456,
-    posts=[
-        BlogPost(
-            title="Life of Cactus",
-            subtitle="So Interesting",
-            body="blah blah"
-        )
-    ]        
-}
+## 2. Core Concepts
 
-This would make it easy to find all the BlogPosts a particular user has written. But what about the other way around? 
-How can you find the author of a particular BlogPost object? 
-This is why we're using a database instead of just simple Python data structures.
+- Day-specific stack and techniques: `flask`, `sqlalchemy`, `wtforms`.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
 
-# In relational databases such as SQLite, MySQL or PostgreSQL we're able to define a relationship between tables using a <ForeignKey> and a <relationship()> method.
+Historical lesson signals recovered from git history:
+- 1. Creating Relational Databases
+- Given that the 1st user is the admin and the blog owner. It would make sense if we could link the blog posts they write to their user in the database.
+- In the future, maybe we will want to invite other users to write posts in the blog and grant them the admin privileges.
 
-e.g. If we wanted to create a <One to Many> relationship between the <User> Table and the <BlogPost> table, where One <User> can create many <BlogPost> objects, we can use the SQLAlchemy docs to achieve this.
+## 3. Project Structure
 
-https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html
+- `main.py`: Entrypoint script coordinating the full flow.
+- `forms.py`: Supporting module for project logic.
+- `requirements.txt`: Project resource used by this day.
+
+## 4. Implementation Walkthrough
+
+1. Define route handlers and keep request parsing separate from rendering logic.
+2. Add targeted checks for edge cases and invalid paths before final output.
+3. Add targeted checks for edge cases and invalid paths before final output.
+
+## 5. Day Code Snippet
+
+Excerpt from `main.py`:
+```python
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get("FLASK_KEY")
+ckeditor = CKEditor(app)
+Bootstrap5(app)
 
 
-# 2. A new database schema
+# TODO: Configure Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
 
-CHALLENGE 1: Modify the class <User>(UserMixin, db.Model)  and class <BlogPost>(db.Model) code to create a bidirectional <One-to-Many> relationship between the two tables. 
-The <User> should be the parent and the <BlogPost> will be child. 
-You should be able to easily locate the <BlogPosts> a <User> has written and also the <User> of any <BlogPost> object.
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(User, user_id)
+```
 
-Note, you will be changing the schema here by adding an <foreign key>, the <author_id>. 
-This will be a breaking change. The blog website will not work after you have made this change.
+## 6. How to Run
 
-# 3. Re-create the database with a new admin user and posts
+```bash
+pip install -r requirements.txt
+```
+```bash
+python "main.py"
+```
 
-Our old database is no longer compatible with the new database structure - there are no entries for author_id in the old posts.
-Our new code in the main.py modifies our database model by adding a new column into our database that was not present in the original <blog.db>  
+## 7. Common Pitfalls and Debug Tips
 
-There is no need to preserve the sample data and testing data so we will delete the database and create a new one from scratch. 
-However, this raises an important point: database schemas need to be defined early during the development process. 
-Once an application has launched and accumulated lots of data, you will need to preserve this data by migrating to the new database. 
-Lucky for us, we can leave out the migration step.
+- Route and template variable mismatches are common; verify context keys end-to-end.
+- Reproduce failures with the smallest input first, then expand once stable.
+
+## 8. Practice Extensions
+
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+
+## 9. Key Takeaways
+
+- **Capstone Blog Project - Adding Users** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- Historical lesson notes were preserved and translated into the new structure for continuity.

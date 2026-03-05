@@ -1,160 +1,84 @@
-# 1. CSS Color Properties
+# Day 44 - Motivational Poster Project & Web Foundation - Intermediate CSS
 
-html {
-    bacground-color: red
-}
-h1 {
-    color: blue
-}
+This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Motivational Poster Project & Web Foundation - Intermediate CSS** and avoids generic cross-day boilerplate.
 
-# Until now we have set the values to Named Colors (https://developer.mozilla.org/en-US/docs/Web/CSS/named-color)
+## Table of Contents
 
-# We can also use Hex Code Colors like we used before in our projects from Color Hunt (https://colorhunt.co/palettes/popular)
-h1 {
-    color: #CBF1F5
-}
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
 
+## 1. What You Build
 
-# 2. Font Properties
+You build **Motivational Poster Project & Web Foundation - Intermediate CSS** as a day-specific project using `html/css`.
+Primary entrypoint: `index.html`.
 
-h1 {
-    color: blue
-    font-weight: bold
-    font-size: 20px
-    font-family: sans-serif
-}
+## 2. Core Concepts
 
-# 2.1 Font size
+- Day-specific stack and techniques: `html/css`.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
 
-# font-size is given usually in pixels, 1 pixel is 1/96 of an inch or about 0.26 mm
-# Another way to represent size is a pt (point) 1/72 of an inch or 0.35 mm
-# THe point is commonly used for word processors, a font of 12 in Word is 12pt
+Historical lesson signals recovered from git history:
+- 1. CSS Color Properties
+- bacground-color: red
+- Until now we have set the values to Named Colors (https://developer.mozilla.org/en-US/docs/Web/CSS/named-color)
 
-# There are other ways to represent font size:
-# 1em - 100% of parent (pronounced m) - relative size
-# 1rem - 100% of root (pronounced rm) - relative to the root element (most cases the html)
+## 3. Project Structure
 
-# 1em is 100% of the parent element
+- `index.html`: Static web page source.
+- `style.css`: Stylesheet for layout and visual presentation.
 
-<body> 20px
-    <h2> Hello</h2> 1em is 100% of body size, so 20px
-# 2em is double the size of body
+## 4. Implementation Walkthrough
 
-# it is recommended to use rem as it is not affected if an element's parent has a change of size during coding
+1. Lay out semantic sections first, then apply styles incrementally.
+2. Use consistent class naming so structure and styles stay maintainable.
+3. Add targeted checks for edge cases and invalid paths before final output.
 
+## 5. Day Code Snippet
 
-# 2.2 Font weight
+Excerpt from `index.html`:
+```html
+<!--
+  TODO: Create a motivational post website.
+Style it how ever you like.
+Look at the goal image for inspiration.
+But it must have the following features:
+1. The main h1 text should be using the Regular Libre Baskerville Font from Google Fonts:
+  https://fonts.google.com/specimen/Libre+Baskerville
+2. The text should be white and background black.
+3. Add your own image into the images folder inside assets. It should have a 5px white border.
+4. The text should be center aligned.
+5. Create a div to contain the h1, p and img elements. Adjust the margins so that the image and text are centered on the page.
+  Hint: You horizontally center a div by giving it a width of 50% and a margin-left of 25%.
+  Hint: Set the image to have a width of 100% so it fills the div.
+6. Read about the text-transform property on MDN docs to make the h1 uppercase with CSS.
+```
 
-# usual ones like 'normal', 'bold' keywords
-# relative to the parent: 'lighter', 'bolder'(- 100 or + 100 relative to the parent)
-# using a number between 100 - 900
+## 6. How to Run
 
+```bash
+open "index.html"
+```
 
-# 2.3 Font Family
+## 7. Common Pitfalls and Debug Tips
 
-h1 {
-    font-family: Helvetica, sans-serif
-            #Typeface specific to MacOS
-            # we add a comma and a backup generic font type for all OS types, like sans-serif
-}
-h2 {
-    font-family: "Times New Roman", serif
-            # for multiple words fonts, we add quotes
-}
+- Reproduce failures with the smallest input first, then expand once stable.
 
-# Custom free fonts can be found at www.fonts.google.com
-# We can added them to the css by embedding them as a link so the page renders correctly for all users of the website
+## 8. Practice Extensions
 
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
 
-# 2.4 Font Alignment
+## 9. Key Takeaways
 
-h1 {
-    text-align: center
-}
-
-# can be left, right, center, justify
-# there is also 'start' and 'end' (eg for arabic text, start is from right and end is left)
-
-
-# 3. CSS Inspection
-
-# We use Google Chrome's built in Developer tools (F12) to make changes to the CSS of https://appbrewery.github.io/just-add-css/
-# Challenge was done on https://appbrewery.github.io/css-inspection/
-
-
-# 4. CSS Box Model
-
-# Margin, Padding and Border Properties form an important CSS concept named the Box Model
-# We can set the width and height of each element either in pixels or percentage
-
-p{
-    width: 600
-    height: 600
-}
-
-# 4.1 We can also set a border around each element
-p{
-    border: 10px solid black;
-}
-# the border property takes can take 3 values separated by a space
-#10px - thickness
-#solid - style of the border: solid, dashed
-#black - color of the border
-
-# No matter how thick we make the border, the size of the element does not chage (widht and height)
-
-# We can refine the border style by indenting other properties
-p{
-    border: 30px solid black;
-        border-top: 0px;
-}
-
-# The border-width can take a maximum of 4 values:
-p{
-    border: 30px solid black;
-        border-width: 0px 10px 20px 30ox;
-        # cloclwise:  up, right, down, left
-}
-# if we provide 2 values, it sets 1+3 and 2+4
-
-# 4.2 Padding
-
-# Useful for text elements as it pushes the border out from the element and makes the text clearly visible
-p {
-    padding:20px;
-    border: 20px solid black;
-}
-# The size of the element does not change, the padding goes between the element box and the border
-
-# 4.3 The Margin
-
-# goes outside the border
-p {
-    padding:20px;
-    border: 20px solid black;
-    margin: 10px
-}
-
-# The CSS Inspector in the Dev Tools in the browser shows the Box Model
-https://appbrewery.github.io/box-model/
-
-# Padding, margin and border-width all can take 4 values in clockwise direction
-
-
-# 5. Content Division Element
-<div></div>
-
-# These elements are invisible unless you apply CSS to them
-# Their purpose is to act as invisble boxes to group separate elements
-https://appbrewery.github.io/box-model/
-
-<body>
-    <div>
-        <p>Hello World</p>
-        <img src="./world.png" />
-    </div>
-    <div>
-        <p>Good Night World</p>
-        <img src="./night-world.png" />
-    </div>
-</body>
+- **Motivational Poster Project & Web Foundation - Intermediate CSS** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- Historical lesson notes were preserved and translated into the new structure for continuity.

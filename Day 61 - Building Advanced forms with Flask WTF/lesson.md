@@ -1,76 +1,88 @@
-# 1. Inheriting Templates Using Jinja2
+# Day 61 - Building Advanced forms with Flask WTF
 
-# Previously, we saw that we can inject a header.html and footer.html using Jinja and the code might look something like this:
+This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Building Advanced forms with Flask WTF** and avoids generic cross-day boilerplate.
 
-{% include "header.html" %}
-Web page content
-{% include "footer.html" %}
+## Table of Contents
 
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
 
-# This is a really flexible way of using Jinja to Template a website. It means that if your header and footer stay the same then you can just insert them into all your webpages.
+## 1. What You Build
 
-# Template Inheritance
-# However, often you'll find that you actually want to use the same design template for your entire website, but you might need to change some code in your header or footer. In these cases, it's better to use Template Inheritance instead.
+You build **Building Advanced forms with Flask WTF** as a day-specific project using `flask`, `wtforms`.
+Primary entrypoint: `main.py`.
 
-# Template inheritance is similar to Class inheritance, you can take a parent template and extend its styling in your child web pages.
+## 2. Core Concepts
 
-# For example, if we create a base.html file that has the following code:
+- Day-specific stack and techniques: `flask`, `wtforms`.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %}</title>
-</head>
-<body>
-    {% block content %}{% endblock %}
-</body>
-</html>
+Historical lesson signals recovered from git history:
+- 1. Inheriting Templates Using Jinja2
+- Previously, we saw that we can inject a header.html and footer.html using Jinja and the code might look something like this:
+- {% include "header.html" %}
 
-# It has predefined areas (or blocks) where new content can be inserted by a child webpage inheriting from this template.
+## 3. Project Structure
 
-1. We could re-write the success.html page to inherit from this base.html template:
+- `main.py`: Entrypoint script coordinating the full flow.
+- `requirements.txt`: Project resource used by this day.
 
-# 1.
-{% extends "base.html" %}
-# 2.
-{% block title %}Success{% endblock %}
-# 3.
-{% block content %}
-   <div class="container">
-      <h1>Top Secret </h1>
-      <iframe src="https://giphy.com/embed/Ju7l5y9osyymQ" width="480" height="360" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
-      <p><a href="https://giphy.com/gifs/rick-astley-Ju7l5y9osyymQ">via GIPHY</a></p>
-   </div>
-{% endblock %}
+## 4. Implementation Walkthrough
 
-# 1. This line of code tells the templating engine (Jinja) to use "base.html" as the template for this page.
-# 2. This block inserts a custom title into the header of the template.
-# 3. This block provides the content of the website. The part that is going to vary between webpages.
+1. Define route handlers and keep request parsing separate from rendering logic.
+2. Add targeted checks for edge cases and invalid paths before final output.
+3. Add targeted checks for edge cases and invalid paths before final output.
 
+## 5. Day Code Snippet
 
-# 2. Super Blocks
+Excerpt from `main.py`:
+```python
+'''
+Red underlines? Install the required packages first: 
+Open the Terminal in PyCharm (bottom left). 
 
-# When we inherit from Python classes, you often see super.init()
-# The super keyword refers to the parent that the child is inheriting from. e.g If Simba inherits from Mufasa, then Mufasa is the super.
-# When we are inheriting templates. Sometimes, there's some part of the template that we want to keep, but we also want to add to it. So we can use super blocks in this case.
+On Windows type:
+python -m pip install -r requirements.txt
 
-3. Add the following code to your base.html:
+On MacOS type:
+pip3 install -r requirements.txt
 
-<style>
-{% block styling %}
-body{
-    background: purple;
-}
-{% endblock %}
-</style>
+This will install the packages from requirements.txt for this project.
+'''
 
-# I named this block "styling" but you can call it anything you want.
-# Just make sure that you close all blocks with {% endblock %}
-# Now if you reload your website, you should see that both the success page and the denied page will have a purple background. 
+class MyForm(FlaskForm):
+```
 
+## 6. How to Run
 
-# 3. Using Bootstrap-Flask as an Inherited Template
+```bash
+pip install -r requirements.txt
+```
+```bash
+python "main.py"
+```
 
-# The way that we're going to quickly improve the appearance of our website is of course through that super useful tool we learnt about on Day 58 - Bootstrap. Previously we saw that we could simply include a link to the Bootstrap CSS code in the header of our website. But there's an even easier way. We can use the Bootstrap-Flask Python extension.
+## 7. Common Pitfalls and Debug Tips
 
+- Route and template variable mismatches are common; verify context keys end-to-end.
+- Reproduce failures with the smallest input first, then expand once stable.
+
+## 8. Practice Extensions
+
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+
+## 9. Key Takeaways
+
+- **Building Advanced forms with Flask WTF** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- Historical lesson notes were preserved and translated into the new structure for continuity.

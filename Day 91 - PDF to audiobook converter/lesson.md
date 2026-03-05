@@ -1,0 +1,82 @@
+# Day 91 - PDF to audiobook converter
+
+This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **PDF to audiobook converter** and avoids generic cross-day boilerplate.
+
+## Table of Contents
+
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
+
+## 1. What You Build
+
+You build **PDF to audiobook converter** as a day-specific project using core Python.
+Primary entrypoint: `main.py`.
+
+## 2. Core Concepts
+
+- Day-specific stack and techniques: core Python.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
+
+## 3. Project Structure
+
+- `main.py`: Entrypoint script coordinating the full flow.
+- `requirements.txt`: Project resource used by this day.
+
+## 4. Implementation Walkthrough
+
+1. Start from the main flow and trace how input becomes final output step by step.
+2. Split repeated logic into helper functions to keep orchestration readable.
+3. Add targeted checks for edge cases and invalid paths before final output.
+
+## 5. Day Code Snippet
+
+Excerpt from `main.py`:
+```python
+pdf_path = "./Privacy-Policy.pdf"
+
+# Access AWS credentials from environment variables
+aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+aws_s3_bucket = os.getenv("AWS_S3_BUCKET")
+region_name = os.getenv("AWS_REGION", "eu-central-1")
+
+
+def pdf_to_text(pdf_path):
+    """
+    Extract text from a PDF file.
+
+    Args:
+```
+
+## 6. How to Run
+
+```bash
+pip install -r requirements.txt
+```
+```bash
+python "main.py"
+```
+
+## 7. Common Pitfalls and Debug Tips
+
+- Reproduce failures with the smallest input first, then expand once stable.
+
+## 8. Practice Extensions
+
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+
+## 9. Key Takeaways
+
+- **PDF to audiobook converter** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.

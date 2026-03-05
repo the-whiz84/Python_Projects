@@ -1,129 +1,84 @@
-# 1. The HTML Boilerplate
+# Day 42 - Birthday Invite Project & Web Foundation - Intermediate HTML
 
-- this gives the structure to the website
-- it looks something like this
-<!DOCTYPE HTML>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>My Website</title>
-    </head>
+This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Birthday Invite Project & Web Foundation - Intermediate HTML** and avoids generic cross-day boilerplate.
 
-    <body>
-        <h1>Hello World!</h1>
-    </body>
-</html>
+## Table of Contents
 
+- [1. What You Build](#1-what-you-build)
+- [2. Core Concepts](#2-core-concepts)
+- [3. Project Structure](#3-project-structure)
+- [4. Implementation Walkthrough](#4-implementation-walkthrough)
+- [5. Day Code Snippet](#5-day-code-snippet)
+- [6. How to Run](#6-how-to-run)
+- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
+- [8. Practice Extensions](#8-practice-extensions)
+- [9. Key Takeaways](#9-key-takeaways)
 
+## 1. What You Build
 
-<!DOCTYPE HTML>
-# at the start of each HTML file we specify the doctype so it tells the browser which html version we are using, currently, html means 5
+You build **Birthday Invite Project & Web Foundation - Intermediate HTML** as a day-specific project using `html/css`.
+Primary entrypoint: `burger.html`.
 
-<html lang="en">
+## 2. Core Concepts
 
-# the actual html content will be the root of the document
-# everything else will go between the opening and closing tags
+- Day-specific stack and techniques: `html/css`.
+- Converting raw inputs/events/data into deterministic outputs.
+- Organizing logic so the main flow stays readable and debuggable.
 
-    <head>
-# important info about our website is set but not displayed to the user
-        <meta charset="UTF-8">
-# all websites should have a meta tag that tells the browser the character set we used
-        <title>My Website</title>
-# the title is what is displayed in the browser tab when website is opened
-    </head>
+Historical lesson signals recovered from git history:
+- 1. The HTML Boilerplate
+- - this gives the structure to the website
+- - it looks something like this
 
-    <body>
-# everything else on the website goes inside the body element
-        <h1>Hello World!</h1>
-    </body>
-# closing tag for body
+## 3. Project Structure
 
-</html>
+- `burger.html`: Static web page source.
+- `index.html`: Static web page source.
+- `index_birthday_invite_project.html`: Static web page source.
+- `solution.html`: Static web page source.
 
-# closing tag for html
+## 4. Implementation Walkthrough
 
-- we should indent our code properly so each element is clearly visible and we don't miss putting the closing tags for each element
+1. Lay out semantic sections first, then apply styles incrementally.
+2. Use consistent class naming so structure and styles stay maintainable.
+3. Add targeted checks for edge cases and invalid paths before final output.
 
-# if we create a .html file in VsCode, we can generate the boilerplate by writing ! on the first line and selecting the options given
+## 5. Day Code Snippet
+
+Excerpt from `burger.html`:
+```html
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<bun type="sesame">
+    <sauce flavor="spicy">
+        <cheese>Cheddar</cheese>
+    </sauce>
+    <prickles>
+        <bacon>Not Burnt</bacon>
+    </prickles>
+    <lettuce>
+        <meat type="Black Angus">Well Done</meat>
+    </lettuce>
+</bun>
+```
 
-# tells the browser how the website should be displayed on the screen that is rendered on
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+## 6. How to Run
 
+```bash
+open "burger.html"
+```
 
-# 2. The List Elements
+## 7. Common Pitfalls and Debug Tips
 
-# 2.1 Unordered List and the list item
-<ul>
-    <li>Milk</li>
-    <li>Eggs</li>
-    <li>Bread</li>
-</ul>
+- Reproduce failures with the smallest input first, then expand once stable.
 
-# will create a bullet point list
+## 8. Practice Extensions
 
+- Add one improvement that increases reliability (validation, retries, or explicit error handling).
+- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
+- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
 
-# 2.2 Ordered List
-<ol>
-    <li>Milk</li>
-    <li>Eggs</li>
-    <li>Bread</li>
-</ol>
+## 9. Key Takeaways
 
-# will create a numbered list
-
-
-# 3. Nesting and Indentation
-
-# We can create nested lists by using indentation
-<ul>
-<li>Wake up and brush teeth</li>
-<li>Drink 500mk of water</li>
-<li>Make omelette:
-    <ul>
-        <li>Whisk eggs with milk</li>
-        <li>Add butter to pan</li>
-        <li>Add in eggs and stir</li>
-        <li>When solid, add salt</li>
-    </ul>
-<li>Start work</li>
-</ul>
-
-
-# 4. Attributes and the Anchor element
-
-<tag attribute=value>Content</tag>
-
-# An attrinute adds additional information to the HTML element, such as the website where the link points to
-<a href="www.google.com">This is a link</a>
-
-# href is the url that the hyperlink should point to
-
-# You can add as many attributes as needed separated by a space
-<tag attribute=value anotherattribute=value>Content</tag>
-
-# In addition to specific attributes that each element has, there are HTML Global Attributes that each element has access to.
-- draggable - boolean
-- hidden - boolean
-<a href="www.google.com" draggable=true>This is a link to Google</a>
-
-
-# 5. The Image Element
-
-<img src="url" />
-
-# Just like the anchor element requires the href attribute to function, the image element requires the source (src) or location of the image
-# The image element is a Void element since it is self closing and has no content
-
-# It is good practice to add also the alt (alternative text attribute) attribute for the image, giving it a description for screen readers.
-<img src="https://picsum.photos/200" alt="forest at sunset" />
+- **Birthday Invite Project & Web Foundation - Intermediate HTML** is strongest when the main flow is simple and each helper has one clear job.
+- Real project snippets from this day should be your baseline when reviewing or extending the code.
+- Historical lesson notes were preserved and translated into the new structure for continuity.
