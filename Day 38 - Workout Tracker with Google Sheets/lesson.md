@@ -1,356 +1,122 @@
-# Day 38 - Workout Tracker with Google Sheets and Natural Language Processing
+# Day 38 - Natural Language Exercise Parsing and Sheets Logging
 
-Today we're building a sophisticated workout tracker that takes natural language input ("I ran 5 miles and did 30 minutes of yoga"), uses artificial intelligence to understand what exercises you performed, calculates calories burned, and stores everything in a Google Sheet.
+Day 38 is one of the first projects in the course that feels like a real personal automation tool. The user types a sentence such as “I ran 5 km and did 30 minutes of yoga,” and the script turns that into structured exercise records with durations and calorie estimates, then logs the result into Google Sheets. What makes the project interesting is not only the APIs involved. It is the fact that each stage transforms the data into a new shape that is better suited for the next stage.
 
-This project demonstrates several powerful concepts: natural language processing through APIs, using Google Sheets as a database, and building data pipelines that transform human input into structured data.
+This is a classic ETL-style workflow:
 
-## Understanding the Architecture
+- extract the user’s description
+- transform it into structured exercise records
+- load those records into a storage system
 
-The application consists of three main components:
+## 1. Extracting Input in the Most Human-Friendly Form
 
-1. **Input Layer**: User enters exercise description in natural language
-2. **Processing Layer**: Nutritionix API parses the text and extracts exercise data
-3. **Storage Layer**: Sheety API writes the data to Google Sheets
-
-This is a classic ETL (Extract, Transform, Load) pattern that appears throughout data engineering and automation.
-
-## Natural Language Processing with Nutritionix
-
-The Nutritionix API is remarkable because it can understand freeform text describing physical activities. You don't need to fill out forms or select from dropdowns—just type what you did.
+The script begins with one freeform prompt:
 
 ```python
-import requests
-import os
-
-NUTRITIONIX_ENDPOINT = "https://trackapi.nutritionix.com/v2/natural/exercise"
-
-# These headers identify your application to Nutritionix
-nutritionix_headers = {
-    "x-app-id": os.environ.get("NUTRITIONIX_APP_ID"),
-    "x-app-key": os.environ.get("NUTRITIONIX_API_KEY"),
-}
-
-# The user types their workout in plain English
 exercise = input("Tell me what exercises you did: ")
-# Example: "I ran 3 miles and cycled for 30 minutes"
-
-# Additional parameters help the API give more accurate results
-exercise_params = {
-    "query": exercise,
-    "gender": "male",
-    "weight_kg": 75.0,
-    "height_cm": 175.0,
-    "age": 30
-}
-
-# Send the request
-response = requests.post(
-    url=NUTRITIONIX_ENDPOINT, 
-    headers=nutritionix_headers, 
-    json=exercise_params
-)
-
-# Parse the response
-exercises = response.json()["exercises"]
 ```
 
-The response contains structured data for each exercise detected:
+That is a big user-experience decision. The script is not asking for a rigid form with one field for exercise name, one field for minutes, and one field for calories. It is letting the user describe the workout naturally.
 
-```python
-# Example response structure:
-# {
-#     "exercises": [
-#         {
-#             "tag_id": 59,
-#             "user_input": "ran",
-#             "duration_min": 30,
-#             "met": 9.8,
-#             "nf_calories": 294.71,
-#             "total_calories": 294.71,
-#             "name": "running",
-#             "description": null
-#         },
-#         {
-#             "tag_id": 119,
-#             "user_input": "cycled",
-#             "duration_min": 30,
-#             "met": 7.5,
-#             "nf_calories": 225.31,
-#             "name": "biking",
-#             "description": null
-#         }
-#     ]
-# }
-```
+That means the program needs another system to do the hard work of interpretation. This is why Nutritionix is such a good fit for the project. It acts like the parsing layer between human language and structured exercise data.
 
-Each exercise in the response includes:
-- `name`: The type of exercise ("running", "biking", etc.)
-- `duration_min`: How many minutes
-- `nf_calories`: Calories burned (Nutriix's calculation)
-- `met`: Metabolic Equivalent of Task (a measure of exercise intensity)
+## 2. Giving the Parsing API Enough Context to Be Useful
 
-This is incredibly powerful because the user doesn't need to know the MET values or calculate anything—they just type what they did.
-
-## Why Personal Parameters Matter
-
-You'll notice we pass `gender`, `weight_kg`, `height_cm`, and `age` to the API. These matter because calorie calculations depend on body composition:
+The Nutritionix request does more than pass the user’s sentence:
 
 ```python
 exercise_params = {
     "query": exercise,
-    "gender": "male",        # Males typically burn fewer calories
-    "weight_kg": 75.0,      # Heavier people burn more
-    "height_cm": 175.0,     # Height affects BMR
-    "age": 30              # Younger people generally have higher BMR
+    "gender": GENDER,
+    "weight_kg": WEIGHT_KG,
+    "height_cm": HEIGHT_CM,
+    "age": AGE,
 }
 ```
 
-The API uses these values along with the exercise MET value to calculate calories. A 150-pound person doing 30 minutes of running burns different calories than a 200-pound person doing the same exercise.
+These extra fields matter because calorie estimates are not universal. The API is being asked to interpret the exercise and personalize the output.
 
-## Google Sheets as a Database
+That is an important lesson in API usage: sometimes the raw user input is not enough. The quality of the response depends on how much context you provide.
 
-Sheety (https://sheety.co) is a service that converts Google Sheets into a REST API. This is brilliant for small-to-medium data storage needs because:
-
-1. **No database setup**: Just create a Google Sheet
-2. **Visual data**: You can see and edit data in Excel/Sheets format
-3. **Built-in sharing**: Easy to collaborate with others
-4. **Free tier**: Sufficient for personal projects
-
-### Setting Up Sheety
-
-1. Create a Google Sheet with headers:
-   - Date | Time | Exercise | Duration | Calories
-
-2. Go to Sheety.co and connect your sheet
-3. Get your API endpoint URL and authentication token
-
-### Reading from Google Sheets
+Once the request is sent:
 
 ```python
-import requests
-import os
-
-SHEETY_ENDPOINT = os.environ.get("SHEETY_ENDPOINT")
-SHEETY_TOKEN = os.environ.get("SHEETY_TOKEN")
-
-sheety_headers = {
-    "Authorization": f"Bearer {SHEETY_TOKEN}",
-    "Content-Type": "application/json"
-}
-
-# Get all rows
-response = requests.get(SHEETY_ENDPOINT, headers=sheety_headers)
-data = response.json()
-
-# data looks like:
-# {
-#     "workouts": [
-#         {
-#             "date": "15/03/2024",
-#             "time": "09:30:00",
-#             "exercise": "Running",
-#             "duration": "30",
-#             "calories": "295"
-#         }
-#     ]
-# }
+workout_response = requests.post(url=NUTRITIONIX_ENDPOINT, headers=nutritionix_headers, json=exercise_params)
+workout_response.raise_for_status()
+workout = workout_response.json()["exercises"]
 ```
 
-### Writing to Google Sheets
+the result is no longer freeform language. It is a list of normalized exercise entries the script can work with predictably.
 
-Writing (POST) is where Sheety really shines:
+## 3. Transforming the API Response into Sheet Rows
+
+The next step is to reshape those exercise records into the payload expected by Sheety:
 
 ```python
-from datetime import datetime
-
-today = datetime.now()
-today_date = today.strftime("%d/%m/%Y")
-today_time = today.strftime("%H:%M:%S")
-
-# For each exercise from Nutritionix
-for exercise in exercises:
+for exercise in workout:
     sheet_body = {
         "workout": {
             "date": today_date,
             "time": today_time,
-            "exercise": exercise["name"].title(),  # "running" → "Running"
+            "exercise": exercise["name"].title(),
             "duration": exercise["duration_min"],
-            "calories": round(exercise["nf_calories"])
+            "calories": exercise["nf_calories"]
         }
     }
-    
-    response = requests.post(
-        url=SHEETY_ENDPOINT,
-        headers=sheety_headers,
-        json=sheet_body
-    )
-    
-    print(f"Added: {exercise['name']} - {exercise['duration_min']} min, {round(exercise['nf_calories'])} cal")
 ```
 
-The key insight is the JSON structure: `{"workout": {...}}`. Sheety expects the sheet name as the outer key.
+This is the transform stage of the pipeline. The Nutritionix response contains more information than the sheet needs, and the keys do not match the sheet’s column structure directly. The code selects the right fields, renames them into the destination shape, and adds local timestamp data.
 
-## Complete Data Pipeline
+That local enrichment step is worth noticing:
 
-Here's how everything fits together:
+- Nutritionix provides exercise interpretation
+- your script provides the current date and time
+
+The final row is a blend of external API output and local application context.
+
+## 4. Loading the Result into Google Sheets Through Sheety
+
+Once the payload is shaped correctly, the script posts it:
 
 ```python
-import requests
-import os
-from datetime import datetime
-
-def main():
-    # ============ STEP 1: Get user input ============
-    exercise = input("Tell me what exercises you did: ")
-    
-    # ============ STEP 2: Process with Nutritionix ============
-    nutritionix_headers = {
-        "x-app-id": os.environ.get("NUTRITIONIX_APP_ID"),
-        "x-app-key": os.environ.get("NUTRITIONIX_API_KEY"),
-    }
-    
-    exercise_params = {
-        "query": exercise,
-        "gender": "male",
-        "weight_kg": 75.0,
-        "height_cm": 175.0,
-        "age": 30
-    }
-    
-    response = requests.post(
-        url="https://trackapi.nutritionix.com/v2/natural/exercise",
-        headers=nutritionix_headers,
-        json=exercise_params
-    )
-    
-    exercises = response.json()["exercises"]
-    
-    # ============ STEP 3: Save to Google Sheets ============
-    today = datetime.now()
-    today_date = today.strftime("%d/%m/%Y")
-    today_time = today.strftime("%H:%M:%S")
-    
-    sheety_headers = {
-        "Authorization": f"Bearer {os.environ.get('SHEETY_TOKEN')}",
-        "Content-Type": "application/json"
-    }
-    
-    print("\nWorkout Summary:")
-    print("-" * 40)
-    
-    for exercise in exercises:
-        sheet_body = {
-            "workout": {
-                "date": today_date,
-                "time": today_time,
-                "exercise": exercise["name"].title(),
-                "duration": exercise["duration_min"],
-                "calories": round(exercise["nf_calories"])
-            }
-        }
-        
-        response = requests.post(
-            url=os.environ.get("SHEETY_ENDPOINT"),
-            headers=sheety_headers,
-            json=sheet_body
-        )
-        
-        print(f"✓ {exercise['name'].title()}: {exercise['duration_min']} min, {round(exercise['nf_calories'])} cal")
-    
-    print("-" * 40)
-    print("All workouts saved to Google Sheets!")
-
-if __name__ == "__main__":
-    main()
+sheety_response = requests.post(url=SHEETY_ENDPOINT, headers=sheety_headers, json=sheet_body)
+print(sheety_response.text)
 ```
 
-## Error Handling and Edge Cases
+This completes the pipeline. The user’s sentence has now moved through three representations:
 
-Several things can go wrong in this pipeline:
+1. natural language text
+2. parsed exercise records from Nutritionix
+3. storage-ready workout rows for Google Sheets
 
-### 1. Nutritionix doesn't understand the input
+This is why the project matters beyond the individual services. It teaches how multiple APIs can be chained together without becoming tangled, as long as each step has a clear input and output shape.
 
-If the user types something Nutritionix can't parse, the API returns an empty exercises list:
+## 5. Why This Is a Strong Automation Pattern
 
-```python
-response = requests.post(url=NUTRITIONIX_ENDPOINT, headers=headers, json=params)
-exercises = response.json().get("exercises", [])
+The project has a reusable structure you will see again:
 
-if not exercises:
-    print("Couldn't understand that exercise. Try being more specific.")
-    print("Example: 'I ran 3 miles' or '30 minutes of cycling'")
-```
+- collect input in a convenient human form
+- delegate interpretation to a service designed for it
+- normalize the result
+- write it into a system that is easy to inspect later
 
-### 2. Sheety authentication fails
+Google Sheets works especially well here because it acts like a lightweight database while staying visible and editable to the user.
 
-```python
-try:
-    response = requests.post(url=endpoint, headers=headers, json=body)
-    response.raise_for_status()
-except requests.exceptions.HTTPError as e:
-    if response.status_code == 401:
-        print("Authentication failed. Check your Sheety token.")
-    elif response.status_code == 403:
-        print("Permission denied. Check your sheet sharing settings.")
-    else:
-        print(f"Error: {e}")
-```
+That visibility is useful in automation. A script is often easier to trust when its output lands in a format people can inspect without extra tooling.
 
-### 3. Network issues
+## How to Run the Project
 
-```python
-try:
-    response = requests.post(url, headers=headers, json=body, timeout=10)
-except requests.exceptions.Timeout:
-    print("Request timed out. Check your internet connection.")
-except requests.exceptions.ConnectionError:
-    print("Could not connect. Check your internet connection.")
-```
-
-## Practical Applications
-
-This pattern—input → API processing → structured storage—appears everywhere:
-
-**Health & Fitness:**
-- Sleep tracking
-- Food logging
-- Weight tracking
-- Mood journaling
-
-**Productivity:**
-- Time tracking
-- Project logging
-- Meeting notes
-
-**Finance:**
-- Expense tracking
-- Receipt logging
-- Budget updates
-
-The beauty is that Google Sheets provides immediate visualization—you can create charts, add conditional formatting, and share with others without building a custom frontend.
-
-## Environment Variables Setup
-
-Before running, set these variables:
+1. Open a terminal in this folder.
+2. Set the required environment variables for Nutritionix and Sheety.
+3. Run:
 
 ```bash
-export NUTRITIONIX_APP_ID="your_app_id"
-export NUTRITIONIX_API_KEY="your_api_key"
-export SHEETY_ENDPOINT="https://api.sheety.co/yourusername/workouts"
-export SHEETY_TOKEN="your_bearer_token"
+python main.py
 ```
 
-Get your Nutritionix credentials from https://www.nutritionix.com/business/api
+4. Enter a sentence describing one or more exercises.
+5. Confirm that the connected sheet receives a new row for each parsed exercise with the current date and time.
 
-## Try It Yourself
+## Summary
 
-```bash
-python "main.py"
-```
-
-Type something like:
-- "I ran 5 kilometers"
-- "30 minutes of yoga and 20 pushups"
-- "Swam for an hour"
-
-Watch as each exercise is parsed, calories calculated, and rows added to your Google Sheet.
+Day 38 teaches more than “call two APIs.” It teaches a real ETL-style automation flow. The script takes human language, enriches it with body metrics, converts the API response into normalized workout rows, and writes those rows into a persistent store. The core lesson is how data changes shape across a pipeline and why each transformation step has a clear purpose.

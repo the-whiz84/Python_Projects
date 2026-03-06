@@ -1,52 +1,47 @@
 # Day 46 - Authenticated Web Requests and Playlist Automation
 
-Yesterday, we learned how to pull data from any website. Today, we're doing something much more powerful: we're taking that scraped data and pushing it into a major platform—Spotify.
+Day 46 turns scraping into cross-platform automation. The script scrapes the Billboard Hot 100 for a chosen date, authenticates with Spotify, searches for matching tracks, and builds a private playlist. The key lesson is that scraping public data is only half the story. Once you need to write into a user account, authentication and API permissions become part of the workflow.
 
-We're building a "Musical Time Machine." You enter a date (like your graduation day or your 10th birthday), we scrape the Billboard Top 100 for that exact week, and then we automatically build a private Spotify playlist with all those songs.
+## 1. Scraping the Source List from Billboard
 
-## The Problem: Moving from Scraping to Automation
-
-Scraping a website like Billboard is the easy part. The difficult piece of the puzzle is talking to Spotify. Unlike a public website, you can't just "scrape" your way into a private user account. You need **Authentication**.
-
-### Step 1: Managing Secrets
-
-To talk to Spotify, you need a Client ID and a Client Secret. These are like your username and password for the API. **Never** hardcode these directly in your script. If you push your code to GitHub, anyone can steal them.
-
-Instead, we use environment variables:
+The script starts by pulling the Billboard chart for a specific date:
 
 ```python
-import os
-
-SPOTIFY_CLIENT_ID = os.environ.get("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
+date = input("Which year do you want to travel to? Type the date in this format YYYY-MM-DD: ")
+response = requests.get(url=f"https://www.billboard.com/charts/hot-100/{date}/")
+response.raise_for_status()
 ```
 
-### Step 2: OAuth 2.0 (The "Dance")
-
-Spotify uses OAuth 2.0. This is the protocol that allows you to "Log in with Google" or "Log in with Facebook" on other sites. In our script, we use the `spotipy` library to handle the heavy lifting:
+Then it parses the song names:
 
 ```python
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+soup = BeautifulSoup(top100_html, "html.parser")
+song_names_spans = soup.select("li ul li h3")
+song_names = [song.getText().strip() for song in song_names_spans]
+```
 
-auth_scope = "playlist-modify-private"
+This reuses the BeautifulSoup ideas from Day 45, but now the scraped output is not the final artifact. It becomes input for another system.
+
+## 2. Authenticating with Spotify Through OAuth
+
+Spotify access is handled with `SpotifyOAuth`:
+
+```python
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=SPOTIFY_CLIENT_ID,
     client_secret=SPOTIFY_CLIENT_SECRET,
-    redirect_uri="https://www.example.com/",
+    redirect_uri=REDIRECT_URI,
     scope=auth_scope
 ))
 ```
 
-The `scope` is crucial. It's us telling Spotify exactly what we want to do. We don't want to delete your account; we only want to `playlist-modify-private`. When you first run this, your browser will open, asking you to grant permission. Once you agree, Spotify sends a code back to your redirect URI, which `spotipy` captures to get your access token.
+This is the major step forward from simple API keys. The script is not only identifying an application. It is obtaining permission to act on behalf of a user.
 
-## The Process: Search, Map, and Create
+That is why the scope matters. `playlist-modify-private` gives only the access needed for this task and nothing more.
 
-Once we have the list of 100 song names from Billboard, we can't just give the names to Spotify. We need their unique **Spotify URIs**.
+## 3. Translating Song Names into Spotify URIs
 
-### Searching for Tracks
-
-We loop through our scraped song names and perform a search for each one:
+Spotify playlist APIs do not accept raw song titles as the final identifier. The script has to search for each song and extract a URI:
 
 ```python
 for song in song_names:
@@ -58,38 +53,55 @@ for song in song_names:
         print(f"{song} doesn't exist in Spotify. Skipped.")
 ```
 
-**Watch out—** Not every song from 1950 is on Spotify! We use a `try/except` block to catch `IndexError` if the search results for a song are empty. Without this, one missing song would crash your entire program.
+This is the important mapping step in the whole project. Billboard names are one representation of a song, but Spotify needs its own internal identifiers.
 
-### Creating the Playlist
+The `try` / `except` block also matters because not every scraped song will have a matching track entry.
 
-Finally, once we have a list of URIs, we create the playlist and add the tracks in one go:
+## 4. Creating the Playlist from the Mapped Track IDs
+
+Once the URIs are ready, the script creates a new private playlist:
 
 ```python
 user_id = sp.current_user()["id"]
-playlist = sp.user_playlist_create(
+PLAYLIST_ID = sp.user_playlist_create(
     user=user_id,
     public=False,
     name=f"{date} - BillBoard Top 100"
-)
-
-sp.user_playlist_add_tracks(playlist_id=playlist['id'], tracks=song_uris)
+)['id']
 ```
 
-## Running the Playlist Script
+Then it adds all the tracks:
 
-1. Set your environment variables in your terminal:
-   ```bash
-   export SPOTIFY_CLIENT_ID='your_id'
-   export SPOTIFY_CLIENT_SECRET='your_secret'
-   ```
-2. Run the script:
-   ```bash
-   python "main.py"
-   ```
-3. Enter a date like `2000-08-12`.
-4. Approve the request in your browser.
-5. Check your Spotify app—you'll have a brand new "2000-08-12 - BillBoard Top 100" playlist waiting for you!
+```python
+sp.user_playlist_add_tracks(playlist_id=PLAYLIST_ID, tracks=song_uris, user=user_id)
+```
+
+At this point the automation has crossed three systems:
+
+- user input for the date
+- Billboard for source chart data
+- Spotify for authenticated playlist creation
+
+That end-to-end handoff is what makes the project feel substantial.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Set the required environment variables:
+
+```bash
+export SPOTIFY_CLIENT_ID='your_id'
+export SPOTIFY_CLIENT_SECRET='your_secret'
+```
+
+3. Run:
+
+```bash
+python main.py
+```
+
+4. Enter a date like `2000-08-12`, approve the Spotify OAuth flow in your browser, and confirm that a private playlist is created in your account.
 
 ## Summary
 
-Today we leaped from just "reading" the web to "interacting" with it. You learned how to handle OAuth authentication, manage sensitive API keys, and bridge the gap between two completely different systems (Billboard and Spotify) using Python as the glue.
+Day 46 connects scraping to authenticated API automation. The script scrapes Billboard for historical chart data, authenticates with Spotify through OAuth, maps scraped song names to Spotify URIs, and creates a private playlist from those tracks. The main lesson is how public web data becomes useful once it is translated into the identifiers and permissions required by another platform.

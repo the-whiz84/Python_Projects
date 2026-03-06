@@ -1,253 +1,108 @@
-# Day 36 - Stock Market Monitoring App
+# Day 36 - Market Data Monitoring and Event-Based Notifications
 
-Today we're building a sophisticated stock market monitoring application that tracks a company's stock price, detects significant movements, fetches related news, and sends you SMS alerts. This project combines multiple APIs (Alpha Vantage for stock data, NewsAPI for articles, Twilio for notifications) into a coherent automation pipeline.
+Day 36 takes the alerting pattern from the previous lessons and applies it to market data. The script watches a stock, measures whether the price moved enough to matter, fetches related news if it did, and sends those headlines through Twilio. The important lesson is how to turn raw external data into a threshold-based event.
 
-This lesson explores how to work with financial data APIs, parse complex JSON responses, calculate meaningful metrics from raw data, and deliver actionable notifications to users.
+## 1. Reducing Historical Stock Data to a Single Signal
 
-## Understanding Stock Data APIs
-
-Stock market data APIs provide historical and real-time information about publicly traded companies. Alpha Vantage offers free API access (with rate limits) that gives you daily stock prices, intraday data, and various technical indicators.
-
-The core concept is simple: you ask the API for data about a specific stock (identified by a ticker symbol like "AAPL" for Apple), and it returns a structured response with prices, volumes, and timestamps.
-
-Alpha Vantage's free tier has limitations: you can make 5 API calls per minute and 500 calls per day. For a personal stock monitor like this, that's usually sufficient. The key is designing your code to be efficient—only fetching the data you need and caching when possible.
-
-## The API Request Structure
-
-Here's how we construct the request to Alpha Vantage:
+The script begins by requesting daily stock data:
 
 ```python
-import requests
-import os
-
-STOCK = "AAPL"
-COMPANY_NAME = "Apple Inc"
-
-STOCK_ENDPOINT = "https://www.alphavantage.co/query"
-
-stock_parameters = {
-    "function": "TIME_SERIES_DAILY",
-    "symbol": STOCK,
-    "apikey": os.environ.get("ALPHAVANTAGE_API_KEY"),
-}
-
-response = requests.get(url=STOCK_ENDPOINT, params=stock_parameters)
-response.raise_for_status()  # Raises an exception if the request failed
-```
-
-The parameters tell Alpha Vantage exactly what data we want:
-- `function`: "TIME_SERIES_DAILY" requests daily price data
-- `symbol`: "AAPL" specifies Apple Inc
-- `apikey`: Our authentication token
-
-## Parsing the Response
-
-Alpha Vantage returns data in a nested dictionary structure. Understanding this structure is crucial:
-
-```python
-data = response.json()
-
-# The data looks like:
-# {
-#     "Time Series (Daily)": {
-#         "2024-03-15": {
-#             "1. open": "175.00",
-#             "2. high": "176.50",
-#             "3. low": "174.25",
-#             "4. close": "176.00",
-#             "5. volume": "45000000"
-#         },
-#         "2024-03-14": { ... },
-#         ...
-#     }
-# }
-
-# We can convert the entire time series to a list for easier access
+stock_response = requests.get(url=STOCK_ENDPOINT, params=stock_parameters)
+stock_response.raise_for_status()
+data = stock_response.json()["Time Series (Daily)"]
 data_list = [value for (key, value) in data.items()]
 ```
 
-The dictionary comprehension `[value for (key, value) in data.items()]` transforms the nested dictionary into a simple list, where index 0 is the most recent day, index 1 is the previous day, and so on.
-
-## Calculating Price Movement
-
-The key metric we care about is the percentage change between yesterday's closing price and the day before:
+From there, it compares the two most recent closing prices:
 
 ```python
-# Get the two most recent closing prices
-yesterday_closing = float(data_list[0]['4. close'])
-prev_day_closing = float(data_list[1]['4. close'])
-
-# Calculate the absolute difference
-closing_difference = abs(yesterday_closing - prev_day_closing)
-
-# Calculate percentage change
-diff_percent = round((closing_difference / prev_day_closing) * 100)
+yesterday_closing = data_list[0]['4. close']
+prev_day_closing = data_list[1]['4. close']
+closing_difference = abs(float(yesterday_closing) - float(prev_day_closing))
+diff_percent = round((closing_difference / float(prev_day_closing)) * 100)
 ```
 
-This calculation tells us: "The stock moved X% compared to the previous day." A 5% move in either direction is generally considered significant for most stocks.
+This is the core reduction step of the project. A large API response gets turned into one number: percentage movement between the last two closes.
 
-We use `abs()` (absolute value) because we care about the magnitude of movement, not just whether it went up or down. Later, we determine the direction separately:
+That is what makes the app useful. Most monitoring scripts are built around this same idea of compressing a noisy data source into one decision metric.
 
-```python
-if yesterday_closing > prev_day_closing:
-    arrow_direction = "🔺"  # Stock went up
-else:
-    arrow_direction = "🔻"  # Stock went down
-```
+## 2. Turning a Metric into a Trigger
 
-## Fetching Related News
-
-When we detect a significant price movement, we want to know what's causing it. NewsAPI lets us search for news about a specific company:
+The stock movement only matters if it crosses a threshold:
 
 ```python
-NEWS_ENDPOINT = "https://newsapi.org/v2/everything"
-
-news_parameters = {
-    "apiKey": os.environ.get("NEWS_API_KEY"),
-    "q": COMPANY_NAME,  # Query for the company name
-    "pageSize": 3,     # Limit to top 3 articles
-    "sortBy": "popularity",  # Get most popular/relevant first
-}
-
-news_response = requests.get(url=NEWS_ENDPOINT, params=news_parameters)
-news_data = news_response.json()["articles"]
-
-# Format each article for SMS
-news_list = []
-for item in news_data:
-    headline = item["title"]
-    brief = item["description"]
-    url = item["url"]
-    
-    formatted = f"Headline: {headline}\n\nBrief: {brief}\n\n{url}"
-    news_list.append(formatted)
-```
-
-NewsAPI returns an "articles" array, where each article has a title, description, source, author, URL, and published timestamp. We format this into a concise message suitable for SMS.
-
-## Sending Structured Alerts
-
-Now we combine everything into a comprehensive alert:
-
-```python
-from twilio.rest import Client
-import os
-
-# Only send if the price moved significantly (more than 1% in our case)
 if diff_percent > 1:
-    account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-    auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
-    client = Client(account_sid, auth_token)
-    
-    # Format the main alert with stock movement
-    stock_alert = f"{STOCK}: {arrow_direction}{diff_percent}%"
-    
-    # Send each news article as a separate message
-    for article in news_list:
-        message = client.messages.create(
-            from_=f"whatsapp:{os.environ.get('TWILIO_PHONE_NUMBER')}",
-            body=f"{stock_alert}\n\n{article}",
-            to=f"whatsapp:{os.environ.get('MY_PHONE_NUMBER')}"
-        )
-        
-        print(f"Sent: {message.status}")
 ```
 
-The message format looks like this:
-```
-AAPL: 🔺3%
-
-Headline: Apple Reports Record Q4 Earnings
-Brief: Apple Inc. announced quarterly earnings that exceeded analyst expectations...
-
-https://news.com/article-url
-```
-
-## Error Handling and Edge Cases
-
-When building real applications that depend on external services, you must handle various failure scenarios:
+Once the threshold is crossed, the script adds a direction marker:
 
 ```python
-try:
-    # Try to get stock data
-    stock_response = requests.get(url=STOCK_ENDPOINT, params=stock_parameters)
-    stock_response.raise_for_status()
-    stock_data = stock_response.json()
-    
-    # Check if we got valid data
-    if "Time Series (Daily)" not in stock_data:
-        print("API returned unexpected format")
-        # This might happen if the API key is invalid or rate-limited
-        
-except requests.exceptions.RequestException as e:
-    print(f"Network error: {e}")
-    
-except KeyError as e:
-    print(f"Unexpected response structure: {e}")
+arrow_direction = ""
+if yesterday_closing > prev_day_closing:
+    arrow_direction = "🔺"
+else:
+    arrow_direction = "🔻"
 ```
 
-Common issues include:
-- **Rate limiting**: Alpha Vantage limits free tier to 5 calls/minute
-- **Invalid API keys**: Check that your key is correct and hasn't expired
-- **Market holidays**: No data for weekends/holidays (API returns empty Time Series)
-- **API changes**: Services occasionally change their response format
+This is a small detail, but it improves the notification immediately. The alert does not only say that the stock moved. It also tells the user whether the move was up or down.
 
-## Architectural Patterns
+## 3. Pulling Context from a Second API
 
-This project demonstrates several important architectural patterns:
+After the price trigger fires, the script asks NewsAPI for articles about the company:
 
-**1. Pipeline Architecture**
-```
-External APIs → Data Processing → Business Logic → Notifications
-```
-
-Each stage is independent. You could swap the notification method (SMS → email → push notification) without changing the data processing logic.
-
-**2. Environment-Based Configuration**
 ```python
-# Configuration lives in environment variables
-API_KEYS = {
-    "stock": os.environ.get("ALPHAVANTAGE_API_KEY"),
-    "news": os.environ.get("NEWS_API_KEY"),
-    "twilio": os.environ.get("TWILIO_AUTH_TOKEN"),
-}
+news_response = requests.get(url=NEWS_ENDPOINT, params=news_parameters)
+news_response.raise_for_status()
+data = news_response.json()["articles"]
 ```
 
-This makes your code portable—you can run it in different environments (development, production) without changing the code.
+Then it formats a short list of summaries:
 
-**3. Conditional Execution**
 ```python
-if should_send_notification(condition):
-    send_notification()
+news_list = [
+    f'Headline: {item["title"]}.\n\nBrief: {item["description"]}\n\n{item["url"]}'
+    for item in data
+]
 ```
 
-We only send alerts when meaningful events occur, avoiding notification fatigue.
+This is the part that makes the alert actionable. A percentage move alone tells you something happened. The news articles help explain why it might have happened.
 
-## Extending the Application
+That is a useful general pattern for automation: first detect the event, then attach enough context for the user to act on it.
 
-Here are ways you could extend this stock monitor:
+## 4. Sending One Notification per Article
 
-1. **Multiple stocks**: Loop through a list of tickers and check each one
-2. **Different thresholds**: Allow different alert thresholds per stock
-3. **Technical indicators**: Add moving averages, RSI, or MACD calculations
-4. **Time-based alerts**: Only check during market hours
-5. **Persistent storage**: Save historical alerts to a database for review
-6. **Email support**: Add email notifications alongside SMS
+The Twilio loop sends each article as a separate message:
 
-## Try It Yourself
+```python
+client = Client(account_sid, auth_token)
+for article in news_list:
+    message = client.messages.create(
+        from_=f"whatsapp:{twilio_no}",
+        body=f"{STOCK}: {arrow_direction}{diff_percent}%\n\n{article}",
+        to=f"whatsapp:{my_tel_no}"
+    )
+```
+
+This is a clean design because the message template is consistent:
+
+- stock symbol
+- direction and percent change
+- one article summary
+
+That structure keeps the notification readable even though it is assembled from multiple services.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Configure the required API keys and Twilio credentials.
+3. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Before running, set these environment variables:
-```bash
-export ALPHAVANTAGE_API_KEY="your_alphavantage_key"
-export NEWS_API_KEY="your_newsapi_key"
-export TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxx"
-export TWILIO_AUTH_TOKEN="your_auth_token"
-export TWILIO_PHONE_NUMBER="+1234567890"
-export MY_PHONE_NUMBER="+1987654321"
-```
+4. Verify that when the movement threshold is exceeded, the script fetches the latest articles and sends formatted WhatsApp alerts.
 
-The script will check Apple's stock, and if it moved more than 1%, send you the latest news about the company.
+## Summary
+
+Day 36 turns stock data into an event-driven notification workflow. The script compares two closing prices, calculates percentage movement, uses that number as a trigger, fetches related news, and sends structured alerts through Twilio. The main lesson is how to turn a stream of external data into a meaningful event plus context.
