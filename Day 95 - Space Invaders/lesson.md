@@ -1,77 +1,135 @@
-# Day 95 - Space Invaders
+# Day 95 - 2D Arcade Architecture with Pygame
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Space Invaders** and avoids generic cross-day boilerplate.
+Space Invaders is larger than the earlier arcade projects because it has multiple enemy types, player lives, bullets from both sides, destructible barriers, a mystery ship, start and game-over screens, and wave progression. That makes it a good lesson in organizing a 2D game into cooperating classes rather than one monolithic loop.
 
-## Table of Contents
+The project works because the game state lives in `Game`, while the moving actors live in their own modules.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Split the Game Into Focused Actor Classes
 
-## 1. What You Build
+The project uses separate classes for the major pieces:
 
-You build **Space Invaders** as a day-specific project using `pygame`.
-Primary entrypoint: `main.py`.
+- `Spaceship`, `Bullet`, and `Barrier` in `player.py`
+- `Alien` and `MysteryShip` in `aliens.py`
+- `Game` in `game.py`
 
-## 2. Core Concepts
+For example, the spaceship owns movement and life state:
 
-- Day-specific stack and techniques: `pygame`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `aliens.py`: Supporting module for project logic.
-- `game.py`: Supporting module for project logic.
-- `player.py`: Supporting module for project logic.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-from game import Game
-
-if __name__ == "__main__":
-    game = Game()
-    game.run()
+class Spaceship:
+    def __init__(self, screen_width, screen_height):
+        self.rect = self.image.get_rect(center=(screen_width // 2, screen_height - 100))
+        self.x_change = 0
+        self.lives = 3
+        self.hit_status = False
 ```
 
-## 6. How to Run
+That split is what keeps the game maintainable. The `Game` class can orchestrate actors without needing to store every behavior inline.
 
-```bash
-pip install -r requirements.txt
+## 2. Let `Game` Own the Main State Machine
+
+The `Game` constructor initializes:
+
+- screen dimensions
+- fonts and images
+- lists of enemies, bullets, and barriers
+- score, wave, and active/game-over flags
+
+```python
+self.running = True
+self.game_active = False
+self.game_over = False
+self.score = 0
+self.wave = 1
+self.player_hit_time = None
 ```
-```bash
-python "main.py"
+
+That is the real architecture of the project. Every frame is interpreted through one of those states:
+
+- start screen
+- active game
+- game over screen
+
+The `run()` loop switches behavior depending on that state instead of trying to handle every case at once.
+
+## 3. Use Collision Logic to Drive the Game
+
+Once the game is active, the loop handles input, movement, drawing, and collisions.
+
+The player fires bullets like this:
+
+```python
+if event.key == pygame.K_SPACE:
+    if len(self.bullets) < 3:
+        bullet = Bullet(self.spaceship.rect.centerx, self.spaceship.rect.top, -1)
+        self.bullets.append(bullet)
 ```
 
-## 7. Common Pitfalls and Debug Tips
+That bullet cap is a small design choice, but it matters. It prevents the game from turning into a spam loop and keeps the pace closer to classic Space Invaders.
 
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+The bullets then interact with enemies, barriers, and the mystery ship through rectangle collisions:
 
-## 8. Practice Extensions
+```python
+if self.check_collision(bullet.rect, alien.rect):
+    self.aliens.remove(alien)
+    self.bullets.remove(bullet)
+    self.score += 10
+```
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+That is the main arcade loop pattern again:
 
-## 9. Key Takeaways
+- move entities
+- detect intersections
+- update score or state
+- remove objects that should no longer exist
 
-- **Space Invaders** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+## 4. Make Progression Part of the Architecture
+
+The game does more than survive one screen. It also tracks:
+
+- remaining lives
+- wave number
+- barrier resets
+- alien regeneration
+
+The helper methods such as `generate_aliens()` and `reset_barriers()` make those resets clean:
+
+```python
+def generate_aliens(self, speed_multiplier):
+    return [
+        Alien(50 + j * 60, 50 + i * 60, speed_multiplier)
+        for i in range(5)
+        for j in range(11)
+    ]
+```
+
+The mystery ship adds another layer of variety without complicating the base alien logic:
+
+```python
+class MysteryShip:
+    def activate(self):
+        self.rect.x = 0
+        self.active = True
+```
+
+This is what makes the project feel like a real game and not only a shooting demo. There are multiple interacting systems, but they remain understandable because each one has a clear owner.
+
+## How to Run Space Invaders
+
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the game:
+   ```bash
+   python main.py
+   ```
+3. Verify the major behaviors:
+   - `Enter` starts and restarts the game
+   - left/right keys move the ship
+   - `Space` fires bullets with a cap of three active shots
+   - aliens, barriers, and the mystery ship all participate in collisions
+   - score, lives, and wave indicators update during play
+
+## Summary
+
+Today, you worked with a fuller arcade architecture. The project separates actors into modules, uses `Game` as the orchestration layer, and drives progression through collisions, lives, and wave resets. The important lesson is not only how to use Pygame. It is how to keep a larger game readable by giving each moving piece a clear role.

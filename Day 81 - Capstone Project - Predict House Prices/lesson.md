@@ -1,86 +1,157 @@
-# Day 81 - Capstone Project - Predict House Prices
+# Day 81 - Machine Learning Capstone: House Price Prediction
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Capstone Project - Predict House Prices** and avoids generic cross-day boilerplate.
+This notebook is a capstone because it combines several ideas that used to appear separately: exploratory analysis, feature relationships, train/test splitting, linear regression, residual analysis, and model improvement through transformation of the target variable.
 
-## Table of Contents
+The project question is straightforward: can you estimate the value of a Boston home from its features? The useful part is not just training a model. It is learning how to inspect the model and decide whether it is behaving well.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Explore the Dataset Before Modeling
 
-## 1. What You Build
+The notebook begins with a standard inspection pass:
 
-You build **Capstone Project - Predict House Prices** as a day-specific project using `notebook`.
-Primary entrypoint: `Multivariable_Regression_and_Valuation_Model.ipynb`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `notebook`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-Historical lesson signals recovered from git history:
-- Capstone Project - Predict House Prices
-- Welcome to Boston Massachusetts in the 1970s! Imagine you're working for a real estate development company. Your company wants to value any residential project before they start. You are tasked with building a model that can provide a price estimate based on a home's characteristics like:
-- - The number of rooms
-
-## 3. Project Structure
-
-- `Multivariable_Regression_and_Valuation_Model.ipynb`: Primary analysis notebook.
-- `Multivariable_Regression_and_Valuation_Model_(solution).ipynb`: Primary analysis notebook.
-- `boston.csv`: Dataset/input data consumed by the day project.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Run notebook cells in order to preserve variable state and reproducible results.
-2. Inspect and clean data before plotting or statistical interpretation.
-3. Document conclusions directly beside code so insights remain auditable.
-
-## 5. Day Code Snippet
-
-Excerpt from `Multivariable_Regression_and_Valuation_Model.ipynb`:
 ```python
-import pandas as pd
-import numpy as np
+data = pd.read_csv('boston.csv', index_col=0)
 
-import seaborn as sns
-import plotly.express as px
-import matplotlib.pyplot as plt
-
-from sklearn.linear_model import LinearRegression
-# TODO: Add missing import statements
-from sklearn.model_selection import train_test_split
+data.shape
+data.columns
+data.head()
+data.info()
+print(f'Any NaN values? {data.isna().values.any()}')
+print(f'Any duplicates? {data.duplicated().values.any()}')
 ```
 
-## 6. How to Run
+That matters because regression is only useful when the feature table is trustworthy.
 
-```bash
-pip install -r requirements.txt
+The first set of visualizations explores the target variable and the main feature relationships:
+
+```python
+sns.displot(data['PRICE'],
+            bins=50,
+            aspect=2,
+            kde=True,
+            color='#2196f3')
 ```
-```bash
-jupyter notebook
+
+And then:
+
+```python
+sns.pairplot(data)
+
+with sns.axes_style('darkgrid'):
+    sns.jointplot(x=data.LSTAT,
+                  y=data.PRICE,
+                  height=7,
+                  color='crimson',
+                  joint_kws={'alpha': 0.5})
 ```
 
-## 7. Common Pitfalls and Debug Tips
+These plots do more than make the notebook look thorough. They help you spot skew, outliers, and strong relationships before you fit a model.
 
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Reproduce failures with the smallest input first, then expand once stable.
+## 2. Split Features and Target the Right Way
 
-## 8. Practice Extensions
+The model uses `PRICE` as the target and everything else as features:
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+```python
+target = data['PRICE']
+features = data.drop('PRICE', axis=1)
 
-## 9. Key Takeaways
+X_train, X_test, y_train, y_test = train_test_split(features,
+                                                    target,
+                                                    test_size=0.2,
+                                                    random_state=10)
+```
 
-- **Capstone Project - Predict House Prices** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+This is the point where the notebook becomes a real machine-learning workflow rather than just a statistics exercise.
+
+The split matters because you need a boundary between the data used to fit the model and the data used to evaluate it. Without that separation, performance numbers become far less trustworthy.
+
+## 3. Fit the Linear Model and Inspect Residuals
+
+Once the split is created, the notebook trains a linear regression model and compares predictions to actual values.
+
+The most important visual checks come after fitting:
+
+```python
+plt.figure(dpi=100)
+plt.scatter(x=y_train, y=predicted_vals, c='indigo', alpha=0.6)
+plt.plot(y_train, y_train, color='cyan')
+plt.title(f'Actual vs Predicted Prices: $y _i$ vs $\\hat y_i$', fontsize=17)
+```
+
+And:
+
+```python
+plt.figure(dpi=100)
+plt.scatter(x=predicted_vals, y=residuals, c='indigo', alpha=0.6)
+plt.title('Residuals vs Predicted Values', fontsize=17)
+```
+
+Residuals are where the notebook becomes educational instead of mechanical. A regression model is not only about getting an `r-squared` value. You also want to know:
+
+- are predictions roughly aligned with actual values?
+- do residuals fan out or cluster oddly?
+- does the error distribution look reasonably centered?
+
+That is why the notebook also plots the residual distribution:
+
+```python
+sns.displot(residuals, kde=True, color='indigo')
+plt.title(f'Residuals Skew ({resid_skew}) Mean ({resid_mean})')
+```
+
+## 4. Improve the Model by Transforming the Target
+
+The notebook then makes a strong modeling move: it log-transforms the house prices.
+
+```python
+y_log = np.log(data['PRICE'])
+sns.displot(y_log, kde=True)
+plt.title(f'Log Prices. Skew is {y_log.skew():.3}')
+```
+
+That transformation matters because housing prices are often skewed. A linear model tends to behave better when the target is more symmetric.
+
+The notebook retrains the model on log prices:
+
+```python
+new_target = np.log(data['PRICE'])
+features = data.drop('PRICE', axis=1)
+
+X_train, X_test, log_y_train, log_y_test = train_test_split(features,
+                                                            new_target,
+                                                            test_size=0.2,
+                                                            random_state=10)
+
+log_regr = LinearRegression()
+log_regr.fit(X_train, log_y_train)
+```
+
+Then it compares the residual behavior of the original and log-price models. This is one of the best habits in the notebook: do not stop at "the model trained." Compare whether the new specification is actually cleaner and more stable.
+
+The final step turns the model into a valuation tool by building a `property_stats` row and predicting a price:
+
+```python
+log_estimate = log_regr.predict(property_stats)[0]
+dollar_est = np.exp(log_estimate) * 1000
+print(f'The property is estimated to be worth ${dollar_est:.6}')
+```
+
+That turns the notebook from an analysis project into an applied estimation model.
+
+## How to Run the House Price Notebook
+
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Open `Multivariable_Regression_and_Valuation_Model.ipynb`.
+3. Run the notebook in order so the exploratory plots, train/test split, regression variables, and transformed targets build on each other correctly.
+4. Verify the main checkpoints:
+   - target distribution and feature relationships
+   - `train_test_split()` output
+   - actual vs predicted and residual plots
+   - log-price model comparison
+   - final property valuation example
+
+## Summary
+
+Today, you learned that a predictive model is only as useful as the diagnostics around it. You explored the Boston housing data, trained a multivariable regression model, checked the residual structure, improved the target distribution with a log transform, and turned the final model into a property valuation workflow.

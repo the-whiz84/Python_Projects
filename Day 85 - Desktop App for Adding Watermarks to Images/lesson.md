@@ -1,83 +1,119 @@
-# Day 85 - Desktop App for Adding Watermarks to Images
+# Day 85 - Desktop Image Processing and Watermark Workflows
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Desktop App for Adding Watermarks to Images** and avoids generic cross-day boilerplate.
+This project is a good example of desktop software that does one concrete job well: take an image, place a watermark in the bottom-right corner, and save the result. The folder even contains two UI implementations, one in PyQt and one in Tkinter, which makes the day more interesting than a single-script utility.
 
-## Table of Contents
+The main application path is the PyQt version in `main.py`.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Build a Desktop Workflow Around File Input
 
-## 1. What You Build
+The PyQt app supports two ways to load an image:
 
-You build **Desktop App for Adding Watermarks to Images** as a day-specific project using `tkinter`.
-Primary entrypoint: `main.py`.
+- drag and drop
+- manual file selection
 
-## 2. Core Concepts
+The drag-and-drop path is handled through event methods:
 
-- Day-specific stack and techniques: `tkinter`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `main_tkinter.py`: Supporting module for project logic.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-QApplication,
-    QLabel,
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QFileDialog,
-    QHBoxLayout,
-    QMessageBox,
+def dragEnterEvent(self, event: QDragEnterEvent):
+    if event.mimeData().hasUrls():
+        event.accept()
+    else:
+        event.ignore()
+```
+
+and:
+
+```python
+def dropEvent(self, event: QDropEvent):
+    file_url = event.mimeData().urls()[0]
+    file_path = file_url.toLocalFile()
+    if file_path.lower().endswith((".png", ".jpg", ".jpeg")):
+        self.process_image(file_path)
+```
+
+That dual input model is what makes the app feel like a real desktop tool instead of just a script with a button.
+
+## 2. Resize and Blend the Watermark Intelligently
+
+The actual image-processing logic happens in `process_image()`:
+
+```python
+image = Image.open(image_path)
+image_width, image_height = image.size
+
+watermark_path = "watermark.png"
+watermark = Image.open(watermark_path)
+```
+
+The watermark is then resized relative to the image width:
+
+```python
+watermark_ratio = 0.15
+watermark_width = int(image_width * watermark_ratio)
+watermark_height = int(watermark.height * (watermark_width / watermark.width))
+resized_watermark = watermark.resize((watermark_width, watermark_height))
+```
+
+This is a better design than hardcoding a fixed watermark size. A watermark that works on a small image will look tiny on a large one unless you scale it proportionally.
+
+The code also applies transparency by rewriting the alpha channel:
+
+```python
+watermark = resized_watermark.convert("RGBA")
+watermark_data = watermark.getdata()
+new_data = []
+for item in watermark_data:
+    new_data.append((item[0], item[1], item[2], int(item[3] * 0.25)))
+watermark.putdata(new_data)
+```
+
+That keeps the watermark visible without dominating the original image.
+
+## 3. Save the Result as a New Artifact
+
+Once the watermark is ready, the app pastes it into the image and saves a new file:
+
+```python
+image = image.convert("RGBA")
+image.paste(
+    watermark,
+    (image_width - watermark_width, image_height - watermark_height),
+    watermark,
 )
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QImage, QDragEnterEvent, QDropEvent
-from PIL import Image
-from pathlib import Path
+
+output_filename = f"{Path(image_path).stem}_watermarked.png"
+watermarked_image_path = os.path.join(self.save_path, output_filename)
+image.save(watermarked_image_path)
 ```
 
-## 6. How to Run
+This is a sensible workflow because it preserves the original file and writes a derived output with a predictable suffix.
 
-```bash
-pip install -r requirements.txt
-```
-```bash
-python "main.py"
-```
+The app also lets the user choose the save location, which turns a one-off script into something closer to a reusable desktop utility.
 
-## 7. Common Pitfalls and Debug Tips
+## 4. Compare the Two UI Approaches in the Folder
 
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+There is also a second implementation in `main_tkinter.py`. It uses drag-and-drop via `TkinterDnD`, applies the same basic watermarking idea, and previews the result inside a Tkinter frame.
 
-## 8. Practice Extensions
+That makes the folder useful beyond the main app. You can compare the same product idea across two GUI frameworks:
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+- PyQt version with a more polished desktop feel
+- Tkinter version with a lighter-weight approach
 
-## 9. Key Takeaways
+This is a useful engineering lesson. The image-processing core is portable even when the UI framework changes.
 
-- **Desktop App for Adding Watermarks to Images** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+## How to Run the Watermark App
+
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the main PyQt application:
+   ```bash
+   python main.py
+   ```
+3. Drag an image into the window or use `Select Image`.
+4. Optionally choose a custom save folder, then confirm the watermarked file is created with the `_watermarked` suffix.
+
+## Summary
+
+Today, you built a real desktop image workflow rather than a pure command-line script. The project scales the watermark to the image, applies alpha blending, saves a derived output, and wraps the whole process in a drag-and-drop UI. The bigger lesson is that a small amount of image processing becomes much more useful once it is embedded in a clear user flow.

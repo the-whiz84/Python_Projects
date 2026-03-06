@@ -1,82 +1,91 @@
-# Day 91 - PDF to audiobook converter
+# Day 91 - PDF Parsing and Text-to-Speech Automation
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **PDF to audiobook converter** and avoids generic cross-day boilerplate.
+This project is a short automation pipeline: read a PDF, extract its text, then hand that text to AWS Polly so it can generate speech. The code is compact, but it touches a few real production concerns at once: file parsing, cloud credentials, and asynchronous media generation.
 
-## Table of Contents
+That makes it a good lesson in stitching services together with minimal code.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Extract Text from the PDF Safely
 
-## 1. What You Build
+The PDF step is isolated in its own function:
 
-You build **PDF to audiobook converter** as a day-specific project using core Python.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: core Python.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-pdf_path = "./Privacy-Policy.pdf"
+def pdf_to_text(pdf_path):
+    with open(pdf_path, "rb") as file:
+        reader = pypdf.PdfReader(file)
+        text = ""
+        for page_num in range(len(reader.pages)):
+            text += reader.pages[page_num].extract_text()
+    return text
+```
 
-# Access AWS credentials from environment variables
+That separation is important. PDF parsing is its own concern, and keeping it outside the AWS setup makes the script easier to understand and extend.
+
+The function iterates page by page instead of assuming the whole document can be treated as one chunk immediately. That is a sensible pattern for document-processing workflows.
+
+## 2. Keep Secrets Out of the Source Code
+
+The script reads AWS configuration from environment variables:
+
+```python
 aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
 aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 aws_s3_bucket = os.getenv("AWS_S3_BUCKET")
 region_name = os.getenv("AWS_REGION", "eu-central-1")
-
-
-def pdf_to_text(pdf_path):
-    """
-    Extract text from a PDF file.
-
-    Args:
 ```
 
-## 6. How to Run
+This is the right habit for any project that touches a cloud API. Secrets should not be hardcoded into scripts, especially for something like Polly where the output is also tied to a storage bucket.
 
-```bash
-pip install -r requirements.txt
+The day is also a good reminder that "automation" often means coordinating local files with remote infrastructure.
+
+## 3. Hand the Text to Polly as a Speech Task
+
+Once the text is extracted, the script creates a Polly client:
+
+```python
+polly_client = boto3.Session(
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    region_name=region_name,
+).client("polly")
 ```
-```bash
-python "main.py"
+
+And then starts the speech synthesis task:
+
+```python
+response = polly_client.start_speech_synthesis_task(
+    VoiceId="Joanna",
+    OutputFormat="mp3",
+    Text=text,
+    Engine="neural",
+    OutputS3BucketName=aws_s3_bucket,
+)
 ```
 
-## 7. Common Pitfalls and Debug Tips
+This is a strong example of service composition:
 
-- Reproduce failures with the smallest input first, then expand once stable.
+- `pypdf` extracts content
+- `boto3` sends it to Polly
+- S3 stores the generated audio
 
-## 8. Practice Extensions
+The script does not try to play the audio locally. It delegates output delivery to AWS storage, which is often the right choice for long-running or cloud-based workflows.
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+## How to Run the PDF-to-Audiobook Script
 
-## 9. Key Takeaways
+1. Set the required environment variables:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_S3_BUCKET`
+   - optionally `AWS_REGION`
+2. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the script:
+   ```bash
+   python main.py
+   ```
+4. Verify that the PDF text is extracted and the speech synthesis task is created in Polly with output written to the configured S3 bucket.
 
-- **PDF to audiobook converter** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+## Summary
+
+Today, you connected document parsing to cloud text-to-speech. The project reads a PDF page by page, keeps AWS credentials in the environment, and hands the extracted text to Polly as an MP3 synthesis task. The larger lesson is how small Python scripts can act as glue between local artifacts and managed cloud services.

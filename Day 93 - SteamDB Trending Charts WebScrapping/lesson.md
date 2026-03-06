@@ -1,85 +1,103 @@
-# Day 93 - SteamDB Trending Charts WebScrapping
+# Day 93 - Trend Data Scraping, Cleaning, and Reporting
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **SteamDB Trending Charts WebScrapping** and avoids generic cross-day boilerplate.
+This project scrapes the SteamDB charts, extracts the most-played games table, converts the values into structured records, and saves the result as a CSV. It is a good example of a scraping workflow that mixes Selenium and BeautifulSoup rather than relying on only one tool.
 
-## Table of Contents
+That combination matters because some pages are easier to parse after the browser has already rendered them.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Use Selenium to Reach the Dynamic Page State
 
-## 1. What You Build
+The script starts by launching a browser:
 
-You build **SteamDB Trending Charts WebScrapping** as a day-specific project using `selenium`, `pandas`, `beautifulsoup`, `bs4`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `selenium`, `pandas`, `beautifulsoup`, `bs4`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `requirements.txt`: Project resource used by this day.
-- `steam_most_played_games.csv`: Dataset/input data consumed by the day project.
-
-## 4. Implementation Walkthrough
-
-1. Call external web/API resources and normalize returned data before use.
-2. Load tabular data, clean null/edge values, then compute the target metrics.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(
     service=Service(ChromeDriverManager().install()), options=options
 )
-
-try:
-    url = "https://steamdb.info/charts/?sort=24h"
-    driver.get(url)
-
-    # Scroll to the bottom of the page to trigger any lazy-loaded content
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-    # Step 2: Wait for the table with id 'table-apps' to load
-    try:
 ```
 
-## 6. How to Run
+Then it loads the SteamDB charts page and scrolls:
 
-```bash
-pip install -r requirements.txt
+```python
+url = "https://steamdb.info/charts/?sort=24h"
+driver.get(url)
+driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 ```
-```bash
-python "main.py"
+
+That scroll is a useful scraping habit. On sites with lazy loading or client-side rendering, the browser often has to interact with the page before the full target content appears.
+
+The script also waits for the table explicitly:
+
+```python
+WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.ID, "table-apps"))
+)
 ```
 
-## 7. Common Pitfalls and Debug Tips
+Without that wait, the parser might run against a partial DOM and fail intermittently.
 
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Reproduce failures with the smallest input first, then expand once stable.
+## 2. Hand the Rendered Page to BeautifulSoup
 
-## 8. Practice Extensions
+Once the table is present, the script switches from browser automation to HTML parsing:
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+```python
+soup = BeautifulSoup(driver.page_source, "html.parser")
+table = soup.find("table", id="table-apps")
+```
 
-## 9. Key Takeaways
+This is a strong hybrid approach:
 
-- **SteamDB Trending Charts WebScrapping** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+- Selenium gets the page into the right state
+- BeautifulSoup handles structured extraction
+
+That division of labor often produces cleaner scraping code than trying to do everything with browser selectors alone.
+
+## 3. Normalize the Table Into Structured Records
+
+The extraction loop pulls a few key fields from each row:
+
+```python
+games = []
+for row in table.select("tbody tr"):
+    game_name = row.select_one("td:nth-child(3) a").text.strip()
+    current_players = (
+        row.select_one("td:nth-child(4)").text.strip().replace(",", "")
+    )
+    peak_24h = row.select_one("td:nth-child(5)").text.strip().replace(",", "")
+    all_time_peak = row.select_one("td:nth-child(6)").text.strip().replace(",", "")
+```
+
+The important cleanup step is the numeric normalization. Player counts arrive as formatted text with commas, so the script strips those separators and converts the values to integers before storing them.
+
+That is what turns the scrape into usable data rather than just copied text.
+
+## 4. Export the Result as a Reusable Dataset
+
+After the records are collected, the script builds a DataFrame and writes it to disk:
+
+```python
+df = pd.DataFrame(games)
+df.to_csv("steam_most_played_games.csv", index=False)
+```
+
+That final CSV is what makes the project reusable. The scrape does not end in a print statement. It ends in a report artifact that another analysis step could pick up later.
+
+The script also wraps the whole flow in exception handling and always closes the browser in `finally`, which is the right habit for automation that launches external processes.
+
+## How to Run the SteamDB Scraper
+
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the scraper:
+   ```bash
+   python main.py
+   ```
+3. Verify the workflow:
+   - the table loads successfully
+   - the script reports how many games it found
+   - `steam_most_played_games.csv` is created with numeric player columns
+
+## Summary
+
+Today, you built a scrape-to-report pipeline. Selenium handled the dynamic page state, BeautifulSoup parsed the rendered HTML, pandas stored the result, and CSV export turned the scrape into a reusable dataset. The big lesson is choosing the right tool for each phase of the extraction workflow rather than forcing one library to do everything.

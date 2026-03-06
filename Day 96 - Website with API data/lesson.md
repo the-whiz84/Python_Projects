@@ -1,82 +1,89 @@
-# Day 96 - Website with API data
+# Day 96 - Consuming External APIs in Flask Web Pages
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Website with API data** and avoids generic cross-day boilerplate.
+This project is a lightweight Flask site built on top of an external API. Instead of serving only local data, the app fetches information about books and chapters from `the-one-api.dev` and turns that response into rendered pages.
 
-## Table of Contents
+That makes the lesson about bridging remote JSON data into a server-rendered website.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Fetch External Data Up Front
 
-## 1. What You Build
+The app defines the API root and immediately requests the list of books:
 
-You build **Website with API data** as a day-specific project using `flask`, `requests`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `flask`, `requests`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Call external web/API resources and normalize returned data before use.
-2. Define route handlers and keep request parsing separate from rendering logic.
-3. Read/write JSON safely with existence checks and fallback defaults.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-app = Flask(__name__)
-
 API_URL = "https://the-one-api.dev/v2/"
 
 book_response = requests.get(f"{API_URL}book").json()
 all_books = book_response["docs"]
 book_id = [doc["_id"] for doc in all_books]
+```
 
+This is a simple pattern, but it teaches a real tradeoff:
 
+- fetching at import time keeps the routes simple
+- it also means app startup depends on the remote API being reachable
+
+For a small project, this is acceptable. It keeps the application easy to read.
+
+## 2. Pass API Data Straight Into Templates
+
+The home route is as small as it should be:
+
+```python
 @app.route("/")
 def home():
     return render_template("index.html", all_books=all_books)
 ```
 
-## 6. How to Run
+That is a good Flask pattern. The route does not transform more than it needs to. It simply hands the normalized response data to the template layer.
 
-```bash
-pip install -r requirements.txt
+The book-detail route does a little more orchestration:
+
+```python
+@app.route("/book/<index>", methods=["GET", "POST"])
+def show_book(index):
+    requested_book = None
+    for book in all_books:
+        if book["_id"] == index:
+            requested_book = book
+            all_chapters = requests.get(f"{API_URL}book/{index}/chapter").json()["docs"]
+    return render_template("book.html", book=requested_book, all_chapters=all_chapters)
 ```
-```bash
-python "main.py"
+
+This route uses the book id from the URL, finds the matching record, then performs a second API call for the chapter list.
+
+That is a very common web-app pattern:
+
+- index page with a collection
+- detail page with per-item follow-up data
+
+## 3. Keep the Website Simple Around the Data
+
+The project also includes static routes like `about`:
+
+```python
+@app.route("/about")
+def about():
+    return render_template("about.html")
 ```
 
-## 7. Common Pitfalls and Debug Tips
+That is useful because it keeps the structure of the site familiar. The API-backed pages are not floating alone. They sit inside a normal Flask site with multiple routes and templates.
 
-- Route and template variable mismatches are common; verify context keys end-to-end.
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+The larger lesson is that external data does not need a JavaScript-heavy frontend to be useful. A classic Flask template app can still consume remote APIs cleanly.
 
-## 8. Practice Extensions
+## How to Run the API-Backed Flask Site
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Start the Flask app:
+   ```bash
+   python main.py
+   ```
+3. Open the local site and verify:
+   - the home page lists the books returned by the API
+   - a `/book/<id>` page loads the corresponding chapters
+   - static routes such as `/about` still render normally
 
-## 9. Key Takeaways
+## Summary
 
-- **Website with API data** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Today, you connected Flask templates to a live external API. The app fetches book data, reuses ids to request chapter details, and passes the resulting JSON into server-rendered pages. The main skill here is not the API itself. It is learning how to move remote data cleanly into a traditional web route structure.

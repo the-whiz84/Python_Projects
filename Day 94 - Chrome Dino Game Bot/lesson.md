@@ -1,77 +1,101 @@
-# Day 94 - Chrome Dino Game Bot
+# Day 94 - Computer Vision + Input Automation for Game Bots
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Chrome Dino Game Bot** and avoids generic cross-day boilerplate.
+This project is a tiny game bot, but it introduces an important automation pattern: observe a small region of the screen, reduce it to a simple signal, and trigger input when that signal crosses a threshold.
 
-## Table of Contents
+The Dino game is just the sandbox. The real lesson is reactive automation driven by image data.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Watch a Small Part of the Screen, Not the Whole Desktop
 
-## 1. What You Build
+The script begins by defining the dinosaur position and a bounding box in front of it:
 
-You build **Chrome Dino Game Bot** as a day-specific project using `numpy`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `numpy`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-dino_coords = (2290, 1100)  # Example coordinates for the dinosaur
+dino_coords = (2290, 1100)
 box = (
     dino_coords[0] + 100,
     dino_coords[1],
     dino_coords[0] + 200,
     dino_coords[1] + 50,
-)  # Area to detect obstacles
+)
+```
 
+That is a strong design choice. The bot does not need to analyze the full screen. It only needs the strip of pixels where obstacles will appear next.
 
+Shrinking the observation window makes the loop cheaper and the detection logic simpler.
+
+## 2. Turn the Screen Region into a Numeric Signal
+
+The capture step uses `ImageGrab` and `ImageOps`:
+
+```python
 def capture_screen():
     image = ImageGrab.grab(box)
     gray_image = ImageOps.grayscale(image)
     return np.array(gray_image)
 ```
 
-## 6. How to Run
+Converting to grayscale is important because the bot does not care about color. It only cares whether the visual intensity in that region suggests an obstacle.
 
-```bash
-python "main.py"
+The result is then reduced to a very simple test:
+
+```python
+def detect_obstacle(screen_data):
+    return np.sum(screen_data) < 1000
 ```
 
-## 7. Common Pitfalls and Debug Tips
+This is primitive computer vision, but it is still computer vision. The code transforms an image into an array and then uses a threshold over the sum of pixel values as the trigger signal.
 
-- Reproduce failures with the smallest input first, then expand once stable.
+## 3. Convert Detection into Automated Input
 
-## 8. Practice Extensions
+Once an obstacle is detected, the bot simulates a jump:
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+```python
+def jump():
+    pyautogui.keyDown("space")
+    time.sleep(0.05)
+    pyautogui.keyUp("space")
+```
 
-## 9. Key Takeaways
+That short press is enough to connect the perception layer to the control layer. This is the core loop of a bot:
 
-- **Chrome Dino Game Bot** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+- capture state
+- interpret state
+- send input
+
+## 4. Run the Whole Bot as a Reactive Loop
+
+The main loop is deliberately simple:
+
+```python
+def main():
+    print("Starting in 3 seconds...")
+    time.sleep(3)
+    while True:
+        screen_data = capture_screen()
+        if detect_obstacle(screen_data):
+            jump()
+        time.sleep(0.1)
+```
+
+That short sleep prevents the loop from running as fast as possible all the time and gives the machine a brief pacing interval.
+
+The main limitation of this project is also part of the lesson: the detection depends on hardcoded coordinates and a hardcoded threshold. That means the bot is tied to a specific resolution and game placement. For a first automation bot, that is acceptable. It is better to understand the perception-control loop clearly before generalizing it.
+
+## How to Run the Dino Bot
+
+1. Install the required packages if needed:
+   ```bash
+   pip install pyautogui pillow numpy
+   ```
+2. Position the Chrome Dino game so the hardcoded coordinates match your screen.
+3. Run the script:
+   ```bash
+   python main.py
+   ```
+4. Verify the flow:
+   - the script waits 3 seconds before starting
+   - the capture region observes the area ahead of the dinosaur
+   - the bot presses space when an obstacle enters that region
+
+## Summary
+
+Today, you built a simple vision-driven bot. The script captures a focused region of the screen, converts it into grayscale numeric data, uses a threshold to detect obstacles, and turns that detection into automated keyboard input. The larger idea is bigger than this game: many automation tools work by reducing complex visual input into a small decision signal and acting on it fast.

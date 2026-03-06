@@ -1,83 +1,145 @@
-# Day 80 - t-Tests and Distributions
+# Day 80 - Statistical Testing, Distributions, and Inference
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **t-Tests and Distributions** and avoids generic cross-day boilerplate.
+Today, the notebook moves from descriptive analysis to evidence. The Semmelweis dataset is still a data-visualization project on the surface, but it introduces a deeper question: when the death rate drops after handwashing is introduced, is that just a visual pattern or is it strong enough to support an actual statistical claim?
 
-## Table of Contents
+That is why this lesson matters. It connects plotting, distributions, and hypothesis testing in one workflow.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Measure the Death Rate Before You Try to Explain It
 
-## 1. What You Build
+The notebook starts with two tables:
 
-You build **t-Tests and Distributions** as a day-specific project using `notebook`.
-Primary entrypoint: `Dr_Semmelweis_Handwashing_Discovery.ipynb`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `notebook`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-Historical lesson signals recovered from git history:
-- t-Tests and Distributions
-- Today you will become a doctor, but not just any doctor. You will become Dr Ignaz Semmelweis, a Hungarian physician born in 1818 who worked in the Vienna General Hospital.
-- In the past, people didn't know about bacteria, germs, or viruses. People illness was caused by "bad air" or evil spirits. But in the 1800s Doctors started looking more at anatomy, doing autopsies and making arguments based on data. Dr Semmelweis suspected that something was going wrong with the procedures at Vienna General Hospital. Dr Semmelweis wanted to figure out why so many women in maternity wards were dying from childbed fever (i.e., puerperal fever).
-
-## 3. Project Structure
-
-- `Dr_Semmelweis_Handwashing_Discovery.ipynb`: Primary analysis notebook.
-- `annual_deaths_by_clinic.csv`: Dataset/input data consumed by the day project.
-- `monthly_deaths.csv`: Dataset/input data consumed by the day project.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Run notebook cells in order to preserve variable state and reproducible results.
-2. Inspect and clean data before plotting or statistical interpretation.
-3. Document conclusions directly beside code so insights remain auditable.
-
-## 5. Day Code Snippet
-
-Excerpt from `Dr_Semmelweis_Handwashing_Discovery.ipynb`:
 ```python
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import scipy.stats as stats
+df_yearly = pd.read_csv('annual_deaths_by_clinic.csv')
+df_monthly = pd.read_csv('monthly_deaths.csv', parse_dates=['date'])
 ```
 
-## 6. How to Run
+The yearly table is useful for comparing clinics. The monthly table is useful for looking at change over time around the handwashing intervention.
 
-```bash
-pip install -r requirements.txt
+The notebook quickly converts raw counts into a more meaningful metric:
+
+```python
+death_perc = df_yearly.deaths / df_yearly.births * 100
+
+df_yearly['pct_deaths'] = df_yearly.deaths / df_yearly.births
 ```
-```bash
-jupyter notebook
+
+That is a crucial move. Raw deaths alone are not enough because the number of births changes too. A death rate is what lets you compare one clinic or one month fairly against another.
+
+## 2. Use Time-Series Charts to See the Intervention
+
+The yearly charts show that clinic 1 and clinic 2 behave very differently, especially once you compare death proportions rather than only birth counts.
+
+```python
+line = px.line(df_yearly,
+               x='year',
+               y='pct_deaths',
+               color='clinic',
+               title='Proportion of Yearly Deaths by Clinic')
+
+line.show()
 ```
 
-## 7. Common Pitfalls and Debug Tips
+The monthly table then becomes the more important one, because it lets the notebook draw a line at the exact point where handwashing became mandatory:
 
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Reproduce failures with the smallest input first, then expand once stable.
+```python
+handwashing_start = pd.to_datetime('1847-06-01')
 
-## 8. Practice Extensions
+df_monthly['pct_deaths'] = df_monthly.deaths / df_monthly.births
+before_soap = df_monthly[df_monthly.date < handwashing_start]
+after_soap = df_monthly[df_monthly.date >= handwashing_start]
+```
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+That split turns one timeline into a natural before-and-after experiment. The notebook then plots those two periods with a rolling average to make the shift visible:
 
-## 9. Key Takeaways
+```python
+moving_average_line, = plt.plot(roll_df.index,
+                                roll_df.pct_deaths,
+                                color='crimson',
+                                linewidth=3,
+                                linestyle='--',
+                                label='6m Moving Average')
+```
 
-- **t-Tests and Distributions** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+This is a good use of smoothing. The raw monthly points still matter, but the rolling line makes the direction of change much easier to read.
+
+## 3. Compare Distributions, Not Just Averages
+
+The notebook does compute average death rates before and after handwashing:
+
+```python
+avg_prob_before = before_soap.pct_deaths.mean() * 100
+avg_prob_after = after_soap.pct_deaths.mean() * 100
+
+mean_diff = avg_prob_before - avg_prob_after
+times = avg_prob_before / avg_prob_after
+```
+
+That gives you the headline result: the monthly death proportion drops sharply after the intervention.
+
+But averages are only one part of the story. The notebook also looks at the shape of the two distributions using box plots, histograms, and kernel density estimates:
+
+```python
+box = px.box(df_monthly,
+             x='washing_hands',
+             y='pct_deaths',
+             color='washing_hands',
+             title='How Have the Stats Changed with Handwashing?')
+
+hist = px.histogram(df_monthly,
+                    x='pct_deaths',
+                    color='washing_hands',
+                    nbins=30,
+                    opacity=0.6,
+                    barmode='overlay',
+                    histnorm='percent',
+                    marginal='box')
+```
+
+This is where the notebook becomes more than a charting exercise. It stops asking only "did the average change?" and starts asking "did the whole distribution shift?"
+
+The KDE plots push that idea further:
+
+```python
+sns.kdeplot(before_soap.pct_deaths, fill=True, clip=(0,1))
+sns.kdeplot(after_soap.pct_deaths, fill=True, clip=(0,1))
+```
+
+The `clip=(0,1)` part is a small but important detail. Death rates cannot go below zero, so the notebook prevents the smoothed distribution from suggesting impossible values.
+
+## 4. Use a t-Test to Support the Claim
+
+This is the statistical heart of the lesson:
+
+```python
+t_stat, p_value = stats.ttest_ind(a=before_soap.pct_deaths,
+                                  b=after_soap.pct_deaths)
+print(f'p-palue is {p_value:.10f}')
+print(f't-statstic is {t_stat:.4}')
+```
+
+The independent-samples t-test asks whether the difference between the two groups is large enough relative to their variation that it is unlikely to have happened by chance alone.
+
+In plain language:
+
+- `t_stat` measures the strength and direction of the difference
+- `p_value` measures how surprising that difference would be if there were really no effect
+
+That is why this day matters so much. It turns a visible drop in the chart into a statistically supported conclusion.
+
+## How to Run the Semmelweis Notebook
+
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Open `Dr_Semmelweis_Handwashing_Discovery.ipynb`.
+3. Run the notebook in order so the derived columns and `before_soap` / `after_soap` tables exist before the distribution and t-test cells.
+4. Verify the main outcomes:
+   - yearly clinic comparison
+   - before/after handwashing split
+   - distribution shift in the histograms and KDE plots
+   - final `ttest_ind()` result
+
+## Summary
+
+Today, you learned that a persuasive chart is not the same as statistical evidence. You converted raw deaths into rates, separated the data into pre- and post-handwashing periods, compared the distributions, and used a t-test to support the conclusion that Semmelweis was seeing a real change rather than random fluctuation.

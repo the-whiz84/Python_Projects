@@ -1,49 +1,21 @@
-# Day 97 - E-Commerce Website
+# Day 97 - E-Commerce Website Structure and UI Composition
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **E-Commerce Website** and avoids generic cross-day boilerplate.
+This project is more about website structure than backend complexity. The Flask app is small, but it establishes the page layout of an e-commerce site: home, shop, about, and contact. That makes the lesson a good one about composition, routing, and frontend organization rather than data processing.
 
-## Table of Contents
+The value here is building a believable site skeleton that can later support real products, carts, and checkout logic.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Use Flask Routes to Define the Store Structure
 
-## 1. What You Build
+The app starts with a very small route layer:
 
-You build **E-Commerce Website** as a day-specific project using `flask`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `flask`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Define route handlers and keep request parsing separate from rendering logic.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
 app = Flask(__name__)
 bootstrap = Bootstrap5(app)
+```
 
+Then defines the main pages:
 
+```python
 @app.route("/", methods=["GET", "POST"])
 def home():
     return render_template("index.html")
@@ -54,28 +26,61 @@ def shop():
     return render_template("shop.html")
 ```
 
-## 6. How to Run
+Along with:
 
-```bash
-pip install -r requirements.txt
+```python
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
 ```
-```bash
-python "main.py"
+
+This is the right level of complexity for a storefront scaffold. The app establishes the navigation model first. It does not prematurely add carts, databases, or payment flows before the page structure exists.
+
+## 2. Use Bootstrap to Accelerate Layout Work
+
+The project enables Bootstrap immediately:
+
+```python
+bootstrap = Bootstrap5(app)
 ```
 
-## 7. Common Pitfalls and Debug Tips
+That is a practical choice for a site like this. E-commerce pages depend heavily on consistent spacing, cards, grids, navigation, and forms. Bootstrap gives the project a predictable visual system without forcing the app to invent all of that from scratch.
 
-- Route and template variable mismatches are common; verify context keys end-to-end.
-- Reproduce failures with the smallest input first, then expand once stable.
+This is one of those cases where a CSS framework is not just convenience. It is a way to keep the layout work proportional to the project scope.
 
-## 8. Practice Extensions
+## 3. Treat the App as a Frontend Foundation
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+Right now the routes are simple because the point of the project is page composition. That is still valuable. A real storefront needs:
 
-## 9. Key Takeaways
+- a landing page
+- a shop page
+- informational pages
+- a contact path
 
-- **E-Commerce Website** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+This project establishes those building blocks so later iterations could attach actual product data and business logic.
+
+In other words, the current app is intentionally more scaffold than engine. That is fine. Good software often grows from a solid information architecture rather than from premature backend complexity.
+
+## How to Run the E-Commerce Site
+
+1. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the Flask app:
+   ```bash
+   python main.py
+   ```
+3. Open the local site and verify:
+   - `/` renders the home page
+   - `/shop` renders the storefront page
+   - `/about` and `/contact` render the supporting pages
+
+## Summary
+
+Today, you built the structural shell of an e-commerce site. The Flask routes define the page map, Bootstrap provides the layout system, and the app creates a foundation that future product, cart, and checkout features could plug into. The lesson is that site architecture comes first, even when the business logic is still minimal.

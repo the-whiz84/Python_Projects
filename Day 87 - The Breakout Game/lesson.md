@@ -1,48 +1,13 @@
-# Day 87 - The Breakout Game
+# Day 87 - Breakout Game Mechanics and Arcade Loop Design
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **The Breakout Game** and avoids generic cross-day boilerplate.
+Breakout is a stronger architecture lesson than it first appears. The project combines a Tkinter menu with a Turtle-based game loop, tracks score and lives, changes ball speed based on progress, and even resets into a second screen of bricks after the first one is cleared.
 
-## Table of Contents
+That makes it a good example of how arcade rules turn into state transitions.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Separate the Menu Layer from the Game Loop
 
-## 1. What You Build
+The entrypoint uses a menu window first:
 
-You build **The Breakout Game** as a day-specific project using `tkinter`, `turtle`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`, `turtle`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `ball.py`: Supporting module for project logic.
-- `brick.py`: Supporting module for project logic.
-- `game.py`: Supporting module for project logic.
-- `menu.py`: Supporting module for project logic.
-- `paddle.py`: Supporting module for project logic.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
 def start_game():
     game = Game()
@@ -54,25 +19,136 @@ if __name__ == "__main__":
     menu.run()
 ```
 
-## 6. How to Run
+That split is useful because the menu and the game have different jobs:
 
-```bash
-python "main.py"
+- `Menu` handles pre-game UI and rules
+- `Game` owns the real-time loop
+
+The menu also exposes the rule set clearly, including scoring by brick color, paddle shrink behavior, and the second screen.
+
+## 2. Model Ball, Paddle, and Bricks as Separate Objects
+
+The game breaks the moving parts into focused classes:
+
+- `Ball`
+- `Paddle`
+- `Brick`
+
+For example, the ball owns its motion vector:
+
+```python
+self.ball.dx = 0.5
+self.ball.dy = -0.5
 ```
 
-## 7. Common Pitfalls and Debug Tips
+and its bounce behavior:
 
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+```python
+def bounce_x(self):
+    self.ball.dx *= -1
 
-## 8. Practice Extensions
+def bounce_y(self):
+    self.ball.dy *= -1
+```
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+That is the right separation. The game loop decides **when** a collision happened, but the ball object decides **how** a bounce changes its velocity.
 
-## 9. Key Takeaways
+The paddle stays focused on movement and size:
 
-- **The Breakout Game** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+```python
+def move_right(self):
+    x = self.paddle.xcor()
+    if x < 350:
+        self.paddle.setx(x + 20)
+
+def shrink(self):
+    current_length = self.paddle.shapesize()[1]
+    if current_length > 1:
+        self.paddle.shapesize(stretch_wid=1, stretch_len=current_length - 1)
+```
+
+## 3. Turn Brick Collisions into Score and Difficulty Changes
+
+The collision code does more than remove bricks. It also drives the scoring and difficulty system:
+
+```python
+if (
+    self.ball.ball.xcor() > brick.brick.xcor() - 25
+    and self.ball.ball.xcor() < brick.brick.xcor() + 25
+) and (
+    self.ball.ball.ycor() > brick.brick.ycor() - 10
+    and self.ball.ball.ycor() < brick.brick.ycor() + 10
+):
+    self.ball.bounce_y()
+    brick.destroy()
+    self.bricks.remove(brick)
+
+    brick_color = brick.brick.color()[0]
+    self.score += self.brick_points.get(brick_color, 0)
+    self.update_score()
+```
+
+That is where the project becomes more arcade-like. The brick color matters, and certain rows also increase the ball speed:
+
+```python
+def increase_speed_on_bricks(self, brick_color):
+    if brick_color == "orange" and not self.orange_brick_hit:
+        self.ball.ball.dx *= 1.3
+        self.ball.ball.dy *= 1.3
+        self.orange_brick_hit = True
+```
+
+The notebook does not need a physics engine because the gameplay rules are encoded directly into these state transitions.
+
+## 4. Use the Main Loop to Coordinate Lives, Screens, and Game Over
+
+The `run()` method is the orchestration layer:
+
+```python
+while True:
+    self.window.update()
+    self.ball.move()
+    self.check_collisions()
+    self.ball.check_wall_collision()
+    self.shrink_paddle_on_top_wall()
+```
+
+That loop continuously updates:
+
+- ball movement
+- paddle collisions
+- brick collisions
+- wall behavior
+- score and life loss
+
+The game also treats clearing the full wall as a state change:
+
+```python
+if len(self.bricks) == 0:
+    self.reset_bricks()
+```
+
+And `reset_bricks()` either creates a second board or ends the game completely depending on the current screen count.
+
+That makes the project more interesting than a single-screen demo. It introduces progression and stateful difficulty.
+
+## How to Run the Breakout Game
+
+1. The project uses the standard `turtle` and `tkinter` modules that come with Python.
+2. Run the game:
+   ```bash
+   python main.py
+   ```
+3. In the menu:
+   - read the rules
+   - start the game
+4. Verify the major behaviors:
+   - left and right arrow keys move the paddle
+   - brick hits increase score
+   - orange and red rows speed the ball up
+   - the paddle shrinks after the top wall condition
+   - clearing the board resets into the next screen
+
+## Summary
+
+Today, you built an arcade loop around explicit rules rather than generic animation. The project separates the menu from gameplay, models the moving pieces with small classes, and uses collisions to drive score, speed, paddle size, and progression. Breakout works here because every gameplay rule has a clear home in the code.

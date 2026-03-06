@@ -1,65 +1,90 @@
-# Day 98 - Python Automation
+# Day 98 - Practical Python Automation Workflows
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Python Automation** and avoids generic cross-day boilerplate.
+Day 98 is unusual because the repository does not contain a finished automation script yet. The `main.py` file is only a placeholder:
 
-## Table of Contents
-
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
-
-## 1. What You Build
-
-You build **Python Automation** as a day-specific project using core Python.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: core Python.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
 # To be done when neeeded
 ```
 
-## 6. How to Run
+That means the real lesson is not "read this completed implementation." It is "design and build an automation from scratch using everything you have learned so far."
 
-```bash
-python "main.py"
-```
+This is still a valuable day because open-ended project prompts are where tutorial knowledge either becomes practical skill or stays theoretical.
 
-## 7. Common Pitfalls and Debug Tips
+## 1. Start With a Repetitive Workflow Worth Automating
 
-- Reproduce failures with the smallest input first, then expand once stable.
+Automation is only useful when it removes repeated manual work. A good project for this day usually has three qualities:
 
-## 8. Practice Extensions
+- it happens often
+- it follows a clear sequence of steps
+- it benefits from consistency more than from human judgment
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+Typical candidates include:
 
-## 9. Key Takeaways
+- renaming or reorganizing files
+- scraping and exporting routine reports
+- sending status emails
+- processing PDFs or images in batches
+- turning web data into CSV summaries
 
-- **Python Automation** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+The important design move is choosing a task with clear inputs and outputs before writing code.
+
+## 2. Break the Automation Into Stages
+
+Even without a finished script in the repo, the right structure is predictable. Most Python automation jobs can be split into a pipeline such as:
+
+1. gather input
+2. validate it
+3. perform the repeated transformation
+4. save or publish the result
+5. report success or failure
+
+That architecture matters because automation can become brittle very quickly if file access, parsing, output generation, and error handling are all mixed together.
+
+This is one of the biggest shifts from tutorial code to real software: the script should be understandable even when it runs unattended.
+
+## 3. Design for Reliability, Not Just Convenience
+
+Automation scripts often fail in predictable places:
+
+- missing files
+- malformed input
+- changed web pages or APIs
+- permission issues
+- partial output from interrupted runs
+
+That is why a practical automation script should usually include:
+
+- explicit validation up front
+- clear error messages
+- idempotent or predictable output naming
+- a way to rerun safely
+
+The fact that the repository leaves the implementation open is actually useful here. It forces you to think about the workflow before coding the mechanics.
+
+## 4. Use Earlier Course Skills as Building Blocks
+
+By Day 98, you already have enough tools to build strong automations:
+
+- file handling from earlier Python projects
+- pandas for cleanup and export
+- requests and BeautifulSoup for data collection
+- Selenium for browser-driven automation
+- Flask if the output needs a web UI
+- cloud services or email APIs if the automation must publish results
+
+A strong Day 98 project is usually not a brand-new idea. It is a composition of earlier skills into one repeatable workflow.
+
+## How to Run the Day 98 Project
+
+At the moment, there is no completed automation flow in the repository beyond the placeholder `main.py`, so there is nothing meaningful to execute yet beyond opening the file.
+
+If you use this day as intended, the run path becomes:
+
+1. define the workflow you want to automate
+2. implement the script in `main.py`
+3. add any dependencies required by that workflow
+4. run the resulting automation with the input files or services it expects
+
+## Summary
+
+Today, the lesson is the blank space itself. The repository does not hand you a finished automation, which forces you to choose a real workflow, design the steps, and build the script yourself. That is the point of the project phase: moving from guided examples to work you can specify and implement on your own.
