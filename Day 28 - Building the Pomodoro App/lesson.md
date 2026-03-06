@@ -1,12 +1,10 @@
 # Day 28 - Pomodoro Timer Logic and Tkinter Scheduling
 
-The Pomodoro Technique is a time management method: you work for 25 minutes, take a short break, and repeat. After four work sessions, you take a longer break. Today we're building a visual timer that follows this exact pattern.
+Day 28 takes the Tkinter basics from the previous lesson and applies them to a timer-driven app. The Pomodoro project is more than a GUI with buttons and labels. It introduces scheduled callbacks, repeated state transitions, and reset behavior, which makes it one of the first desktop apps in the course that has to manage time as part of its logic.
 
-This builds directly on what we learned in Day 27 with Tkinter, but now we're using `window.after()` to schedule events in the future—essential for any timer or countdown app.
+## 1. Using `after()` to Build a Countdown Without Freezing the Window
 
-## The timer logic
-
-The core function counts down from a given number of seconds:
+The countdown is powered by this function:
 
 ```python
 def count_down(count):
@@ -18,15 +16,15 @@ def count_down(count):
     canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
     if count > 0:
         timer = window.after(1000, count_down, count - 1)
-    else:
-        start_timer()
 ```
 
-`window.after(1000, count_down, count - 1)` is the key line. It tells Tkinter: "wait 1000 milliseconds (1 second), then call `count_down` again with the new value." This creates the countdown effect without blocking the UI.
+`window.after(1000, count_down, count - 1)` is the main idea of the lesson. It tells Tkinter to wait one second, then call the same function again with a smaller number.
 
-## Work and break scheduling
+That matters because the UI stays responsive. A normal `time.sleep()` loop would freeze the window and make the app feel broken. `after()` lets Tkinter keep handling button clicks and screen updates while the countdown continues.
 
-The `start_timer()` function decides what to do based on how many sessions you've completed:
+## 2. Modeling Work and Break Cycles with a Repetition Counter
+
+The session logic lives in `start_timer()`:
 
 ```python
 def start_timer():
@@ -43,11 +41,33 @@ def start_timer():
         timer_label.config(text="Work", fg=GREEN)
 ```
 
-Every even rep (2, 4, 6) is a short break. Every 8th rep is a long break. Everything else is a work session. We use modulo (`%`) to cycle through these states.
+The `reps` variable turns the timer into a cycle:
 
-## Visual feedback
+- odd reps are work sessions
+- even reps are short breaks
+- every eighth rep is a long break
 
-When a work session completes, we add a checkmark to show progress:
+This is a strong example of using one simple state variable to control a larger workflow. The app does not need separate counters for work rounds and break rounds because `reps` already encodes that sequence.
+
+## 3. Resetting Scheduled Work Correctly
+
+The reset function is just as important as the countdown:
+
+```python
+def reset_timer():
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="00:00")
+    timer_label.config(text="Timer")
+    check_label.config(text="")
+```
+
+`after_cancel(timer)` is the crucial line. Without it, the previously scheduled callback would still fire even after the user pressed Reset.
+
+This is one of the more practical lessons in GUI programming: once you schedule future work, you also need a clean way to cancel it.
+
+## 4. Using Visual Feedback to Show Progress
+
+The app also updates the interface to show completed work sessions:
 
 ```python
 marks = ""
@@ -57,11 +77,9 @@ for _ in range(work_sessions):
 check_label.config(text=marks)
 ```
 
-The number of checkmarks equals completed work sessions, so after four work sessions (8 total reps), the user sees four checkmarks.
+That checkmark row is simple, but it makes the app feel much more understandable to the user. The timer is no longer just counting down. It is communicating where the user is in the Pomodoro cycle.
 
-## The UI setup
-
-We use a Canvas widget to display the tomato image and the countdown text on top of it:
+The canvas setup reinforces that same idea visually by layering timer text over the tomato image:
 
 ```python
 canvas = Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
@@ -70,12 +88,18 @@ canvas.create_image(100, 112, image=tomato_img)
 timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
 ```
 
-Canvas lets you layer text on images, which is perfect for this kind of timer display.
+## How to Run the Project
 
-## Try it yourself
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Click Start to begin a work session. The timer counts down from 1 minute (we use 1 minute instead of 25 for testing purposes). When it hits zero, it automatically starts the next session. Click Reset to start over.
+3. Click `Start` and confirm that the timer updates once per second without freezing the window.
+4. Click `Reset` and verify that the countdown stops, the timer display returns to `00:00`, and the session markers clear.
+
+## Summary
+
+Day 28 turns Tkinter widgets into a time-based application. You use `after()` to schedule repeated callbacks, use a repetition counter to alternate between work and break sessions, cancel pending callbacks during reset, and provide visual feedback with labels and checkmarks. It is an important lesson because it shows how GUI apps manage state over time, not just on button clicks.

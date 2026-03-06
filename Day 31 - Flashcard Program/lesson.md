@@ -1,12 +1,10 @@
-# Day 31 - Flashcard Program
+# Day 31 - Flashcard State Management and Data-Driven UI
 
-Today we're building a flashcard app that helps you learn French words. You see a French word, try to remember the English translation, flip the card to check, and mark whether you knew it or not. Words you don't know stay in the deck; words you know are removed.
+Day 31 builds a flashcard app that keeps track of what the user still needs to study. That makes it more than a simple card-flipping interface. The app combines Tkinter for presentation, pandas for data loading and saving, and timed callbacks for automatic card flipping. The most important idea is that the study deck changes based on user actions, so the dataset becomes part of the app state.
 
-This combines Tkinter for the UI, Pandas for data handling, and the concept of filtering lists based on user actions.
+## 1. Loading Either the Original Deck or the Saved Progress File
 
-## Loading and managing data
-
-We start by loading the French words. If the user has used the app before, there's a `words_to_learn.csv` with words they haven't mastered yet. If that file doesn't exist, we fall back to the original word list:
+The app starts by trying to load a smaller progress file:
 
 ```python
 try:
@@ -18,11 +16,16 @@ else:
     to_learn = data.to_dict(orient="records")
 ```
 
-The `orient="records"` format turns each row into a dictionary, so we get a list like `[{"French": "bonjour", "English": "hello"}, ...]`.
+This is a strong design pattern:
 
-## Flipping cards with timers
+- if progress exists, resume from there
+- otherwise, start from the original dataset
 
-The card automatically flips after 3 seconds:
+The call to `to_dict(orient="records")` matters because it turns each row into a dictionary. That gives the rest of the app a simple list of cards to work with instead of a DataFrame that would be awkward to mutate one card at a time.
+
+## 2. Using a Timer to Flip the Card Automatically
+
+The app shows the French word first, then flips to English after three seconds:
 
 ```python
 def new_card():
@@ -33,18 +36,15 @@ def new_card():
     canvas.itemconfig(word_text, text=current_card["French"], fill="black")
     canvas.itemconfig(canvas_image, image=card_front)
     flash_card = window.after(3000, flip_card)
-
-def flip_card():
-    canvas.itemconfig(canvas_image, image=card_back)
-    canvas.itemconfig(lang_text, text="English", fill="white")
-    canvas.itemconfig(word_text, text=current_card["English"], fill="white")
 ```
 
-`window.after(3000, flip_card)` schedules the flip function to run after 3000 milliseconds. We store the timer ID so we can cancel it if the user clicks a button before the timer fires.
+This is a good extension of the scheduling idea from the Pomodoro project. `after()` is not only for countdown timers. It is a general way to delay an action inside a GUI app.
 
-## Removing known words
+`after_cancel(flash_card)` is just as important as the new timer. If the user skips to another card before the old timer finishes, the previous scheduled flip must be canceled or the interface will fall out of sync.
 
-When the user clicks the checkmark (known word), we remove that card from the list and save the updated list:
+## 3. Letting User Feedback Change the Dataset
+
+When the user marks a word as known, the app removes it from the study list:
 
 ```python
 def known_word():
@@ -54,12 +54,34 @@ def known_word():
     new_card()
 ```
 
-This creates a spaced-repetition effect: words you struggle with keep appearing, words you've mastered get filtered out.
+This is the heart of the project. The app is not only displaying data. It is using the user’s answer to reshape the next session.
 
-## Try it yourself
+That makes the project feel more like a learning tool than a simple GUI. The dataset evolves as the user improves.
+
+## 4. Why the Interface and Data Model Work Together
+
+The visual side of the app is simple:
+
+- a canvas for the card image and text
+- one button for “known”
+- one button for “show another card”
+
+But the app only feels useful because those controls are wired to the data model. Clicking the wrong button gives you another card without changing the dataset. Clicking the right button removes the current card and saves the new study list.
+
+That connection between interface events and persistent data is the real step forward on this day.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Wait 3 seconds to see the English translation. Click the checkmark if you knew it, or the X to see it again later.
+3. Wait for a card to flip automatically after a few seconds.
+4. Click the correct-answer button and confirm that the app saves the updated learning list to `data/words_to_learn.csv`.
+
+## Summary
+
+Day 31 combines timed GUI behavior with persistent learning state. The app loads either the original dataset or saved progress, uses `after()` to flip cards automatically, and rewrites the study list when the user marks a word as known. The project works well because the interface is directly tied to the evolving dataset.
