@@ -1,20 +1,10 @@
 # Day 02 - Data Types, Numbers, and Type Conversion
 
-Today we're building a Tip Calculator — you enter the bill, pick a tip percentage, say how many people are splitting it, and the script tells everyone what they owe.
+Today we're building a Tip Calculator. The program asks for a bill amount, a tip percentage, and the number of people splitting the cost. Then it calculates how much each person should pay. The calculation is simple, but the lesson introduces a bigger idea: user input arrives as text, so you need type conversion before Python can do any real math.
 
-Simple idea, but this is where you first run into one of Python's quirks: `input()` always gives you a string, even when you type a number. So you have to learn how to convert between types to do any math at all.
+## 1. Why `input()` Is Not Enough on Its Own
 
-## The project
-
-Everything is in `main.py`. The flow goes like this:
-
-1. Ask for the total bill.
-2. Ask for the tip percentage (10, 12, or 15).
-3. Ask how many people are splitting.
-4. Calculate the tip, add it to the bill, divide by the number of people.
-5. Print each person's share, formatted to two decimal places.
-
-## Let's walk through the code
+The first lines of `main.py` collect all the data the program needs:
 
 ```python
 print("Welcome to the tip calculator!\n")
@@ -23,28 +13,54 @@ tip = input("How much tip would you like to give? 10, 12 or 15 percent? ")
 people = input("How many people to split the bill? ")
 ```
 
-Right off the bat — `total_bill`, `tip`, and `people` are all strings at this point. If you tried to do `total_bill / people` without converting, Python would throw a `TypeError`. That's the whole reason type conversion exists.
+At this point, all three variables are strings. That matters because `input()` always returns text, even when the user types something that looks like a number.
+
+If you tried to divide `total_bill` by `people` immediately, Python would raise a `TypeError`. So this lesson is really about learning when to turn text into numbers.
+
+## 2. Converting Strings into the Right Numeric Types
+
+The calculation block shows the difference between integers and floating-point numbers:
 
 ```python
 tip_amount = float(total_bill) * (int(tip) / 100)
 bill_with_tip = float(total_bill) + float(tip_amount)
 split_bill = float(bill_with_tip) / int(people)
+```
 
+There are two key choices here:
+
+- `float()` is used for the bill because money can include decimals.
+- `int()` is used for the tip percentage and number of people because those are whole numbers in this project.
+
+That distinction is worth noticing early. Choosing the right data type makes the math easier to reason about and prevents bugs later when programs become more complex.
+
+## 3. Formatting the Result for Real Users
+
+Once the math is done, the program prints the final amount:
+
+```python
 print(f"Each person should pay: €{split_bill:.2f}")
 ```
 
-Here's what's happening with the conversions:
+This line introduces two useful ideas at once:
 
-- **`float()`** turns a string into a decimal number. We use it for the bill because money has cents.
-- **`int()`** turns a string into a whole number. Tip percentage and number of people don't need decimals.
-- **`:.2f`** inside the f-string formats the final number to exactly two decimal places — so you get `€33.60` instead of `€33.6`.
+- an f-string lets you insert variables directly into a string
+- `:.2f` formats the number to two decimal places
 
-The commented-out code at the bottom of the file shows an alternative approach where you convert the inputs right when you receive them. That's actually cleaner — you deal with the type conversion once and then forget about it. Both styles work, but converting early is the habit you'll want to build.
+Without that formatting, Python might print something like `33.6` instead of `33.60`. For money, that difference matters. Even simple programs should present results in a way that matches how people expect to read them.
 
-## Try it yourself
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Try a €150 bill, 12% tip, split 5 ways — you should get €33.60 per person.
+3. Enter a bill amount, a tip percentage, and the number of people.
+4. Verify that the final output is rounded to two decimal places.
+
+## Summary
+
+Day 02 teaches the first real bridge between user input and computation. You collect text with `input()`, convert it into numbers with `int()` and `float()`, perform the tip calculation, and format the result with an f-string. That pattern shows up constantly in practical Python programs.

@@ -1,10 +1,8 @@
 # Day 18 - Turtle Graphics, Color Systems, and Reusable Drawing Functions
 
-Today is the day we leave the terminal behind and start drawing on screen. Up until now, every program you've written produced text output. Now we're controlling a little "turtle" that drags a pen around a canvas.
+Today the course moves from terminal output to graphics. Instead of printing text, the program controls a `turtle` cursor that draws on a canvas. This folder pairs short drawing exercises with a final Hirst-style dot painting, which makes it a good introduction to graphical coordinates, pen state, and reusable drawing helpers.
 
-This folder has two parts. `main_turtle_and_the_gui.py` walks through several drawing challenges—the spirograph is the most satisfying one. `main.py` is the final project: a Hirst-style dot painting that samples colors and arranges them in a grid.
-
-## Getting the turtle on screen
+## 1. Getting the Turtle on Screen
 
 The first thing you need is the screen and the turtle object:
 
@@ -18,7 +16,7 @@ screen.exitonclick()
 
 That `exitonclick()` is the magic line that keeps the window open until you click it. Without it, the program runs, draws everything, and closes the window before you can even see what happened.
 
-## RGB colors and why they matter
+## 2. RGB Colors and Why They Matter
 
 By default, turtle understands color names like "red" or "ForestGreen". But if you want specific colors from an image, you need RGB tuples. The trick is setting the color mode first:
 
@@ -39,7 +37,7 @@ def random_color():
 
 Now every time we call `random_color()`, we get a fresh RGB tuple we can pass to `pencolor()`.
 
-## The spirograph challenge
+## 3. The Spirograph Challenge
 
 This is the most satisfying visual in the folder. A spirograph is just a circle drawn over and over, each time rotated by a small angle. When you do enough rotations, the patterns overlap into something beautiful:
 
@@ -55,7 +53,7 @@ spirograph(10)
 
 The math here is simple: 360 degrees makes a full circle. If we rotate by 10 degrees each time, we need 36 iterations to come back around. That's what `int(360 / size_of_gap)` calculates for us. Call `spirograph(5)` for a denser pattern or `spirograph(45)` for something more open.
 
-## The Hirst dot painting
+## 4. The Hirst Dot Painting
 
 In `main.py`, we take a curated list of colors extracted from an image and arrange them in a 10x10 grid. The turtle doesn't actually draw lines here—it just drops dots:
 
@@ -78,11 +76,13 @@ for pos in range(10):
 
 `timmy.teleport()` moves the turtle without drawing anything. That's essential—we only want dots, not lines connecting them.
 
-## Why this day matters
+## 5. Why This Day Matters
 
 Today you're learning to think about coordinate systems and state. The turtle has a position, a heading, a pen up or down state, and a color. Every command you give changes one of those things. It's a gentle introduction to game development concepts before we build actual games.
 
-## Try it yourself
+Every turtle command changes some part of the drawing state: position, heading, pen color, or whether the pen is actively drawing. That is why this lesson connects so naturally to later animation and game projects.
+
+## How to Run the Projects
 
 ```bash
 python "main_turtle_and_the_gui.py"
@@ -93,3 +93,7 @@ Try changing the gap size in the spirograph. Then run the dot painting:
 ```bash
 python "main.py"
 ```
+
+## Summary
+
+Day 18 introduces graphical programming through `turtle`. You create a drawing window, switch to RGB color tuples, reuse helper functions for random colors, and combine loops with angle changes to build more complex visuals like a spirograph and a dot grid. The visuals are fun, but the real lesson is learning to control drawing state over time.

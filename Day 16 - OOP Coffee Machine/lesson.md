@@ -1,14 +1,10 @@
 # Day 16 - Object-Oriented Programming Fundamentals
 
-Yesterday, we built a Coffee Machine using procedural programming—lots of functions, dictionaries, and global variables. It worked, but keeping track of which function modified which dictionary got a little messy as the program grew.
+Day 16 rebuilds the coffee machine from the previous lesson, but the architecture changes completely. Instead of keeping the whole workflow in one file with shared dictionaries and standalone functions, the program now creates objects that carry their own data and behavior. That shift is the real lesson: object-oriented programming is not about making code look fancier. It is about assigning responsibility to the right part of the program.
 
-Today, we are rebuilding that exact same Coffee Machine, but we're shifting our thinking to **Object-Oriented Programming (OOP)**. Instead of thinking about "functions" and "variables," we think about **Objects** that have their own data (**Attributes**) and their own capabilities (**Methods**).
+## 1. Moving from Procedures to Objects
 
-## Blueprints and objects
-
-In our procedural version, all the code lived in `main.py`. Today, look at the project files: we have `menu.py`, `coffee_maker.py`, and `money_machine.py`. Each of these files contains a **Class**. Think of a Class as a blueprint. It describes what an object will know and what it will do.
-
-In `main.py`, the first thing we do is build our actual objects from those blueprints. This is the moment where the "blueprint" becomes a real, usable machine in our memory:
+The main file starts by creating the three objects the app needs:
 
 ```python
 from menu import Menu, MenuItem
@@ -20,11 +16,17 @@ coffee_machine = CoffeeMaker()
 coin_machine = MoneyMachine()
 ```
 
-Now, `coffee_machine` is a real, functional object. It internally keeps track of its own water, coffee, and milk. We don't have to manage a `resources` dictionary in our main file anymore!
+Each object represents a distinct responsibility:
 
-## Calling methods on objects
+- `Menu` knows which drinks exist
+- `CoffeeMaker` knows the machine resources and brewing logic
+- `MoneyMachine` knows how payment works
 
-In yesterday's version, when the user typed "report," we called a standalone `report()` function and passed around variables. Today, the `coffee_machine` object knows how to print its own report. We just ask it to do so using the dot notation (`object.method()`):
+That division is the core OOP idea. Instead of one file managing everything directly, each object owns part of the system.
+
+## 2. Calling Methods Instead of Passing Shared State Everywhere
+
+When the user asks for a report, the program does not call one big helper function. It asks each object to report on itself:
 
 ```python
 if order == "report":
@@ -32,11 +34,13 @@ if order == "report":
     coin_machine.report()
 ```
 
-We are commanding the objects to perform their built-in tasks. The `MoneyMachine` handles the cash report, and the `CoffeeMaker` handles the ingredient inventory.
+This is a cleaner interface than passing the resources dictionary and profit total into standalone functions. The object already has the state it needs, so the caller only needs to request the action.
 
-## The logic flow in main.py
+That is an important design improvement from Day 15. The main loop no longer needs to know how reporting works internally.
 
-If a user orders a latte, look at how clean the code reads once the heavy lifting is moved into those classes:
+## 3. Reading the Main Workflow Like a Conversation
+
+The drink order flow is compact because each object does one job:
 
 ```python
 drink = drink_menu.find_drink(order)
@@ -46,22 +50,35 @@ if coffee_machine.is_resource_sufficient(drink):
         coffee_machine.make_coffee(drink)
 ```
 
-Notice the conversation happening here:
-1. We ask the `drink_menu` object to find the specified drink. It hands us back a `MenuItem` object.
-2. We ask the `coffee_machine` if it has enough resources for that specific `MenuItem`.
-3. We ask the `coin_machine` to handle the payment. It prompts the user for coins, checks the total, and gives change.
-4. If everything passes, we command the `coffee_machine` to actually brew the coffee.
+This reads almost like a conversation:
 
-## Why this shift matters
+1. get the requested drink from the menu
+2. ask the coffee machine if it has enough ingredients
+3. ask the money machine to handle payment
+4. tell the coffee machine to brew the drink
 
-The `main.py` is now incredibly short—just 25 lines. All the complex, messy logic about counting coins or subtracting water amounts is hidden away inside the classes. As the programmer writing the main loop, you just plug the objects together and let them do all the work.
+That readability is one of the main practical benefits of OOP. Good object design keeps the top-level workflow short and expressive.
 
-This is the power of OOP: it lets us build much larger, more complex systems without our "main" logic becoming an unreadable mess.
+## 4. Why the Main File Gets Smaller as the System Gets Smarter
 
-## Try it yourself
+The strongest sign that the refactor worked is how little `main.py` needs to know. It does not calculate coin totals itself, subtract ingredients itself, or manage recipe details itself. Those rules live in the classes where they belong.
+
+This is the key design takeaway from the day: as programs grow, the main file should describe orchestration, not every internal detail.
+
+The old deleted `lesson.py` in git history only contained small `turtle` and `prettytable` experiments, so the current lesson source is the real teaching material here.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Play with it just like yesterday. Functionally, it's identical to the user, but architecturally, it's totally different—and much more robust.
+3. Order drinks, request a `report`, and compare the behavior to the procedural coffee machine from Day 15.
+4. Notice that the user experience is similar even though the internal structure is now object-oriented.
+
+## Summary
+
+Day 16 introduces object-oriented design by rebuilding an existing app with classes. `Menu`, `CoffeeMaker`, and `MoneyMachine` each own part of the logic, which keeps `main.py` focused on orchestration instead of low-level details. The lesson is less about syntax and more about assigning responsibility to the right object.

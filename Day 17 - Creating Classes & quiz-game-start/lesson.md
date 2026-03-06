@@ -1,10 +1,8 @@
 # Day 17 - Classes, Objects, Attributes, and Methods
 
-Today we're taking the idea from Day 16 and slowing it down a little. Instead of jumping straight into several ready-made classes, we build a simple class ourselves and then use the same thinking in a quiz app.
+Today we slow the object-oriented ideas down and build them in two stages. First, `main_creating_classes.py` shows the raw mechanics of defining a class and creating objects. Then the quiz project applies those ideas to a small app with state, question data, and scoring. The lesson is not just how to write a class. It is how to decide what each object should own.
 
-This folder has two parts that belong together. `main_creating_classes.py` teaches the raw syntax of creating objects, and the quiz project shows why that syntax matters once your program starts tracking state across multiple questions.
-
-## Building your first class
+## 1. Building Your First Class
 
 Let's start with the smallest example, because this is where `__init__` and `self` usually stop feeling abstract. In `main_creating_classes.py`, we define a `User` class and give every new user an id, a username, and two counters:
 
@@ -30,7 +28,7 @@ The `follow()` method is also a great example because it changes state in two pl
 
 Read that slowly. `self` is the object calling the method, and `user` is the object being passed in. So when `user_1.follow(user_2)` runs, `user_1` starts following one more person, and `user_2` gains one follower. That is much easier to reason about than juggling separate dictionaries or parallel lists.
 
-## Turning raw data into objects
+## 2. Turning Raw Data into Objects
 
 Now the quiz app takes the same idea and makes it useful. In `question_model.py`, the `Question` class is intentionally tiny:
 
@@ -58,7 +56,7 @@ quiz = QuizBrain(question_bank)
 
 That loop is doing an important translation step. `data.py` gives us raw API-style data. Our app does not want to work with loose dictionaries forever, so we convert each one into a `Question` object. After that, the rest of the program can rely on `.text` and `.answer` without caring where the data originally came from.
 
-## Letting one object run the quiz
+## 3. Letting One Object Run the Quiz
 
 The real control lives in `quiz_brain.py`. This class tracks which question we are on, asks the next one, and keeps score:
 
@@ -88,13 +86,21 @@ def check_answer(self, user_answer, correct_answer):
 
 Notice what stays inside the class: the current score and the current question number. That is the habit I want you to keep from this lesson. If a value belongs to one object, let that object own it.
 
-## Why this day matters
+## 4. Why This Day Matters
 
 If `self` still feels strange, that is normal. The easiest way to think about it is this: `self` is just Python's way of saying, "work with this specific object, not the class in general." Once that clicks, the rest of OOP becomes much less mysterious.
 
 This day is really about responsibility. `Question` stores question data. `QuizBrain` runs the quiz. `User` tracks follower relationships. Each object has a clear job, and the program becomes easier to read because of it.
 
-## Try it yourself
+The lesson ties together once you see the division of responsibility:
+
+- `User` owns follower-related state
+- `Question` owns one question and one answer
+- `QuizBrain` owns quiz progress and scoring
+
+That is the habit object-oriented design is trying to teach.
+
+## How to Run the Projects
 
 Run the quiz app first:
 
@@ -107,3 +113,7 @@ Then run the smaller class demo and trace what happens to the follower counts af
 ```bash
 python "main_creating_classes.py"
 ```
+
+## Summary
+
+Day 17 makes object-oriented programming concrete. You define classes with attributes and methods, turn raw dictionary data into `Question` objects, and let `QuizBrain` own the quiz state instead of relying on loose global variables. The syntax matters, but the bigger lesson is responsibility: each object should manage the data and behavior that belong together.

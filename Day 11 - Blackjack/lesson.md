@@ -1,48 +1,69 @@
 # Day 11 - Blackjack Capstone and Multi-Function Program Design
 
-Today is our first Capstone Project: Blackjack (also known as 21).
+Day 11 is the first capstone project, and the scale changes immediately. Blackjack has enough moving parts that a single top-to-bottom script would become hard to read and harder to debug. The lesson is not only about card rules. It is about splitting a larger problem into functions that each handle one clear responsibility.
 
-Until now, we've mostly written code top-to-bottom, maybe with one or two functions. But Blackjack is too complex to write entirely in one giant loop. You have deck management, score calculation (with tricky Ace rules), win/loss comparison, and the dealer's automatic turns.
+## 1. Breaking the Game into Focused Functions
 
-To handle that complexity, we break the game down into small, single-purpose functions.
+`main.py` organizes the game around four helper functions:
 
-## Breaking the problem down
+```python
+def deal_card():
+    """Returns a random card from the deck."""
 
-If you look at `main.py`, you'll see the logic is split into distinct pieces:
+def calculate_score(card_list):
+    """Takes a list of cards and returns the score calculated."""
 
-1. **`deal_card()`**: Its only job is to pick a random card from the deck and hand it back.
-2. **`calculate_score(card_list)`**: It looks at a hand of cards, adds them up, and handles special rules.
-3. **`compare(u_score, c_score)`**: It purely looks at two numbers and returns a string saying who won.
-4. **`play_game()`**: The orchestrator. It calls the other functions to actually run the game.
+def compare(u_score, c_score):
+    """Get the score of user and computer and return the winner"""
 
-By isolating these jobs, we make the code way easier to test and fix when things break.
+def play_game():
+```
 
-## The tricky part: Scoring the Ace
+This structure matters because each function solves a different part of the program:
 
-In Blackjack, an Ace is worth 11, unless adding 11 would bust your hand — then it's worth 1. Also, a two-card 21 (an Ace and a 10) is a "Blackjack" and wins instantly.
+- `deal_card()` handles card selection
+- `calculate_score()` knows the scoring rules
+- `compare()` decides the final outcome
+- `play_game()` runs the turn-by-turn flow
 
-Here's how we handle that in `calculate_score`:
+That separation is what makes the project manageable. Larger programs stay readable when each function has one job.
+
+## 2. Encoding Blackjack Rules in `calculate_score()`
+
+The scoring function handles the two trickiest Blackjack rules:
 
 ```python
 score = sum(card_list)
-
-# Check for a natural Blackjack
 if score == 21 and len(card_list) == 2:
-    return 0  # We use 0 as a special flag for Blackjack
+    return 0
 
-# Handle the Ace rule
 if score > 21 and 11 in card_list:
     card_list.remove(11)
     card_list.append(1)
 ```
 
-First, we check for a natural Blackjack using `score == 21 and len(card_list) == 2`. We `return 0` instead of 21, which acts as a secret signal to the rest of our code that a natural Blackjack occurred.
+The first rule is a natural Blackjack. Instead of returning `21`, the function returns `0` as a special signal value. That lets the rest of the game detect Blackjack quickly.
 
-Then, we handle the Ace. If the hand is over 21 _and_ there's an `11` in the list, we physically remove the `11` and swap it for a `1`.
+The second rule handles aces. If the hand would bust and contains an `11`, the code converts one ace from `11` to `1`. This is a good example of translating a real game rule into state changes inside the data structure.
 
-## The Dealer's turn
+## 3. Managing the Player and Dealer Turns
 
-When the player is done hitting, the dealer (computer) has to take its turn. House rules say the dealer must keep hitting until their score is 17 or higher. We use a simple while loop for this:
+The player turn happens inside a loop:
+
+```python
+while not end_game:
+    user_score = calculate_score(user_hand)
+    pc_score = calculate_score(pc_hand)
+
+    if pc_score == 0 or user_score == 0 or user_score > 21:
+        end_game = True
+    else:
+        draw_card = input("Type 'y' to get another card, type 'n' to pass: ").lower()
+```
+
+This section keeps recalculating the scores after each move. That repeated recalculation is important because the state changes every time a card is drawn.
+
+After the player stops, the dealer follows house rules:
 
 ```python
 while pc_score != 0 and pc_score < 17:
@@ -50,12 +71,32 @@ while pc_score != 0 and pc_score < 17:
     pc_score = calculate_score(pc_hand)
 ```
 
-The dealer keeps drawing cards, and we keep recalculating their score, right up until they hit 17 or bust.
+The dealer logic is automatic and deterministic. That creates a useful contrast: the player chooses, but the dealer follows strict rules.
 
-## Try it yourself
+## 4. Using a Comparison Function to Keep Endgame Logic Clean
 
-```bash
-python "main.py"
+At the end, the script calls `compare()`:
+
+```python
+print(compare(user_score, pc_score))
 ```
 
-Play a few hands. Watch how the game asks you to hit or stand, and notice how the dealer's logic automatically kicks in as soon as you stop drawing.
+That is cleaner than mixing all the win-loss rules into `play_game()`. The comparison function becomes a dedicated decision layer for the final result.
+
+This is one of the main design lessons of the capstone: once a program has enough branches and edge cases, moving decision logic into named functions makes the main workflow much easier to follow.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
+
+```bash
+python main.py
+```
+
+3. Start a game, choose whether to draw or pass, and watch how the dealer keeps drawing until the score reaches at least `17`.
+4. Play a few rounds to confirm that Blackjack, busts, and ace conversion all behave correctly.
+
+## Summary
+
+Day 11 is the first project that really benefits from function design. Blackjack splits the logic into card dealing, scoring, comparison, and game flow, which keeps the code understandable even as the rules become more complex. The capstone teaches both game logic and program structure at the same time.

@@ -1,12 +1,10 @@
 # Day 07 - Hangman Logic and State Tracking
 
-Today we're building Hangman. It's the biggest project yet, and it brings together everything we've learned so far: variables, conditionals, for loops, and randomisation.
+Today we're building Hangman, and this is the first beginner project that starts to feel like a real game loop instead of a short script. It combines random word selection, repeated guesses, lives, and a visible board state that changes over time. That makes it a strong introduction to two important ideas: keeping track of state and using a `while` loop when you do not know in advance how many turns the program will need.
 
-But it also introduces three massive new concepts: **while loops** (running code until a specific condition is met), **state tracking** (remembering what happened on previous turns), and **modules** (splitting your code across multiple files so it doesn't become a gigantic mess).
+## 1. Splitting Data and Logic into Separate Files
 
-## The project
-
-Wait, where did all the code go? If you look at `main.py`, you'll notice we aren't storing the giant list of words or the ASCII art for the hangman stages in the main file anymore.
+The first thing to notice in `main.py` is that the project no longer keeps everything in one file:
 
 ```python
 import random
@@ -14,11 +12,13 @@ from hangman_art import logo, stages
 from hangman_words import word_list
 ```
 
-This is how real Python projects are organized. We put the massive list of words in `hangman_words.py` and the ASCII art in `hangman_art.py`. Then we `import` them. This keeps `main.py` clean—it only contains the game logic, not the heavy data.
+This is a useful step forward in project organization. The word list and ASCII art are data, not game logic, so moving them into `hangman_words.py` and `hangman_art.py` keeps `main.py` focused on the actual rules of play.
 
-## Setting up the board
+Even in a small project, separating responsibilities makes the main program easier to read.
 
-First, we pick a random word. But we don't want to show the user the word; we want to show them blanks (`_`).
+## 2. Representing the Hidden Word as State
+
+After choosing a random word, the script creates a display list filled with underscores:
 
 ```python
 chosen_word = random.choice(word_list)
@@ -28,11 +28,13 @@ for _ in range(len(chosen_word)):
     display.append("_")
 ```
 
-If the word is "apple", `display` becomes `['_', '_', '_', '_', '_']`. This list is our **state**. As the user guesses correctly, we'll swap out those underscores for real letters.
+This `display` list is the central piece of game state. It starts as blanks, and each correct guess replaces one or more underscores with the matching letter.
 
-## The game loop
+That design matters because the program needs to remember progress from one turn to the next. A single print statement would not be enough. The game needs a data structure it can update over time.
 
-We don't know how many guesses it will take to win or lose. A `for` loop won't work here because we don't have a fixed number of iterations. We need a **while loop**.
+## 3. Running the Game Until a Win or Loss
+
+Hangman cannot use a fixed loop count because the number of guesses depends on the player. That is why the game uses a `while` loop:
 
 ```python
 end_of_game = False
@@ -40,17 +42,14 @@ lives = 6
 
 while not end_of_game:
     guess = input("Please guess a letter: ").lower()
-    # ... game logic happens here ...
 ```
 
-This loop runs forever until `end_of_game` gets flipped to `True`. When does that happen?
+The loop continues until something changes `end_of_game` to `True`. There are two ways that happens:
 
-1. They run out of lives (they lose).
-2. There are no more `"_"` characters in the `display` list (they win).
+- the player fills in every missing letter
+- the player runs out of lives
 
-## Checking the guess
-
-Inside the while loop, we check if the guessed letter is inside the word. We have to check every single position because the letter might appear twice (like the 'p's in "apple").
+Inside that loop, the script checks every position in the chosen word:
 
 ```python
 for position in range(len(chosen_word)):
@@ -59,7 +58,11 @@ for position in range(len(chosen_word)):
         display[position] = letter
 ```
 
-If the guess is wrong, we subtract a life. The `in` keyword is a lifesaver here — it lets us check if a value exists inside a string or list without writing a manual loop:
+That position-by-position update is what allows repeated letters to work correctly. If the word contains the same letter twice, both positions can be revealed.
+
+## 4. Penalizing Wrong Guesses and Rendering Feedback
+
+Wrong guesses cost a life:
 
 ```python
 if guess not in chosen_word:
@@ -70,12 +73,27 @@ if guess not in chosen_word:
         print(f"\n***********************YOU LOSE**********************")
 ```
 
-Finally, we print the current hangman picture from our imported `stages` list. Because the list is ordered backwards (stage 6 is full health, stage 0 is dead), we just use `stages[lives]`.
+This block shows how state connects different parts of the program:
 
-## Try it yourself
+- `guess` comes from user input
+- `chosen_word` determines whether the guess is correct
+- `lives` tracks the remaining attempts
+- `stages[lives]` displays the right hangman graphic for that moment
+
+That is the larger lesson of the project. Games work because the program keeps updating internal state and turning it into visible feedback.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Play a few rounds. Notice how the screen clears after every guess (using `os.system('clear')`) to make it feel like a real terminal game instead of a scrolling log.
+3. Guess one letter at a time.
+4. Verify that correct guesses reveal letters in `display` and wrong guesses reduce the life count and change the hangman stage.
+
+## Summary
+
+Day 07 introduces real stateful game logic. You import supporting data from separate modules, represent the hidden word as a mutable list, use a `while` loop to keep the game running, and update lives and display state after each guess. It is one of the first projects where the program has to remember what happened before and react differently on every turn.

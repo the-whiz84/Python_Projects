@@ -1,14 +1,10 @@
 # Day 09 - Dictionaries, Nesting, and Data Modeling
 
-Today we're building a Secret Auction program. If you've ever been to a silent auction, you know how it works: people write down their names and bids, and at the very end, we find out who bid the highest.
+Today we're building a secret auction program. Each bidder enters a name and a bid, the screen clears between turns, and the program announces the winner at the end. The main lesson is data modeling: choosing the right structure to represent the relationship between a person and their bid.
 
-To build this, we need a way to link a person's name directly to their bid. A list won't work well for this — we'd have to keep a list of names and a list of bids and try to keep them perfectly synced up. Instead, we're going to use a **dictionary**.
+## 1. Why a Dictionary Fits This Problem
 
-## How Dictionaries Work
-
-Dictionaries in Python are just like real dictionaries. You have a "word" (the **key**), and you look it up to find the "definition" (the **value**).
-
-In our project, the key is the bidder's name, and the value is their bid amount.
+The program stores bids in a dictionary:
 
 ```python
 bid_list = {}
@@ -16,39 +12,61 @@ bid_list = {}
 while add_user == True:
     name = input("What is your name?\n")
     bid = int(input("What is your bid amount?\n$"))
-
     bid_list[name] = bid
 ```
 
-That line `bid_list[name] = bid` is the magic. It says: "Go into the `bid_list` dictionary. Find the page for this `name`, and write down this `bid`."
+This is the correct structure because each bidder name maps directly to one value. A dictionary is built for exactly that pattern: key to value.
 
-If the dictionary was empty, it adds a new entry. If that person already existed, it overwrites their old bid with the new one. So at the end of the loop, our dictionary looks something like this behind the scenes:
+In this project:
+
+- the key is the bidder's name
+- the value is the bid amount
+
+If you tried to solve this with separate lists for names and bids, you would have to keep those lists perfectly aligned. A dictionary removes that bookkeeping and makes the relationship explicit.
+
+## 2. Collecting Entries Until the Auction Ends
+
+The auction continues inside a `while` loop:
 
 ```python
-{"Alice": 150, "Bob": 100, "Charlie": 200}
+check = input("Do you want to add other bidders? Type 'yes' or 'no'\n").lower()
+if check == "yes":
+    clear()
+else:
+    add_user = False
+    clear()
 ```
 
-## Finding the highest bidder
+This structure lets the program keep accepting new entries until the operator decides to stop. The `clear()` call is also part of the lesson. It is not just cosmetic. In a blind auction, the next bidder should not see the previous bid, so the terminal is cleared after each turn.
 
-After everyone has entered their bids (and we've cleared the screen between each person so nobody can cheat), we need to find the winner.
+That is a good reminder that some code exists to support the workflow, not only the calculation.
+
+## 3. Finding the Highest Bidder from the Dictionary
+
+At the end, the script computes the winner:
 
 ```python
 highest_bid = max(bid_list, key=bid_list.get)
 winning_bid = bid_list[highest_bid]
-
 print(f"The winner with the highest bid is {highest_bid} with a bid of {winning_bid}!")
 ```
 
-Normally, `max()` just looks for the highest number in a list. But when you give it a dictionary, it doesn't know what to look at — the keys (the names) or the values (the bids).
+This line is worth understanding carefully. `max()` usually returns the largest item from a sequence. When you give it a dictionary, it normally looks at keys. But `key=bid_list.get` changes the comparison so `max()` evaluates each name by its stored bid amount instead.
 
-By passing `key=bid_list.get`, we're telling `max()`: "Please look at the _values_ to figure out the highest number, but tell me which _key_ it belongs to." So it finds that 200 is the highest bid, and returns `"Charlie"`.
+So the program asks: which key has the highest associated value? That is a neat example of using a built-in function with a custom rule.
 
-Once we have `"Charlie"` saved in `highest_bid`, we can look up his actual bid amount by doing `bid_list[highest_bid]`.
+## How to Run the Project
 
-## Try it yourself
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Add a few users with different bids. The screen clears after each entry to keep it a secret. Try putting in the exact same name twice — notice how the second bid overwrites the first one because dictionary keys must be unique!
+3. Enter multiple bidders and different bid amounts.
+4. Confirm that the screen clears between bidders and that the final winner matches the highest bid entered.
+
+## Summary
+
+Day 09 introduces dictionaries as a way to model linked data cleanly. The program maps names to bids, uses a loop to keep collecting entries, and applies `max(..., key=bid_list.get)` to recover the winning bidder. It is a small project, but it teaches an important habit: choose the data structure that matches the relationship in the problem.

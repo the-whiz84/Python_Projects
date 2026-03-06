@@ -1,12 +1,10 @@
 # Day 08 - Functions with Parameters and Caesar Cipher Logic
 
-Today we're building a Caesar Cipher — an encryption program that shifts every letter in a message by a certain number of places down the alphabet.
+Today we're building a Caesar cipher program. It shifts letters forward or backward through the alphabet to encode or decode a message. The encryption idea is old, but it gives you a practical reason to write your own function, pass values into it, and reuse that function inside a loop.
 
-Up until now, you've used built-in functions like `print()` and `len()`. But today, you get to build your own custom function. We're going to wrap the entire encryption and decryption logic inside a single, reusable block of code called `caesar()`.
+## 1. Wrapping Logic Inside a Reusable Function
 
-## Passing data into functions
-
-Here's the core function we use in `main.py`:
+The center of the project is the `caesar()` function:
 
 ```python
 def caesar(original_text, shift_amount, encode_or_decode):
@@ -14,30 +12,21 @@ def caesar(original_text, shift_amount, encode_or_decode):
 
     if encode_or_decode == "decode":
         shift_amount *= -1
-
-    for letter in original_text:
-        if letter not in alphabet:
-            output_text += letter
-        # ... shifting logic ...
 ```
 
-Notice the variables inside the parentheses: `original_text`, `shift_amount`, and `encode_or_decode`. These are **parameters**. They act like variables that are only available _inside_ the function.
+This is the first day where the main logic is packaged into a reusable block instead of being written once from top to bottom. That matters because the program needs to do the same job repeatedly for different user inputs.
 
-When the user types their inputs, we pass those inputs into the function:
+The parameters tell the function everything it needs:
 
-```python
-direction = input("Type 'encode' to encrypt, type 'decode' to decrypt:\n").lower()
-text = input("Type your message:\n").lower()
-shift = int(input("Type the shift number:\n"))
+- `original_text` is the message to transform
+- `shift_amount` is how far to move each letter
+- `encode_or_decode` decides whether the shift goes forward or backward
 
-caesar(original_text=text, shift_amount=shift, encode_or_decode=direction)
-```
+That is the larger lesson behind the cipher. Functions let you separate the job from the specific values used on each run.
 
-By explicitly saying `original_text=text`, we are using **keyword arguments**. It tells Python exactly which parameter gets which piece of data. This is much safer than just passing `text, shift, direction` and hoping you got the order right.
+## 2. Shifting Letters and Wrapping Around the Alphabet
 
-## The shifting logic and the modulo operator
-
-The tricky part of a Caesar Cipher is what happens when you reach the end of the alphabet. If you shift 'z' by 1, you need to loop back around to 'a'.
+The main transformation happens here:
 
 ```python
 shifted_position = alphabet.index(letter) + shift_amount
@@ -45,26 +34,62 @@ shifted_position %= len(alphabet)
 output_text += alphabet[shifted_position]
 ```
 
-This is where the modulo operator (`%`) comes in. `len(alphabet)` is 26.
-If `shifted_position` becomes 26 (which is past the end of our list indices 0-25), `26 % 26` equals `0`, which loops perfectly back to 'a'. If the shift is huge, like 100, `100 % 26` is `22`, which drops us exactly at 'w'.
+The first line finds the current letter position and adds the shift. The second line is the important one: `%=` wraps the index back into the valid alphabet range.
 
-This little math trick saves us from having to write a messy `if shifted_position > 25:` check, and it safely handles massive shift numbers that the user might type to try and break the program.
+Without that step, shifting past `'z'` would push the index outside the list. With modulo, the cipher loops back to the beginning cleanly. That is why a shift can be small or large and still work correctly.
 
-## Keeping non-letters intact
+## 3. Preserving Characters That Should Not Change
 
-What if the user types a space, a number, or a question mark?
+The function also protects spaces and punctuation:
 
 ```python
-if letter not in alphabet:
-    output_text += letter
+for letter in original_text:
+    if letter not in alphabet:
+        output_text += letter
+    else:
+        shifted_position = alphabet.index(letter) + shift_amount
+        shifted_position %= len(alphabet)
+        output_text += alphabet[shifted_position]
 ```
 
-We just add it to the output string as-is. Our function only shifts characters that actually exist in the `alphabet` list.
+This check makes the program more practical. A real message often contains spaces, numbers, or punctuation marks, and users expect those characters to stay readable.
 
-## Try it yourself
+That small `if` statement is doing quality-of-life work: the cipher transforms only what belongs to the alphabet and leaves everything else alone.
+
+## 4. Reusing the Function in a Repeating Program Loop
+
+Outside the function, the script runs inside a `while` loop:
+
+```python
+while not game_over:
+    direction = input("Type 'encode' to encrypt, type 'decode' to decrypt:\n").lower()
+    text = input("Type your message:\n").lower()
+    shift = int(input("Type the shift number:\n"))
+
+    caesar(original_text=text, shift_amount=shift, encode_or_decode=direction)
+```
+
+This is a strong pattern to learn early:
+
+- collect fresh input
+- pass it into a function
+- let the function handle the core logic
+- repeat until the user chooses to stop
+
+It is a much cleaner design than rewriting the cipher logic directly inside the loop body every time.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Try encrypting a message with a normal shift like `5`. Then, take the garbled output, run the program again, choose `decode`, and pass in the same shift number. The math flips (`shift_amount *= -1`) and gives you back your original text!
+3. Choose `encode` or `decode`, enter a message, and provide a shift value.
+4. Test the program by encoding a message first, then decoding it with the same shift.
+
+## Summary
+
+Day 08 introduces user-defined functions through a real text transformation problem. You pass values into `caesar()`, use modulo arithmetic to wrap around the alphabet, preserve non-letter characters, and reuse the same function inside a loop that can run again and again. The cipher is the project, but the bigger lesson is how functions make logic reusable and easier to control.

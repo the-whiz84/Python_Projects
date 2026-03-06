@@ -1,21 +1,10 @@
 # Day 01 - Working with Variables, Strings, and Input/Output
 
-Today we're building a Band Name Generator — a tiny script that asks you two questions and mashes the answers together into a (sometimes hilarious) band name.
+Today we're building a Band Name Generator: a tiny script that asks two questions and combines the answers into a simple result. It is small on purpose. On the first day, the goal is not complexity. The goal is to get comfortable with Python reading input, storing values, and printing output back to the terminal.
 
-It's a simple project, but it covers three things you'll use in every single Python program: printing text to the screen, getting input from the user, and storing values in variables.
+## 1. The Whole Program Fits in One Screen
 
-## The project
-
-The entire program lives in `band_name.py`, and it's only about ten lines long. Here's the idea:
-
-1. Greet the user.
-2. Ask them what city they grew up in.
-3. Ask them the name of their first pet.
-4. Stick the two answers together and print it as their band name.
-
-That's it. No imports, no classes, no functions — just raw Python basics.
-
-## Let's walk through the code
+The project lives in `band_name.py`, and the full script is short enough to read in one pass:
 
 ```python
 print("Welcome to the Band Name Generator!\n")
@@ -27,20 +16,59 @@ BAND_NAME = CITY + " " + PET
 print("Your band name could be:\n" + BAND_NAME)
 ```
 
-A few things to notice:
+That compact size is useful for a first lesson. You can see the complete flow from top to bottom:
 
-- **`print()`** sends text to the terminal. The `\n` inside the string adds a line break — it's how you tell Python "go to the next line here."
+1. print a greeting
+2. collect two pieces of user input
+3. combine those strings
+4. print the final result
 
-- **`input()`** pauses the program and waits for the user to type something. Whatever they type gets returned as a string, and we save it into a variable (`CITY`, `PET`).
+There are no functions or imports yet. The point is to learn how Python executes statements in order.
 
-- **String concatenation** with `+` joins strings together. We add a space `" "` between the city and pet so the band name doesn't smash the words together like `"DallasRex"`.
+## 2. Reading Input and Saving It in Variables
 
-- **Variable naming**: this script uses `UPPER_CASE` names. In Python, that convention usually signals a constant, but at this stage you're just getting a feel for giving your data a name. The important thing is that the name tells you what's inside.
+The two `input()` calls are the most important part of the lesson:
 
-## Try it yourself
-
-```bash
-python "band_name.py"
+```python
+CITY = input("What is the name of the city you grew in?\n")
+PET = input("What is the name of your first pet?\n")
 ```
 
-Run it a few times with different answers. You'll get results like "London Whiskers" or "Cairo Buddy" — the sillier the better.
+`input()` pauses the program and waits for the user to type. Whatever the user types comes back as a string. We then assign that string to a variable so the program can use it later.
+
+This is your first exposure to a core programming pattern:
+
+- ask for data
+- store the data
+- reuse the data later in the program
+
+Without variables, the answers would disappear as soon as the user typed them. With variables, the program can remember those values and build something from them.
+
+## 3. Building Output from Smaller Pieces
+
+Once the city and pet name are stored, the script combines them into one new string:
+
+```python
+BAND_NAME = CITY + " " + PET
+print("Your band name could be:\n" + BAND_NAME)
+```
+
+The `+` operator joins strings together. That process is called string concatenation. The extra `" "` in the middle matters because it inserts a space between the two words.
+
+This is also a good place to notice `print()`. It sends text to the terminal, and `\n` adds a line break. Even in a simple script, formatting output clearly makes the program easier to read.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
+
+```bash
+python band_name.py
+```
+
+3. Type a city name and a pet name when the prompts appear.
+4. Check that the script prints a combined band name at the end.
+
+## Summary
+
+Day 01 teaches the basic input-output loop of a Python program. You print text, collect input, store it in variables, and combine strings into a final result. The script is tiny, but the pattern is foundational and shows up in almost every program you write later.

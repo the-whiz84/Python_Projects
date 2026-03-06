@@ -1,16 +1,10 @@
 # Day 04 - Randomisation and Python Lists
 
-Today we're building Rock Paper Scissors against the computer. You pick a move, the computer picks a random one, and the code figures out who wins.
+Today we're building Rock Paper Scissors against the computer. The game is simple, but it introduces two important ideas that show up everywhere in Python: generating random values and storing related items in a list. This project is also useful because the folder contains two solutions, which makes it easier to compare a more repetitive style with a cleaner one.
 
-This is where you get introduced to two important tools: **lists** (storing multiple things in one variable) and **randomisation** (making the computer pick something unpredictable). You'll also see two different ways to solve the same problem — one verbose, one clean — and understand why lists make your code so much better.
+## 1. Letting the Computer Make an Unpredictable Choice
 
-## The project
-
-There are two files here: `main.py` and `rps.py`. Both do the same thing — Rock Paper Scissors — but they approach it differently.
-
-`main.py` maps each choice using if/elif blocks. `rps.py` puts the three hand gestures into a list and uses the player's number directly as an index. Let's look at both.
-
-## The if/elif approach (`main.py`)
+The first version in `main.py` starts with the computer move:
 
 ```python
 import random
@@ -19,11 +13,15 @@ player_choice = int(input("Type '0' for Rock, '1' for Paper or '2' for Scissors:
 ai_choice = random.randint(0, 2)
 ```
 
-`random.randint(0, 2)` picks a random integer between 0 and 2 (inclusive). That's our computer opponent.
+`random.randint(0, 2)` returns a whole number between `0` and `2`, inclusive. That number becomes the computer's move.
 
-Then the code uses separate if/elif chains to convert the number into ASCII art — one chain for the player, another for the computer. It works, but it's repetitive. If you had 10 options instead of 3, you'd need 10 elif branches for each side.
+That matters because the game now behaves differently every time you run it. Randomness is what turns a fixed script into something that feels interactive.
 
-## The list approach (`rps.py`)
+The rest of `main.py` uses `if` / `elif` chains to print the correct ASCII art for each move. It works, but it is repetitive. Repetition is usually the first sign that a better data structure might help.
+
+## 2. Replacing Repetition with a List
+
+The cleaner version in `rps.py` stores the hand shapes in a list:
 
 ```python
 game_images = [rock, paper, scissors]
@@ -39,11 +37,13 @@ else:
     print(game_images[ai_choice])
 ```
 
-This is the big idea: **a list lets you use a number to grab the right item**. `game_images[0]` is rock, `game_images[1]` is paper, `game_images[2]` is scissors. No if/elif needed — the player's input _is_ the index.
+This is the big idea of the day: a list lets you use a numeric index to fetch the right item. `game_images[0]` is rock, `game_images[1]` is paper, and `game_images[2]` is scissors. Instead of writing separate branches for each display case, the program can look up the correct artwork directly.
 
-The validation check `player_choice >= 3 or player_choice < 0` catches bad input before we try to use it as an index. Without it, typing `5` would crash the program with an `IndexError`.
+The validation check matters too. If the user types a number outside the valid range, Python would raise an `IndexError` when trying to access the list. Guarding against bad input is already becoming part of writing stable programs.
 
-## Deciding the winner
+## 3. Handling the Game Rules in the Right Order
+
+Once both moves exist, the program decides the winner:
 
 ```python
 if player_choice == ai_choice:
@@ -58,13 +58,30 @@ else:
     print("You win!")
 ```
 
-The win logic handles the wrap-around cases first (rock beats scissors, scissors lose to rock), then uses a simple comparison for everything else. The order of these checks matters — if you don't handle the wrap-arounds first, the `<` comparison would give wrong results for those edge cases.
+The wrap-around cases come first because they break the simple numeric ordering:
 
-## Try it yourself
+- rock (`0`) beats scissors (`2`)
+- scissors (`2`) loses to rock (`0`)
+
+If you skipped those special cases and only relied on `<`, the logic would be wrong at the edges. This is a useful lesson beyond games: when your data has an exception to the general rule, handle that exception explicitly.
+
+## How to Run the Projects
+
+1. Open a terminal in this folder.
+2. Run the first version:
 
 ```bash
-python "main.py"
-python "rps.py"
+python main.py
 ```
 
-Play a few rounds. Compare the two approaches — you'll see why `rps.py` is cleaner and why lists are one of the most useful things in Python.
+3. Run the list-based version:
+
+```bash
+python rps.py
+```
+
+4. Try a few valid moves and one invalid move to confirm the input check works.
+
+## Summary
+
+Day 04 introduces randomisation and lists through a small game. `random.randint()` gives the computer an unpredictable move, and the list-based version shows how indexing can replace repetitive condition chains. By comparing the two files, you can already see how better data structures lead to cleaner code.

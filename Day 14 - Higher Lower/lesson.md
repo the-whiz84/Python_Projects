@@ -1,12 +1,10 @@
 # Day 14 - Algorithmic Comparison and Game Rounds
 
-Today we're building Higher Lower. The game shows you two Instagram accounts and asks who has more followers. If you guess right, your score goes up, the second account becomes the first account, and a new challenger appears.
+Today we're building Higher Lower. The player sees two accounts, guesses which one has more followers, and keeps going until a guess is wrong. The project is a good lesson in round-based state because one choice survives into the next round while the other is replaced.
 
-This project is all about managing state across multiple rounds of a game. We'll be working heavily with a list of dictionaries (the `data` list from `game_data.py`) and passing variables forward through a `while` loop.
+## 1. Working with a List of Dictionaries
 
-## Working with lists of dictionaries
-
-Inside `game_data.py`, we have a massive list full of dictionaries that look like this:
+The source data comes from `game_data.py`, where each entry looks like this:
 
 ```python
 {
@@ -17,59 +15,87 @@ Inside `game_data.py`, we have a massive list full of dictionaries that look lik
 }
 ```
 
-To pick an account for the game, we use `random.choice(data)`. This grabs one entire dictionary out of the list.
+Each item is a dictionary, and all of them live inside one list. That means the game can pick a random account like this:
 
 ```python
 selection1 = random.choice(data)
+selection2 = random.choice(data)
 ```
 
-Now `selection1` holds the Instagram dictionary. To get specific pieces out of it, we use the dictionary keys. Notice how we use a list comprehension in `main.py` just to grab the nice, printable parts for the user:
+Once a dictionary is selected, the program pulls out the pieces it needs for display and comparison. This is a useful structure because each record keeps related fields together instead of spreading them across multiple lists.
+
+## 2. Separating Display Data from Comparison Data
+
+The program prepares a readable version of each choice:
 
 ```python
 compare_a = [selection1[key] for key in ('name', 'description', 'country')]
-print(f"Compare A: {compare_a[0]}, a {compare_a[1]} from {compare_a[2]}")
-```
-
-And we grab the actual follower count as an integer so we can do math with it:
-
-```python
+compare_b = [selection2[key] for key in ("name", "description", "country")]
 followers_a = int(selection1['follower_count'])
+followers_b = int(selection2['follower_count'])
 ```
 
-## The Game Loop and Swapping State
+This is a nice design step. The game uses one set of values for printing and another for the actual comparison. That keeps the output friendly while still preserving the numeric field needed to decide the winner.
 
-Here is the trickiest part of the logic: when the player wins a round, the account from spot "B" slides over into spot "A" for the next round.
+It also reinforces an important lesson: the data you show to users is not always the same as the data you compute with.
 
-To make this work, we generate `selection1` _before_ the while loop starts. Then, inside the loop, we generate `selection2`.
+## 3. Carrying the Winner into the Next Round
+
+The most important game mechanic is how the next round is built:
 
 ```python
 selection1 = random.choice(data)
 
 while not game_over:
     selection2 = random.choice(data)
-
-    # Make sure we didn't randomly pick the exact same account twice
     while selection1 == selection2:
         selection2 = random.choice(data)
 ```
 
-If the user guesses correctly, they get a point. But here's the magic line:
+Then, when the player guesses correctly and `B` has more followers, the script does this:
 
 ```python
-    elif player_choice == "b" and followers_b > followers_a:
-        score += 1
-        print(f"You are correct! Current score: {score}")
-        selection1 = selection2
+selection1 = selection2
 ```
 
-`selection1 = selection2`.
+That single assignment is what makes the game feel continuous. Instead of throwing both choices away, the winning account becomes the next `A` entry. The loop then pulls in only one fresh challenger.
 
-That one line takes the winner (which was in slot B) and makes it slot A. When the while loop circles back to the top, it generates a brand new `selection2`. This is how you create a continuous chain of rounds without writing the same code over and over again.
+This is the main state-management idea of the project: one variable persists across rounds and changes only when the game rules say it should.
 
-## Try it yourself
+## 4. Ending the Game on a Wrong Guess
+
+The comparison logic controls the score and stop condition:
+
+```python
+if player_choice == "a" and followers_a > followers_b:
+    score += 1
+elif player_choice == "b" and followers_b > followers_a:
+    score += 1
+    selection1 = selection2
+else:
+    print(f"Sorry, that's wrong! Final score: {score}")
+    game_over = True
+```
+
+This keeps the round logic simple:
+
+- correct guess: score increases
+- wrong guess: game ends
+
+That clarity is what makes the loop easy to follow even though the game is effectively running the same structure again and again.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Play a few rounds. Notice how the screen clears out the old text after every guess so the terminal doesn't fill up with endless scrolling text.
+3. Compare the two presented accounts and type `A` or `B`.
+4. Confirm that correct guesses increase the score and that one account carries forward into the next round.
+
+## Summary
+
+Day 14 uses a simple comparison game to teach how state survives across rounds. You pull structured records from a list of dictionaries, separate display values from numeric comparisons, and carry the current winner into the next round. The game feels dynamic because the loop preserves just enough state from one turn to the next.

@@ -1,73 +1,99 @@
 # Day 12 - Variable Scope and Number Guessing Logic
 
-Today we're building a Number Guessing Game. The computer thinks of a number between 1 and 100, and you have to guess it. If you choose "easy" mode you get 10 tries; if you choose "hard" mode you get 5.
+Today we're building a number guessing game. The computer chooses a number between `1` and `100`, the player selects a difficulty, and each guess reduces the remaining turns until the answer is found or the attempts run out. The project is a good setting for learning variable scope because the game needs both shared state and function-local state to work cleanly.
 
-While you're building this, you're going to bump into a concept called **Variable Scope**. It determines where a variable can be seen and modified in your code, and it's one of the biggest sources of bugs for beginners.
+## 1. Understanding Which Variables Live Where
 
-## Local vs Global Scope
-
-Look at how the chosen number is defined in `main.py`:
+The chosen number is created outside the helper functions:
 
 ```python
 chosen_number = random.randint(1, 100)
-
-def check_number(guessed_number, lives):
-    if guessed_number > chosen_number:
-        print("Too high")
-        # ...
 ```
 
-`chosen_number` is sitting out in the open, outside of any functions. That makes it a **Global Variable**. Any function in the file can read it.
-
-But look at `lives`:
+That makes it available to `check_number()` and `numbers_game()` without passing it around directly. In contrast, the remaining lives are managed as a parameter:
 
 ```python
 def check_number(guessed_number, lives):
-    # ...
     elif guessed_number > chosen_number:
         print("Too high")
         return lives - 1
 ```
 
-`lives` is passed in as a parameter. It is a **Local Variable**. It only exists inside `check_number()`. If you tried to `print(lives)` at the very bottom of the file outside the function, Python would crash with a `NameError`.
+This is the key scope lesson:
 
-## Why returning is better than modifying globals
+- `chosen_number` is shared at the file level
+- `lives` exists only inside the function call unless you pass it back out
 
-If `lives` is just a number that counts down, why don't we just make it a global variable and do `lives -= 1` inside the function?
+Once you understand that boundary, it becomes much easier to predict how state moves through the program.
 
-You _can_ do that in Python (using the `global` keyword), but you really, really shouldn't. If you have five different functions all modifying the same global variable, tracking down bugs becomes a nightmare.
+## 2. Returning Updated State Instead of Mutating It Everywhere
 
-Instead, look at what we did:
-
-```python
-        return lives - 1
-```
-
-The function takes the current `lives`, subtracts 1, and **returns** the new number. Then, down in our game loop, we overwrite the old variable with the new returned value:
+The best design choice in the project is that `check_number()` returns the new life count:
 
 ```python
-    while turns_remaining > 0:
-        player_guess = int(input("Guess the number: "))
-        turns_remaining = check_number(player_guess, turns_remaining)
+return lives - 1
 ```
 
-This pattern — pass a value in, get a modified value out, and save it — is much safer. The function isn't secretly messing with variables outside its walls. It's completely self-contained.
-
-## Constants
-
-At the bottom of the file (in the commented-out instructor solution), you might notice variables written in all caps:
+Then the caller stores that result:
 
 ```python
-EASY_LEVEL_TURNS = 10
-HARD_LEVEL_TURNS = 5
+while turns_remaining > 0:
+    player_guess = int(input("Guess the number: "))
+    turns_remaining = check_number(player_guess, turns_remaining)
 ```
 
-These are **Constants**. Python doesn't actually prevent you from changing them, but the all-caps naming is an agreement among programmers: "This value is set once and never changes." It's perfect for things like difficulty settings or the value of Pi.
+This pattern is safer than hiding the update inside a global variable. The function receives the current value, computes a new one, and hands it back. That makes the function easier to reason about because its effect is visible where it is called.
 
-## Try it yourself
+## 3. Using Difficulty to Control the Game Loop
+
+The difficulty setting determines how many turns the player gets:
+
+```python
+difficulty = input("Choose your difficulty. Type 'normal' or 'hard': ")
+
+if difficulty == "normal":
+    turns_remaining = 10
+elif difficulty == "hard":
+    turns_remaining = 5
+```
+
+That value then controls the main guessing loop. This is a small but important design move: input from one part of the program changes the rules of the rest of the run.
+
+The loop continues until the player either guesses correctly or uses every attempt:
+
+```python
+while turns_remaining > 0:
+    player_guess = int(input("Guess the number: "))
+    turns_remaining = check_number(player_guess, turns_remaining)
+```
+
+This ties together user input, comparison logic, and game state in a clean cycle.
+
+## 4. Restarting the Game Cleanly
+
+At the end, the script offers a replay option:
+
+```python
+play_again = input("Do you want to play again? Type 'y' or 'n': ")
+if play_again == "y":
+    clear()
+    numbers_game()
+```
+
+Like Day 10, this uses a function call to restart the workflow. It is a simple approach, but it keeps the restart behavior contained inside the game function rather than scattering it across the file.
+
+## How to Run the Project
+
+1. Open a terminal in this folder.
+2. Run:
 
 ```bash
-python "main.py"
+python main.py
 ```
 
-Try playing on hard mode. The `check_number` function will tell you if you're too high or too low, but with only 5 tries, you'll need to use binary search (always guessing the middle of the remaining range) to win consistently.
+3. Choose `normal` or `hard`, then start guessing numbers from `1` to `100`.
+4. Confirm that wrong guesses reduce the remaining turns and that the game ends when the answer is found or the attempts reach zero.
+
+## Summary
+
+Day 12 uses a guessing game to teach how state moves through functions. The chosen number is shared, the remaining lives are passed in and returned, and the difficulty setting controls the main loop length. It is a practical lesson in scope, return values, and keeping game logic predictable.
