@@ -1,79 +1,65 @@
 # Day 31 - Flashcard Program
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Flashcard Program** and avoids generic cross-day boilerplate.
+Today we're building a flashcard app that helps you learn French words. You see a French word, try to remember the English translation, flip the card to check, and mark whether you knew it or not. Words you don't know stay in the deck; words you know are removed.
 
-## Table of Contents
+This combines Tkinter for the UI, Pandas for data handling, and the concept of filtering lists based on user actions.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Loading and managing data
 
-## 1. What You Build
+We start by loading the French words. If the user has used the app before, there's a `words_to_learn.csv` with words they haven't mastered yet. If that file doesn't exist, we fall back to the original word list:
 
-You build **Flashcard Program** as a day-specific project using `tkinter`, `pandas`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`, `pandas`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-
-## 4. Implementation Walkthrough
-
-1. Create UI widgets, bind callbacks, and keep state updates deterministic.
-2. Load tabular data, clean null/edge values, then compute the target metrics.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-BACKGROUND_COLOR = "#B1DDC6"
-
-# ##################### ADD THE FLASH CARD FUNCTIONALITY ##############
-current_card = {}
-to_learn = {}
-
 try:
-	data = pandas.read_csv("data/words_to_learn.csv")
+    data = pandas.read_csv("data/words_to_learn.csv")
 except FileNotFoundError:
-	original_data = pandas.read_csv("data/french_words.csv")
-	to_learn = original_data.to_dict(orient="records")
+    original_data = pandas.read_csv("data/french_words.csv")
+    to_learn = original_data.to_dict(orient="records")
 else:
-	to_learn = data.to_dict(orient="records")
+    to_learn = data.to_dict(orient="records")
 ```
 
-## 6. How to Run
+The `orient="records"` format turns each row into a dictionary, so we get a list like `[{"French": "bonjour", "English": "hello"}, ...]`.
+
+## Flipping cards with timers
+
+The card automatically flips after 3 seconds:
+
+```python
+def new_card():
+    global current_card, flash_card
+    window.after_cancel(flash_card)
+    current_card = random.choice(to_learn)
+    canvas.itemconfig(lang_text, text="French", fill="black")
+    canvas.itemconfig(word_text, text=current_card["French"], fill="black")
+    canvas.itemconfig(canvas_image, image=card_front)
+    flash_card = window.after(3000, flip_card)
+
+def flip_card():
+    canvas.itemconfig(canvas_image, image=card_back)
+    canvas.itemconfig(lang_text, text="English", fill="white")
+    canvas.itemconfig(word_text, text=current_card["English"], fill="white")
+```
+
+`window.after(3000, flip_card)` schedules the flip function to run after 3000 milliseconds. We store the timer ID so we can cancel it if the user clicks a button before the timer fires.
+
+## Removing known words
+
+When the user clicks the checkmark (known word), we remove that card from the list and save the updated list:
+
+```python
+def known_word():
+    to_learn.remove(current_card)
+    new_data = pandas.DataFrame(to_learn)
+    new_data.to_csv("data/words_to_learn.csv", index=False)
+    new_card()
+```
+
+This creates a spaced-repetition effect: words you struggle with keep appearing, words you've mastered get filtered out.
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Flashcard Program** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Wait 3 seconds to see the English translation. Click the checkmark if you knew it, or the X to see it again later.

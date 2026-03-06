@@ -1,29 +1,51 @@
 # Day 20-21 - Game Loops, OOP Composition, Inheritance, and Collision Logic
-Days 20-21 combine a real-time game loop with class-based architecture so you can coordinate movement, growth, scoring, and collisions in one coherent design.
 
-## What You Learn
-- Building a frame loop with `screen.update()` + `time.sleep(...)`.
-- Splitting game concerns into classes (`Snake`, `Food`, `Scoreboard`).
-- Using inheritance (`Food(Turtle)`, `Scoreboard(Turtle)`) and `super().__init__()`.
-- Updating list-based body segments from tail to head.
-- Detecting collisions with food, walls, and snake tail.
+This is where it all comes together. We're building a real-time Snake game with proper class architecture—Snake, Food, and Scoreboard as separate classes. It's also where we first use inheritance, and it changes how you think about building on top of existing code.
 
-## Historical Notes Recovered from Git
-The deleted `lesson.py` for this day emphasized:
-- class inheritance
-- `super().__init__()` to initialize parent behavior
-- list slicing techniques
+The game runs in a loop that updates the screen after every movement. Each class has a clear job: the Snake knows how to move and grow, the Food knows how to randomize its position, and the Scoreboard knows the current score.
 
-Those ideas are visible in the final game: inheritance is used directly in `food.py` and `scoreboard.py`, and slicing appears in tail-collision checks.
+## Inheritance: building on top of Turtle
 
-## Current Project Architecture
-- `main.py`: game loop orchestration and collision rules.
-- `snake.py`: snake creation, movement, directional guardrails, and growth.
-- `food.py`: random food placement via a `Turtle` subclass.
-- `scoreboard.py`: score rendering and game-over message.
+We've used `Turtle` to draw before. Now we subclass it to create specialized objects. In `food.py`, `Food` inherits from `Turtle`, which means it automatically gets all the Turtle capabilities (position, movement, shape) plus what we add:
 
-## Real Day Snippets
-From `snake.py` (tail-to-head body movement):
+```python
+class Food(Turtle):
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.penup()
+        self.shapesize(stretch_wid= 0.5, stretch_len= 0.5)
+        self.color("red")
+        self.speed("fastest")
+        self.refresh()
+
+    def refresh(self):
+        random_x = random.randint(-280, 280)
+        random_y = random.randint(-280, 280)
+        self.goto(random_x, random_y)
+```
+
+The `super().__init__()` call is what hands control to the parent class `Turtle` so our `Food` object gets initialized with all the standard turtle properties. After that, we customize it—small red circle, always penup so it doesn't draw lines, and a `refresh()` method to jump to a new random spot.
+
+The same pattern appears in `scoreboard.py`:
+
+```python
+class Scoreboard(Turtle):
+    def __init__(self):
+        super().__init__()
+        self.score = 0
+        self.hideturtle()
+        self.penup()
+        self.color("white")
+        self.goto(0, 280)
+        self.write_score()
+```
+
+We don't need to see the scoreboard turtle itself, so we hide it with `hideturtle()`. But it can still write text to the screen, which is exactly what we need.
+
+## How the snake moves
+
+The trickiest part of snake movement is that every segment follows the one ahead of it. We can't just move all segments forward at once—segment 2 has to follow segment 1, segment 3 follows segment 2, and so on. The solution is to work backwards from the tail:
 
 ```python
 def move(self):
@@ -34,31 +56,38 @@ def move(self):
     self.head.fd(MOVE_DISTANCE)
 ```
 
-From `food.py` (inheritance + parent constructor):
+`range(len(self.snake_body) - 1, 0, -1)` gives us the indices in reverse order: 2, 1 (if we have three segments). Each segment moves to where the previous segment was. Only the head moves forward into new territory.
+
+## Directional guardrails
+
+One annoying bug happens if you can reverse direction instantly—you'd crash into your own body. We prevent this by checking the current heading before allowing a turn:
 
 ```python
-class Food(Turtle):
-    def __init__(self):
-        super().__init__()
-        self.shape("circle")
-        self.penup()
+def up(self):
+    if self.head.heading() != DOWN:
+        self.head.setheading(UP)
 ```
 
-From `main.py` (tail collision using slicing):
+If the snake is currently going down (270 degrees), pressing Up gets ignored. Same logic applies to all four directions.
+
+## The game loop
+
+In `main.py`, the game runs inside a `while` loop with `screen.update()` and a small sleep to control frame rate. This is the heartbeat of any real-time game:
 
 ```python
-for segment in snake.snake_body[1:]:
-    if snake.head.distance(segment) < 10:
-        game_is_on = False
-        scoreboard.game_over()
+while game_is_on:
+    screen.update()
+    time.sleep(0.1)
+    snake.move()
+    # check collisions...
 ```
 
-## Common Pitfalls
-- Snake reverses into itself: directional methods must block opposite heading.
-- Tail movement looks broken: segment updates must iterate from end to start.
-- Flickering visuals: `screen.tracer(0)` and explicit `screen.update()` must be paired.
+When the snake eats food, we extend its body and increase the score. When it hits the wall or its own tail, the game ends.
 
-## Run
+## Try it yourself
+
 ```bash
 python "main.py"
 ```
+
+Use arrow keys to control the snake. Try to get the highest score without hitting the walls or your own tail.

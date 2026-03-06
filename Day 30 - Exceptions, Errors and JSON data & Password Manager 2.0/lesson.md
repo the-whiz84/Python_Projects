@@ -1,83 +1,87 @@
-# Day 30 - Exceptions, Errors and JSON data & Password Manager 2.0
+# Day 30 - Exceptions, Errors, JSON Data, and Password Manager 2.0
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Exceptions, Errors and JSON data & Password Manager 2.0** and avoids generic cross-day boilerplate.
+Today we're upgrading the password manager from Day 29. Instead of saving to a plain text file, we use JSON—a structured format that makes it easy to look up specific passwords later. We also learn how to handle errors gracefully with try/except blocks.
 
-## Table of Contents
+This is the first day where we systematically deal with things going wrong: missing files, wrong data formats, and edge cases.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## JSON basics
 
-## 1. What You Build
+JSON (JavaScript Object Notation) stores data in a structure that looks like a Python dictionary:
 
-You build **Exceptions, Errors and JSON data & Password Manager 2.0** as a day-specific project using `tkinter`, `pandas`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`, `pandas`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `main_password_manager_2_0.py`: Service module that encapsulates external/data operations.
-- `nato_alphabet.py`: Supporting module for project logic.
-- `nato_phonetic_alphabet.csv`: Dataset/input data consumed by the day project.
-
-## 4. Implementation Walkthrough
-
-1. Collect and validate user input before performing transformations.
-2. Read/write JSON safely with existence checks and fallback defaults.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-json.dump(data, data_file, indent=4)
+import json
 
-# Read
-# json.load()
-data = json.load(data_file)
-
-# Update data
-# json.update()
-#1. Reading old data
-data = json.load(data_file)
-#2. Updating old data with new data
-data.update(new_data)
-#3. Saving updated data
-json.dump(data, data_file, indent=4)
+# Writing to JSON
+new_data = {
+    website: {
+        "email": email,
+        "password": password,
+    }
+}
+with open("data.json", "w") as data_file:
+    json.dump(new_data, data_file, indent=4)
 ```
 
-## 6. How to Run
+`json.dump()` writes a Python dictionary to a file in JSON format. The `indent=4` makes it readable when you open the file.
+
+Reading it back:
+
+```python
+with open("data.json", "r") as data_file:
+    data = json.load(data_file)
+```
+
+Now `data` is a Python dictionary you can look up by website name.
+
+## Handling missing files
+
+The problem with opening files is they might not exist yet. Instead of crashing, we catch the error:
+
+```python
+try:
+    with open("data.json", "r") as data_file:
+        data = json.load(data_file)
+except FileNotFoundError:
+    with open("data.json", "w") as data_file:
+        json.dump(new_data, data_file, indent=4)
+else:
+    data.update(new_data)
+    with open("data.json", "w") as data_file:
+        json.dump(data, data_file, indent=4)
+```
+
+If the file doesn't exist, we create it with the new data. If it does exist, we load it, update it with the new entry, and save it back.
+
+## Looking up passwords
+
+Now we can search for a specific website:
+
+```python
+def find_password():
+    website = website_entry.get()
+
+    try:
+        with open("data.json", "r") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo(title="Error", message="No data file present.")
+    else:
+        if website in data:
+            messagebox.showinfo(title=website, message=f"Email: {data[website]['email']}\nPassword: {data[website]['password']}")
+        else:
+            messagebox.showinfo(title="Error", message="No details for the website exists.")
+```
+
+We try to read the file, handle the case where it doesn't exist, and then check if the specific website is in our data.
+
+## Why this matters
+
+Exception handling is what separates scripts that work in ideal conditions from scripts that work in the real world. File operations always have a chance of failing—permissions, deleted files, disk errors. Using try/except lets your program keep running and handle problems gracefully.
+
+## Try it yourself
 
 ```bash
-python "main.py"
+python "main_password_manager_2_0.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Exceptions, Errors and JSON data & Password Manager 2.0** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Add a few passwords, then search for one by name. Check the `data.json` file to see how the structured data looks.

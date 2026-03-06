@@ -1,83 +1,77 @@
-# Day 67 - Building a RESTful Blog website with Editing
+# Day 67 - RESTful Blog: Building a Professional CMS
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Building a RESTful Blog website with Editing** and avoids generic cross-day boilerplate.
+Yesterday, we built a pure Data API. Today, we bring those RESTful principles back to the browser. We are building a professional **Content Management System (CMS)**.
 
-## Table of Contents
+No more "hardcoding" posts. We implemented **Rich Text Editing**, **Dynamic Route Parameterization**, and the most efficient architectural pattern in Flask: **Form Reuse**.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. CKEditor: The Rich Text Pipeline
 
-## 1. What You Build
+In professional blogging, users expect to format text with **Bold**, _Italics_, Lists, and Hyperlinks. A standard HTML `<textarea>` can't do this.
 
-You build **Building a RESTful Blog website with Editing** as a day-specific project using `flask`, `sqlalchemy`, `wtforms`.
-Primary entrypoint: `main.py`.
+We integrated **CKEditor**, an industrial-grade "What You See Is What You Get" (WYSIWYG) editor.
 
-## 2. Core Concepts
+- **Frontend**: CKEditor injects a JavaScript-powered toolbar into the page.
+- **Backend**: We use the `CKEditorField` in WTForms.
+- **The Pipe**: When the user clicks "Submit", CKEditor converts the formatted text into raw HTML strings and sends them to Flask. Flask then saves this HTML directly into our database's `Text` column.
 
-- Day-specific stack and techniques: `flask`, `sqlalchemy`, `wtforms`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
+## 2. DRY Architecture: The "Form Reuse" Pattern
 
-## 3. Project Structure
+One of the most powerful ways to keep your code **DRY (Don't Repeat Yourself)** is to use the same WTForm class and the same HTML template for both **Creating** and **Updating** resources.
 
-- `main.py`: Entrypoint script coordinating the full flow.
-- `requirements.txt`: Project resource used by this day.
+In `main.py`, we implemented this by passing a flag to the template:
 
-## 4. Implementation Walkthrough
-
-1. Define route handlers and keep request parsing separate from rendering logic.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("FLASK_KEY")
-bootstrap = Bootstrap5(app)
-ckeditor = CKEditor(app)
+@app.route('/edit-post/<int:post_id>', methods=['GET', 'POST'])
+def edit_post(post_id):
+    post = db.get_or_404(BlogPost, post_id)
+    # 1. Pre-populate the form with existing data
+    edit_form = PostForm(
+        title=post.title,
+        body=post.body,
+        # ...
+    )
+    # 2. Logic to distinguish between "Create" (POST) and "Initial Load" (GET)
+    if edit_form.validate_on_submit():
+        post.title = edit_form.title.data
+        # ... update ...
+        db.session.commit()
 
-# CREATE DATABASE
-class Base(DeclarativeBase):
-    pass
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
-db = SQLAlchemy(model_class=Base)
-db.init_app(app)
-
-
-# CONFIGURE TABLE
+    # 3. Pass is_edit=True so the same template knows to show "Edit Post" header
+    return render_template("make-post.html", form=edit_form, is_edit=True)
 ```
 
-## 6. How to Run
+By reusing `make-post.html`, we ensure that any UI changes (like adding a new field) only need to be made in one file, reducing the risk of bugs and maintainability debt.
 
-```bash
-pip install -r requirements.txt
+## 3. Dynamic Routing: The ID Pattern
+
+Professional websites don't have routes like `/post1`, `/post2`. They use **Dynamic Path Variables**.
+
+```python
+@app.route('/post/<int:post_id>')
+def show_post(post_id):
+    post = db.get_or_404(BlogPost, post_id)
+    return render_template("post.html", post=post)
 ```
-```bash
-python "main.py"
-```
 
-## 7. Common Pitfalls and Debug Tips
+The `<int:post_id>` part tells Flask: "Any number that comes after `/post/` should be captured and passed into my function as a variable." This allows one single route to handle millions of different blog posts dynamically.
 
-- Route and template variable mismatches are common; verify context keys end-to-end.
-- Reproduce failures with the smallest input first, then expand once stable.
+## How to Run the RESTful Blog
 
-## 8. Practice Extensions
+1.  **Dependencies**:
+    ```bash
+    pip install Flask Flask-Bootstrap Flask-CKEditor Flask-SQLAlchemy Flask-WTF
+    ```
+2.  **Run**:
+    ```bash
+    python main.py
+    ```
+3.  **Interaction**:
+    - Visit `http://127.0.0.1:5003/`.
+    - Use the "Create New Post" button to see the CKEditor in action.
+    - Submit the post and click the "Edit" button to verify the **Form Reuse** pattern populates the data correctly.
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+## Summary
 
-## 9. Key Takeaways
+Today, you transitioned from building "Pages" to building a "Platform." You learned how to handle complex Rich Text data, how to reuse logic for Create/Update operations to keep your code DRY, and how to use dynamic path variables to scale your routing architecture.
 
-- **Building a RESTful Blog website with Editing** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Tomorrow, we tackle the final challenge of any professional app: **Security**. We'll learn how to keep unauthorized users away from your "Delete" buttons by adding a full Login system!

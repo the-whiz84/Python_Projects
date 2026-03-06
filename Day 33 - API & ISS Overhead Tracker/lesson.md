@@ -1,82 +1,76 @@
 # Day 33 - API & ISS Overhead Tracker
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **API & ISS Overhead Tracker** and avoids generic cross-day boilerplate.
+Today we're building a program that tracks the International Space Station (ISS) and emails you when it passes over your location at night. This is our first day working with external APIs—services that other people run that we can call over the internet to get data.
 
-## Table of Contents
+The `requests` library makes HTTP calls easy, and we combine it with sunset/sunrise data to determine if it's dark enough to see the station.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Calling an API
 
-## 1. What You Build
+The open-notify API tells us the ISS's current position:
 
-You build **API & ISS Overhead Tracker** as a day-specific project using `tkinter`, `requests`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`, `requests`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `kanye_quote.py`: Supporting module for project logic.
-- `main_api.py`: Supporting module for project logic.
-
-## 4. Implementation Walkthrough
-
-1. Call external web/API resources and normalize returned data before use.
-2. Read/write JSON safely with existence checks and fallback defaults.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-MY_LAT = 45.649490
-MY_LONG = 25.606550
+import requests
 
+response = requests.get(url="http://api.open-notify.org/iss-now.json")
+response.raise_for_status()
+data = response.json()
 
-
-def check_position():
-	response = requests.get(url="http://api.open-notify.org/iss-now.json")
-	response.raise_for_status()
-	data = response.json()
-
-	iss_latitude = float(data["iss_position"]["latitude"])
-	iss_longitude = float(data["iss_position"]["longitude"])
-	if MY_LAT - 5 <= iss_latitude <= MY_LAT + 5 and MY_LONG - 5 <= iss_longitude <= MY_LONG + 5:
-		return True
+iss_latitude = float(data["iss_position"]["latitude"])
+iss_longitude = float(data["iss_position"]["longitude"])
 ```
 
-## 6. How to Run
+`response.json()` parses the JSON response into a Python dictionary. We extract the latitude and longitude from the nested structure.
+
+## Checking if the ISS is overhead
+
+We define a "overhead" zone as within 5 degrees of our position:
+
+```python
+if MY_LAT - 5 <= iss_latitude <= MY_LAT + 5 and MY_LONG - 5 <= iss_longitude <= MY_LONG + 5:
+    return True
+```
+
+This is a simple bounding box check.
+
+## Is it nighttime?
+
+We need to know if it's dark outside—we can't see the ISS during the day. The sunrise-sunset API gives us that information:
+
+```python
+parameters = {
+    "lat": MY_LAT,
+    "lng": MY_LONG,
+    "formatted": 0,
+}
+response = requests.get("https://api.sunrise-sunset.org/json", params=parameters)
+data = response.json()
+sunrise = int(data["results"]["sunrise"].split("T")[1].split(":")[0])
+sunset = int(data["results"]["sunset"].split("T")[1].split(":")[0])
+time_now = datetime.now().hour
+
+if sunset <= time_now <= sunrise:
+    return True
+```
+
+The API returns times in ISO format (`2024-01-15T07:30:00+00:00`). We split on `T` to get the time part, then split on `:` to get the hour.
+
+## Running on a schedule
+
+The script runs in an infinite loop, checking every 60 seconds:
+
+```python
+while True:
+    time.sleep(60)
+    if check_position() and is_night():
+        send_email()
+```
+
+This is a simple approach for a personal notification script. For production, you'd use a proper scheduler or cron job.
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **API & ISS Overhead Tracker** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+The script will check every minute and email you when the ISS is overhead and it's dark. Set your `MY_EMAIL` and `MY_EMAIL_PASSWD` environment variables first.

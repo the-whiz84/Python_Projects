@@ -1,79 +1,81 @@
-# Day 28 - Building the Pomodoro App
+# Day 28 - Pomodoro Timer Logic and Tkinter Scheduling
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Building the Pomodoro App** and avoids generic cross-day boilerplate.
+The Pomodoro Technique is a time management method: you work for 25 minutes, take a short break, and repeat. After four work sessions, you take a longer break. Today we're building a visual timer that follows this exact pattern.
 
-## Table of Contents
+This builds directly on what we learned in Day 27 with Tkinter, but now we're using `window.after()` to schedule events in the future—essential for any timer or countdown app.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## The timer logic
 
-## 1. What You Build
+The core function counts down from a given number of seconds:
 
-You build **Building the Pomodoro App** as a day-specific project using `tkinter`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-
-## 4. Implementation Walkthrough
-
-1. Create UI widgets, bind callbacks, and keep state updates deterministic.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-PINK = "#e2979c"
-RED = "#e7305b"
-GREEN = "#9bdeac"
-YELLOW = "#f7f5dd"
-FONT_NAME = "Courier"
-WORK_MIN = 1
-SHORT_BREAK_MIN = 5
-LONG_BREAK_MIN = 20
-reps = 0
-timer = None
+def count_down(count):
+    count_min = math.floor(count / 60)
+    count_sec = count % 60
+    if count_sec < 10:
+        count_sec = f"0{count_sec}"
 
-# ---------------------------- TIMER RESET ------------------------------- # 
-
-def reset_timer():
+    canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
+    if count > 0:
+        timer = window.after(1000, count_down, count - 1)
+    else:
+        start_timer()
 ```
 
-## 6. How to Run
+`window.after(1000, count_down, count - 1)` is the key line. It tells Tkinter: "wait 1000 milliseconds (1 second), then call `count_down` again with the new value." This creates the countdown effect without blocking the UI.
+
+## Work and break scheduling
+
+The `start_timer()` function decides what to do based on how many sessions you've completed:
+
+```python
+def start_timer():
+    global reps
+    reps += 1
+    if reps % 8 == 0:
+        count_down(LONG_BREAK_MIN * 60)
+        timer_label.config(text="Break", fg=RED)
+    elif reps % 2 == 0:
+        count_down(SHORT_BREAK_MIN * 60)
+        timer_label.config(text="Break", fg=PINK)
+    else:
+        count_down(WORK_MIN * 60)
+        timer_label.config(text="Work", fg=GREEN)
+```
+
+Every even rep (2, 4, 6) is a short break. Every 8th rep is a long break. Everything else is a work session. We use modulo (`%`) to cycle through these states.
+
+## Visual feedback
+
+When a work session completes, we add a checkmark to show progress:
+
+```python
+marks = ""
+work_sessions = math.floor(reps/2)
+for _ in range(work_sessions):
+    marks += "✔"
+check_label.config(text=marks)
+```
+
+The number of checkmarks equals completed work sessions, so after four work sessions (8 total reps), the user sees four checkmarks.
+
+## The UI setup
+
+We use a Canvas widget to display the tomato image and the countdown text on top of it:
+
+```python
+canvas = Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
+tomato_img = PhotoImage(file="tomato.png")
+canvas.create_image(100, 112, image=tomato_img)
+timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
+```
+
+Canvas lets you layer text on images, which is perfect for this kind of timer display.
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Building the Pomodoro App** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Click Start to begin a work session. The timer counts down from 1 minute (we use 1 minute instead of 25 for testing purposes). When it hits zero, it automatically starts the next session. Click Reset to start over.

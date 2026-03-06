@@ -1,78 +1,106 @@
-# Day 51 - Twitter Complaint Bot
+# Day 51 - Twitter Complaint Bot: Encapsulating State with OOP
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Twitter Complaint Bot** and avoids generic cross-day boilerplate.
+Today, we orchestrate an advanced cross-system workflow: building a bot that interacts with two entirely disconnected web ecosystems simultaneously. We are building a "Complaint Bot" that benchmarks your internet speed against your ISP contract on Speedtest.net, and, if inadequate, automatically authenticates into Twitter (X) to publicly ping the provider with the metrics.
 
-## Table of Contents
+As the scope of our scripts expands across multiple domains, functional programming (`def do_this():`) begins to break down. Storing the download speed, the browser session, and the credentials in global variables creates unmanageable spaghetti code.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+Today, we graduate to **Object-Oriented Programming (OOP)** for automation.
 
-## 1. What You Build
+## Architecting the Bot Class
 
-You build **Twitter Complaint Bot** as a day-specific project using `selenium`.
-Primary entrypoint: `main.py`.
+Instead of a sprawling linear script, we instantiate the environment into a single, cohesive class. This encapsulates the specific state of the transaction.
 
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `selenium`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `twitter_bot.py`: Supporting module for project logic.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-PROMISED_DOWN = 200
-PROMISED_UP = 100
-ISP = ""
+class InternetSpeedTwitterBot:
 
-twitter_bot = InternetSpeedTwitterBot()
-# Get current download/upload speeds from Speedtest.net
+    # The Constructor initializes the instance's state
+    def __init__(self, promised_down, promised_up) -> None:
+        self.driver = webdriver.Chrome(options=chrome_options)
+
+        # State variables encapsulated within the object instance
+        self.up = 0
+        self.down = 0
+        self.promised_down = promised_down
+        self.promised_up = promised_up
+```
+
+By locking the `driver` array and the metric variables deeply inside `self`, you guarantee that your scraping methods and your posting methods are always referencing the exact same authenticated context.
+
+### Single Responsibility Principle
+
+A core tenet of software engineering is the **Single Responsibility Principle**. A function should do exactly one thing.
+
+Our class exposes public methods representing distinct, atomic workflows:
+
+1. `def get_internet_speed(self):` -> Exclusively responsible for navigating Speedtest, managing the long polling delays required for the test (often 40+ seconds), and mutating `self.up` and `self.down`.
+2. `def tweet_at_provider(self, message):` -> Exclusively responsible for the Twitter OAuth pipeline and submitting the final payload.
+
+```python
+def get_internet_speed(self):
+    self.driver.get("https://www.speedtest.net")
+    time.sleep(3) # Wait for UI to mount
+
+    # Locate and trigger the test
+    self.driver.find_element(By.XPATH, value='...').click()
+
+    # The test is asynchronous. We block the execution thread for 40 seconds to allow completion.
+    time.sleep(40)
+
+    # We mutate the internal state of the class instance
+    self.down = self.driver.find_element(By.CLASS_NAME, value="download-speed").text
+```
+
+## Bypassing Security & MFA Wait States
+
+Authenticating into Twitter requires maneuvering through a heavily monitored flow. Social networks frequently flag headless Chrome instances. We utilize `time.sleep()` to map out human-like latency between key strokes.
+
+```python
+# Pass user credentials into the React input forms
+username = self.driver.find_element(By.NAME, value='text')
+username.send_keys(self.username, Keys.ENTER)
+
+# Yield the thread to allow Twitter's backend to process the email and serve the password DOM
+time.sleep(2)
+
+password = self.driver.find_element(By.NAME, value="password")
+password.send_keys(self.password, Keys.ENTER)
+```
+
+**MFA Interrupts:**
+If Twitter detects a new execution environment (which they frequently do with Selenium binaries), they will throw a Two-Factor Authentication (MFA) challenge page.
+
+Rather than engineering a massive pipeline to intercept your email/SMS, we execute a simple Human-in-the-Loop block in the script. The script sleeps for 30 seconds explicitly to yield control back to you. You type the code on your keyboard, and the autonomous execution silently resumes in the background.
+
+## The Clean Orchestrator
+
+Because the heavy lifting is completely abstracted into the Class file, `main.py` becomes beautifully declarative:
+
+```python
+twitter_bot = InternetSpeedTwitterBot(PROMISED_DOWN, PROMISED_UP)
 twitter_bot.get_internet_speed()
 
-# Send tweet at ISP
-tweet = f"Hey {ISP}, why is my internet speed {twitter_bot.down}  Mbps Down / {twitter_bot.up} Mbps Up?!\nWhen I pay for guaranteed speeds of {PROMISED_DOWN}/{PROMISED_UP}"
-
-twitter_bot.tweet_at_provider(tweet)
+# Only execute the secondary pipeline if the primary condition fails
+if float(twitter_bot.down) < PROMISED_DOWN:
+    tweet = f"Hey ISP, why is my internet speed exactly {twitter_bot.down} Mbps Down?"
+    twitter_bot.tweet_at_provider(tweet)
 ```
 
-## 6. How to Run
+## Running the Speed Complaint Bot
 
-```bash
-python "main.py"
-```
+1. Set your Twitter (X) credentials securely in your environment:
+   ```bash
+   export TWITTER_USERNAME='your_username'
+   export TWITTER_PASSWD='your_password'
+   ```
+2. Open `main.py` and set `PROMISED_DOWN` and `PROMISED_UP` constants to match your ISP contract.
+3. Run the script:
+   ```bash
+   python "main.py"
+   ```
+4. Be physically present to authorize an MFA code if Twitter triggers a secondary security challenge!
 
-## 7. Common Pitfalls and Debug Tips
+## Summary
 
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+By migrating our procedural scripts into Object-Oriented architectures, you unlocked the ability to build massive, cross-domain pipelines without collapsing under the weight of global variable spaghetti. You mapped asynchronous web events to atomic Class methods, cleanly separating concerns.
 
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Twitter Complaint Bot** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Tomorrow, we dive back into the DOM to handle modals that actively resist standard scrolling paradigms using direct JavaScript injection!

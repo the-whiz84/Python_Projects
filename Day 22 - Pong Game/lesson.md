@@ -1,38 +1,28 @@
 # Day 22 - Real-Time Game Loop Design and Collision Response
-Day 22 teaches how to coordinate multiple moving objects in a real-time loop while keeping controls, physics, and scoring in separate classes.
 
-## What You Learn
-- Building a smooth loop with `screen.tracer(0)` and `screen.update()`.
-- Keyboard handling for two players on the same keyboard.
-- Class-based game objects (`Paddle`, `Ball`, `Scoreboard`).
-- Collision detection against walls and paddles.
-- Dynamic game speed via `ball.move_speed`.
+Pong is the classic two-player game, and building it teaches you how to coordinate multiple moving objects at once. We've got a ball that bounces off walls and paddles, two players controlling separate paddles, and a scoreboard that tracks both sides.
 
-## Architecture of This Day
-- `main.py`: orchestrates the loop, input bindings, and scoring conditions.
-- `paddle.py`: paddle movement abstraction.
-- `ball.py`: movement vector and bounce behavior.
-- `scoreboard.py`: left/right score rendering and updates.
+This builds directly on what we did with Snake, but now we're tracking two paddles instead of one snake, and the ball bounces in two dimensions instead of moving in one direction.
 
-This separation is the core engineering lesson: each class handles one responsibility, and `main.py` coordinates them.
+## The ball and its movement
 
-## Real Day Snippets
-From `main.py` (loop + collision orchestration):
+The `Ball` class inherits from `Turtle` just like our Food did in the Snake game. It tracks its own horizontal and vertical movement with `x_move` and `y_move`:
 
 ```python
-while game_is_on:
-    time.sleep(ball.move_speed)
-    screen.update()
-    ball.move()
-
-    if ball.ycor() > 280 or ball.ycor() < -280:
-        ball.bounce_y()
-
-    if ball.distance(r_paddle) < 50 and ball.xcor() > 320 or ball.distance(l_paddle) < 50 and ball.xcor() < -320:
-        ball.bounce_x()
+def move(self):
+    new_x = self.xcor() + self.x_move
+    new_y = self.ycor() + self.y_move
+    self.goto(new_x, new_y)
 ```
 
-From `ball.py` (difficulty ramp on paddle hit):
+When the ball hits the top or bottom wall, we reverse the vertical direction:
+
+```python
+def bounce_y(self):
+    self.y_move *= -1
+```
+
+When it hits a paddle, we reverse horizontal direction and also make it slightly faster:
 
 ```python
 def bounce_x(self):
@@ -40,20 +30,51 @@ def bounce_x(self):
     self.move_speed *= 0.9
 ```
 
-From `scoreboard.py` (state + redraw):
+Multiplying `move_speed` by 0.9 makes the ball 10% faster each time it hits a paddle. That little detail is what makes the game get harder the longer a rally goes on.
+
+## Two paddles, two key sets
+
+In Snake, one player controlled one snake. In Pong, we need two sets of keyboard bindings. The trick is that we create two separate `Paddle` objects and bind different keys to each:
 
 ```python
-def l_point(self):
-    self.l_score += 1
-    self.update_score()
+l_paddle = Paddle((-350, 0))
+r_paddle = Paddle((350, 0))
+
+screen.listen()
+screen.onkey(key="w", fun=l_paddle.move_up)
+screen.onkey(key="s", fun=l_paddle.move_down)
+screen.onkey(key="Up", fun=r_paddle.move_up)
+screen.onkey(key="Down", fun=r_paddle.move_down)
 ```
 
-## Common Bugs on This Day
-- Ball passes through paddle: collision thresholds are too small or checked too late.
-- Game feels choppy: missing `tracer(0)`/`update()` pairing or sleep value too large.
-- Scores not updating visually: `clear()` must run before writing new values.
+W and S control the left paddle, Up and Down arrows control the right. Both paddles use the same `Paddle` class—we just pass different starting positions.
 
-## Run
+## Collision detection
+
+The main game loop checks for collisions in two places:
+
+```python
+if ball.ycor() > 280 or ball.ycor() < -280:
+    ball.bounce_y()
+
+if ball.distance(r_paddle) < 50 and ball.xcor() > 320 or ball.distance(l_paddle) < 50 and ball.xcor() < -320:
+    ball.bounce_x()
+```
+
+`ball.distance(r_paddle)` checks how close the ball is to the paddle. If it's within 50 pixels and in the right horizontal zone, we bounce. The conditions look complex because we need to check both paddles and make sure the ball is actually in the hitting zone, not just near the paddle.
+
+When the ball goes past a paddle (x coordinate exceeds the screen width), the other player scores and the ball resets to the center.
+
+## Why this matters
+
+Pong demonstrates how to build a real-time game loop with multiple independent objects. Each class does one thing: the ball moves and bounces, the paddles move up and down, the scoreboard tracks points, and `main.py` orchestrates the timing and collision checks.
+
+This same architecture—separate classes for separate responsibilities, coordinated in a central loop—applies to every game you'll build from here on.
+
+## Try it yourself
+
 ```bash
 python "main.py"
 ```
+
+Player 1 uses W and S, Player 2 uses Up and Down arrows. First to score wins—or play until you're bored.

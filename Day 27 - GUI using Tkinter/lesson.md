@@ -1,51 +1,66 @@
 # Day 27 - Tkinter Widgets, Callbacks, and Layout Managers
-Day 27 introduces desktop GUI programming with Tkinter, including widget creation, event callbacks, and layout control with `pack` and `grid`.
 
-## What You Learn
-- Creating a Tkinter app window (`Tk`, title, size, padding).
-- Building widgets (`Label`, `Button`, `Entry`).
-- Handling user actions with callback functions (`command=...`).
-- Reading input values from `Entry` and updating UI state.
-- Laying out components with `pack()` and `grid()`.
+So far, all our programs have run in the terminal. Today we're building actual desktop applications with a Graphical User Interface, using Tkinter—Python's built-in GUI library.
 
-## Day 27 Files
-- `main.py`: Tkinter basics, callback binding, and notes on `*args`/`**kwargs`.
-- `mile_to_km_converter.py`: practical conversion app using `grid` layout.
-- `main2.py`, `other_tkinter_widgets.py`: additional layout/widget experiments.
+The mileage converter in `mile_to_km_converter.py` is a complete tiny app: you type a number, click a button, and it shows the converted result. This introduces the core patterns of GUI programming.
 
-## Real App Example (`mile_to_km_converter.py`)
+## Creating the window
+
+Every Tkinter app starts with a window object:
+
+```python
+from tkinter import *
+
+window = Tk()
+window.title("Mile to Km Converter")
+window.minsize(width=300, height=150)
+window.config(padx=20, pady=20)
+```
+
+`padx` and `pady` add space around everything inside the window so it doesn't feel cramped.
+
+## Input, labels, and buttons
+
+The widgets you need are Entry (text box), Label (text display), and Button:
+
+```python
+miles_input = Entry(width=5)
+miles_input.grid(row=0, column=1)
+
+miles_label = Label(text="Miles")
+miles_label.grid(row=0, column=2)
+
+button = Button(text="Calculate", command=convert)
+button.grid(row=2, column=1)
+
+window.mainloop()
+```
+
+The `grid()` method places widgets in rows and columns. It's one of two main layout systems in Tkinter (the other is `pack`, which stacks widgets vertically).
+
+## Callbacks: connecting actions
+
+The key to any interactive GUI is the callback function. When the button is clicked, Tkinter calls the function you passed to `command`:
 
 ```python
 def convert():
     number_to_convert = float(miles_input.get())
     km_value = round(number_to_convert * 1.609)
     output_label.config(text=km_value)
-
-button = Button(text="Calculate", command=convert)
-button.grid(row=2, column=1)
 ```
 
-This is the core event-driven pattern for Tkinter: user action -> callback -> UI update.
+Notice we pass the function itself (`command=convert`), not call it (`command=convert()`). If you add parentheses, the function runs immediately when the app starts, not when you click.
 
-## Callback Example (`main.py`)
+`.get()` retrieves what's typed in the Entry field. `.config(text=...)` updates the Label to show the new result.
 
-```python
-def button_clicked():
-    my_label.config(text=my_input.get())
+## Why this matters
 
-my_button = tkinter.Button(text="Click Me", command=button_clicked)
-```
+This is the foundation for every GUI app you'll build. Whether it's a password manager, a Pomodoro timer, or a weather dashboard, the pattern is always the same: create widgets, lay them out, connect buttons to functions that read input and update the display.
 
-The function is passed by reference (`button_clicked`), not called immediately.
+## Try it yourself
 
-## Common Pitfalls
-- Button callback not firing: `command=button_clicked()` is wrong; use `command=button_clicked`.
-- Layout conflicts: do not mix `pack` and `grid` in the same parent container.
-- Conversion crash on empty input: guard `float(miles_input.get())` with validation.
-
-## Run
 ```bash
 python "mile_to_km_converter.py"
-# or
-python "main.py"
 ```
+
+Type a number of miles and click Calculate. Try changing the conversion formula to go the other direction, or add a new button that clears the input.

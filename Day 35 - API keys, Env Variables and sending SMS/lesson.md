@@ -1,80 +1,254 @@
-# Day 35 - API keys, Env Variables and sending SMS
+# Day 35 - API Keys, Environment Variables, and Sending SMS
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **API keys, Env Variables and sending SMS** and avoids generic cross-day boilerplate.
+Today we're diving into the world of external APIs and securing our credentials. When you build real applications that talk to services like Twilio, Weather APIs, or any other third-party service, you need a way to authenticate yourself without hardcoding passwords into your source code.
 
-## Table of Contents
+This lesson covers three interconnected topics: what API keys are and why they matter, how to store secrets using environment variables, and how to send SMS or WhatsApp messages using Twilio.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Why API Keys Matter
 
-## 1. What You Build
+Every service that provides data or capabilities over the internet needs to know who is making requests. Without authentication, anyone could use a service without paying or respecting rate limits. API keys are the solution— they're unique identifiers that identify you as a user of the service.
 
-You build **API keys, Env Variables and sending SMS** as a day-specific project using `requests`.
-Primary entrypoint: `main.py`.
+When you sign up for a service like Twilio, OpenWeatherMap, or Alpha Vantage, you get an API key (or a pair of keys). These keys are strings of letters and numbers that look something like `SK1234567890ABCDEF`. You include this key in your requests, and the service knows exactly who you are.
 
-## 2. Core Concepts
+Here's the critical rule: never put API keys in your source code that you plan to commit to GitHub. Thousands of developers have had their AWS accounts drained, their Twilio credits stolen, and their APIs abused because they accidentally committed keys to public repositories. The solution is environment variables.
 
-- Day-specific stack and techniques: `requests`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
+## Understanding Environment Variables
 
-## 3. Project Structure
+Environment variables are key-value pairs that exist in your operating system's environment. Every process running on your computer has access to these variables. Python can read them through the `os` module.
 
-- `main.py`: Entrypoint script coordinating the full flow.
-- `rain_alert.py`: Supporting module for project logic.
+Think of environment variables as a separate configuration layer that lives outside your code. Your code reads from this layer, but the actual values live somewhere else—usually in your terminal configuration or a `.env` file.
 
-## 4. Implementation Walkthrough
+Here's how you read an environment variable in Python:
 
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-account_sid = os.environ["TWILIO_ACCOUNT_SID"]
-auth_token = os.environ["TWILIO_AUTH_TOKEN"]
-client = Client(account_sid, auth_token)
+import os
 
-# message = client.messages.create(
-#     body="Join Earth's mightiest heroes. Like Kevin Bacon.",
-#     from_="+15017122661",
-#     to="+15558675310",
-# )
-#
-# print(message.body)
+# This reads the value of MY_API_KEY from the system environment
+api_key = os.environ.get("MY_API_KEY")
 
-# We can also use Whatsapp instead
-from twilio.rest import Client
+# If the variable doesn't exist, you get None by default
+# You can provide a default value instead:
+api_key = os.environ.get("MY_API_KEY", "fallback_default")
 ```
 
-## 6. How to Run
+The difference between `os.environ["KEY"]` and `os.environ.get("KEY")` is important. Using square brackets (`[]`) will raise a KeyError if the variable doesn't exist. Using `.get()` returns None (or your default) if it's missing, which is usually safer for optional configuration.
+
+### Setting Environment Variables
+
+On macOS and Linux, you set environment variables in your terminal using the `export` command:
+
+```bash
+export TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export TWILIO_AUTH_TOKEN="your_auth_token_here"
+export MY_API_KEY="secret_key_123"
+```
+
+These commands set the variables for your current terminal session. If you want them to persist across sessions, you add them to your shell configuration file (like `~/.bashrc` or `~/.zshrc`).
+
+On Windows, you'd use the `set` command in Command Prompt:
+
+```cmd
+set TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+Or in PowerShell:
+
+```powershell
+$env:TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+For development, many developers use a `.env` file combined with the `python-dotenv` library. You create a file called `.env` in your project root:
+
+```
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_here
+MY_API_KEY=secret_key_123
+```
+
+Then in your Python code:
+
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # This reads the .env file and sets environment variables
+
+api_key = os.environ.get("MY_API_KEY")
+```
+
+This approach is convenient because you can add `.env` to your `.gitignore` file, keeping your secrets out of version control while still having them available locally.
+
+## Introducing Twilio
+
+Twilio is a cloud communications platform that lets you send SMS messages, make phone calls, and send WhatsApp messages programmatically. They've made it incredibly simple to integrate communications into your applications.
+
+To use Twilio, you need three things:
+
+1. **Account SID** - A 34-character identifier for your Twilio account
+2. **Auth Token** - A secret password for your account
+3. **A Twilio phone number** - The number messages will be sent from
+
+You get all of these when you sign up for a free Twilio account. The free account gives you some credit to experiment with.
+
+## Sending SMS with Twilio
+
+The Twilio Python library handles all the complexity of communicating with their API. Here's the basic pattern:
+
+```python
+from twilio.rest import Client
+import os
+
+# Get credentials from environment variables
+account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+
+# Create a Twilio client
+client = Client(account_sid, auth_token)
+
+# Send an SMS message
+message = client.messages.create(
+    body="Hello from Python! This is an SMS message.",
+    from_="+1234567890",  # Your Twilio phone number
+    to="+1987654321"       # The recipient's phone number
+)
+
+# The message object contains the SID, status, and other details
+print(f"Message sent with SID: {message.sid}")
+print(f"Message status: {message.status}")
+```
+
+The `from_` parameter requires a phone number you've purchased through Twilio. The `to` parameter is any valid phone number. Both must be in E.164 format, which means they include the country code: `+1` for US numbers, `+44` for UK numbers, and so on.
+
+## Sending WhatsApp Messages
+
+Twilio also supports WhatsApp messaging. The API is almost identical to SMS, but you use WhatsApp-specific prefixes:
+
+```python
+from twilio.rest import Client
+import os
+
+account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+client = Client(account_sid, auth_token)
+
+message = client.messages.create(
+    body="Hello via WhatsApp!",
+    from_="whatsapp:+1234567890",    # Twilio's WhatsApp sandbox number
+    to="whatsapp:+1987654321"         # Recipient's WhatsApp number
+)
+
+print(f"WhatsApp message sent: {message.sid}")
+```
+
+For WhatsApp, you start with Twilio's sandbox number. Once you've tested and ready to go live, you can connect your own business WhatsApp number.
+
+## Error Handling with Twilio
+
+When working with external APIs, things can go wrong. The network might be down, the recipient's number might be invalid, or you might have exceeded your account balance. Here's how to handle these gracefully:
+
+```python
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
+import os
+
+account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+client = Client(account_sid, auth_token)
+
+try:
+    message = client.messages.create(
+        body="Test message",
+        from_="+1234567890",
+        to="+1987654321"
+    )
+    print(f"Success! Message SID: {message.sid}")
+    
+except TwilioRestException as e:
+    print(f"Twilio error: {e.code} - {e.msg}")
+    # Handle specific error codes
+    
+except Exception as e:
+    print(f"Unexpected error: {e}")
+```
+
+Common Twilio error codes include:
+- 20003: Authentication failed (check your credentials)
+- 21211: Invalid phone number
+- 21601: Phone number is not SMS-capable
+- 29999: Generic programming error (check your request format)
+
+## Practical Application: Rain Alert
+
+Let's put this together into a practical example. In the project's `rain_alert.py`, you'll see a function that checks the weather and sends an SMS if rain is expected:
+
+```python
+import requests
+from twilio.rest import Client
+import os
+
+def check_weather_and_alert():
+    # 1. Check weather using OpenWeatherMap API
+    weather_params = {
+        "lat": YOUR_LATITUDE,
+        "lon": YOUR_LONGITUDE,
+        "appid": os.environ.get("OPENWEATHER_API_KEY"),
+        "exclude": "current,minutely,daily"
+    }
+    
+    response = requests.get(
+        "https://api.openweathermap.org/data/2.5/onecall",
+        params=weather_params
+    )
+    
+    # Parse the response to check for rain in the next few hours
+    weather_data = response.json()
+    will_rain = False
+    
+    for hour_data in weather_data.get("hourly", [])[:12]:
+        weather_id = hour_data.get("weather", [{}])[0].get("id", 0)
+        if weather_id < 700:  # Weather codes below 700 indicate rain/snow
+            will_rain = True
+            break
+    
+    # 2. Send SMS if rain is expected
+    if will_rain:
+        client = Client(
+            os.environ.get("TWILIO_ACCOUNT_SID"),
+            os.environ.get("TWILIO_AUTH_TOKEN")
+        )
+        
+        client.messages.create(
+            body="It's going to rain today. Remember to bring an umbrella! ☔",
+            from_=os.environ.get("TWILIO_PHONE_NUMBER"),
+            to=os.environ.get("MY_PHONE_NUMBER")
+        )
+```
+
+This is a complete automation pipeline: fetch data from an external API, make a decision based on that data, and take action (send a notification) based on the result.
+
+## Why This Matters
+
+The combination of API keys, environment variables, and third-party service integration is the foundation of modern application development. Almost every real application you build will need to:
+
+1. Authenticate with external services (API keys)
+2. Keep those credentials secure (environment variables)
+3. Communicate with users through multiple channels (SMS, email, push notifications)
+
+These patterns appear everywhere, from the simplest scripts to enterprise-scale systems. Master them now, and you'll be able to build sophisticated applications that interact with the world beyond your own servers.
+
+## Try It Yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
+Before running, make sure you've set the required environment variables:
 
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+```bash
+export TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export TWILIO_AUTH_TOKEN="your_token_here"
+export TWILIO_PHONE_NUMBER="+1234567890"
+export MY_PHONE_NUMBER="+1987654321"
+```
 
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **API keys, Env Variables and sending SMS** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+The script will attempt to send an SMS or WhatsApp message using your Twilio credentials.

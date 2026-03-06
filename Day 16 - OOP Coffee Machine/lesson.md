@@ -1,75 +1,67 @@
 # Day 16 - Object-Oriented Programming Fundamentals
-Day 16 introduces OOP by moving from one-file procedural logic to collaborating classes with clear responsibilities.
 
-## What You Learn
+Yesterday, we built a Coffee Machine using procedural programming—lots of functions, dictionaries, and global variables. It worked, but keeping track of which function modified which dictionary got a little messy as the program grew.
 
-- Why classes are useful for organizing real programs.
-- How objects collaborate (`Menu`, `CoffeeMaker`, `MoneyMachine`).
-- How method calls replace long conditional/procedural blocks.
+Today, we are rebuilding that exact same Coffee Machine, but we're shifting our thinking to **Object-Oriented Programming (OOP)**. Instead of thinking about "functions" and "variables," we think about **Objects** that have their own data (**Attributes**) and their own capabilities (**Methods**).
 
-## Recovered Historical Notes (From Git)
+## Blueprints and objects
 
-The deleted `lesson.py` from this day included exploratory OOP practice and object usage examples:
-- creating objects (`Turtle`, `PrettyTable`)
-- calling object methods (`shape`, `color`, `add_column`)
-- seeing how objects package both data and behavior
+In our procedural version, all the code lived in `main.py`. Today, look at the project files: we have `menu.py`, `coffee_maker.py`, and `money_machine.py`. Each of these files contains a **Class**. Think of a Class as a blueprint. It describes what an object will know and what it will do.
 
-That historical context is important: Day 16 is where the course shifts from syntax exercises to **designing with objects**.
-
-## Day-Specific Architecture
-
-`main.py` does orchestration only. Core logic is delegated to classes in separate modules:
-
-- `menu.py`
-  - `MenuItem`: encapsulates one drink (ingredients + cost)
-  - `Menu`: exposes available items and lookup by name
-- `coffee_maker.py`
-  - tracks machine resources
-  - validates ingredient sufficiency
-  - updates inventory after serving
-- `money_machine.py`
-  - processes coin input
-  - verifies payment
-  - computes change and tracks profit
-
-This is the main OOP takeaway: each class owns one domain concern.
-
-## Code Reference
-
-From `main.py`:
+In `main.py`, the first thing we do is build our actual objects from those blueprints. This is the moment where the "blueprint" becomes a real, usable machine in our memory:
 
 ```python
+from menu import Menu, MenuItem
+from coffee_maker import CoffeeMaker
+from money_machine import MoneyMachine
+
 drink_menu = Menu()
 coffee_machine = CoffeeMaker()
 coin_machine = MoneyMachine()
-
-while is_machine_on:
-    order = input(f"What would you like? ({drink_menu.get_items()}): ")
-    if order == "report":
-        coffee_machine.report()
-        coin_machine.report()
-    elif order == "off":
-        is_machine_on = False
-    else:
-        drink = drink_menu.find_drink(order)
-        if coffee_machine.is_resource_sufficient(drink):
-            if coin_machine.make_payment(drink.cost):
-                coffee_machine.make_coffee(drink)
 ```
 
-From recovered `lesson.py` history:
+Now, `coffee_machine` is a real, functional object. It internally keeps track of its own water, coffee, and milk. We don't have to manage a `resources` dictionary in our main file anymore!
+
+## Calling methods on objects
+
+In yesterday's version, when the user typed "report," we called a standalone `report()` function and passed around variables. Today, the `coffee_machine` object knows how to print its own report. We just ask it to do so using the dot notation (`object.method()`):
 
 ```python
-from prettytable import PrettyTable
-
-table = PrettyTable()
-table.add_column("Pokemon Name", column=["Pikachu", "Squirtle", "Charmander"])
-table.add_column("Type", column=["Electric", "Water", "Fire"])
-print(table)
+if order == "report":
+    coffee_machine.report()
+    coin_machine.report()
 ```
 
-## Run
+We are commanding the objects to perform their built-in tasks. The `MoneyMachine` handles the cash report, and the `CoffeeMaker` handles the ingredient inventory.
+
+## The logic flow in main.py
+
+If a user orders a latte, look at how clean the code reads once the heavy lifting is moved into those classes:
+
+```python
+drink = drink_menu.find_drink(order)
+
+if coffee_machine.is_resource_sufficient(drink):
+    if coin_machine.make_payment(drink.cost):
+        coffee_machine.make_coffee(drink)
+```
+
+Notice the conversation happening here:
+1. We ask the `drink_menu` object to find the specified drink. It hands us back a `MenuItem` object.
+2. We ask the `coffee_machine` if it has enough resources for that specific `MenuItem`.
+3. We ask the `coin_machine` to handle the payment. It prompts the user for coins, checks the total, and gives change.
+4. If everything passes, we command the `coffee_machine` to actually brew the coffee.
+
+## Why this shift matters
+
+The `main.py` is now incredibly short—just 25 lines. All the complex, messy logic about counting coins or subtracting water amounts is hidden away inside the classes. As the programmer writing the main loop, you just plug the objects together and let them do all the work.
+
+This is the power of OOP: it lets us build much larger, more complex systems without our "main" logic becoming an unreadable mess.
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
+
+Play with it just like yesterday. Functionally, it's identical to the user, but architecturally, it's totally different—and much more robust.

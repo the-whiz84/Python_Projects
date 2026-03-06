@@ -1,81 +1,163 @@
-# Day 41 - Favorite Movie Project & Web Foundation - Introduction to HTML
+# Day 41 - Introduction to HTML and Your First Web Pages
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Favorite Movie Project & Web Foundation - Introduction to HTML** and avoids generic cross-day boilerplate.
+Today we're leaving Python behind and stepping into web development. HTML (HyperText Markup Language) is the foundation of every website you've ever visited. While Python handles the logic behind the scenes, HTML structures the content that appears in your browser.
 
-## Table of Contents
+This day introduces the building blocks of web pages: headings, paragraphs, and void elements. You'll create your first HTML documents and see them come alive in your browser.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## What is HTML?
 
-## 1. What You Build
+HTML is not a programming language—it's a markup language. That means it describes the structure and content of a page, rather than executing logic. Think of it like the skeleton of a webpage: it tells the browser what content exists and how it's organized, but not how it looks (that's CSS's job, which we'll cover tomorrow).
 
-You build **Favorite Movie Project & Web Foundation - Introduction to HTML** as a day-specific project using `html/css`.
-Primary entrypoint: `index.html`.
+The first websites were created using only HTML. They were simple—text, headings, and links—but they worked. As the web evolved, we added CSS for styling and JavaScript for interactivity, but HTML remains the bedrock everything else builds upon.
 
-## 2. Core Concepts
+## Your First HTML Document
 
-- Day-specific stack and techniques: `html/css`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
+Every HTML document follows a basic structure:
 
-Historical lesson signals recovered from git history:
-- 1. What is HTML? Hyper Text Markup Language
-- The first websites were created using only HTML.
-- HTML defines the construct and structure of the website.
-
-## 3. Project Structure
-
-- `index.html`: Static web page source.
-- `index_favorite_movie_project.html`: Static web page source.
-- `solution.html`: Static web page source.
-
-## 4. Implementation Walkthrough
-
-1. Lay out semantic sections first, then apply styles incrementally.
-2. Use consistent class naming so structure and styles stay maintainable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `index.html`:
 ```html
-<p>This is a paragraph</p>
-<hr />
-<p>This is another paragraph</p>
-<p>
-To see a World in a Grain of Sand<br />
-And a Heaven in a Wild Flower,<br />
-Hold Infinity in the palm of your hand<br />
-And Eternity in an hour.<br />
-</p>
-# William Blake
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My First Page</title>
+    </head>
+    <body>
+        <h1>Hello, World!</h1>
+        <p>This is my first webpage.</p>
+    </body>
+</html>
 ```
 
-## 6. How to Run
+Let's break down what's happening here:
+
+- `<!DOCTYPE html>` tells the browser this is an HTML5 document
+- `<html>` is the root element that wraps everything
+- `<head>` contains metadata (title, character encoding, styles)
+- `<body>` contains everything visible on the page
+- `<h1>` is the main heading
+- `<p>` is a paragraph
+
+## Headings: Organizing Content
+
+Headings create hierarchy in your content. HTML provides six levels:
+
+```html
+<h1>The Main Title</h1>
+<h2>A Major Section</h2>
+<h3>A Subsection</h3>
+<h4>A Minor Subsection</h4>
+<h5>Even Smaller Heading</h5>
+<h6>The Smallest Heading</h6>
+```
+
+In the movie project, you'll see:
+
+```html
+<h1>Radu's Greatest Movies of All Time</h1>
+
+<h2>Top 10 best movies I've watched</h2>
+
+<hr />
+
+<h3>The Shawshank Redemption</h3>
+<p>
+    This is the only movie I can gladly re-watch anytime.<br />
+    One of the classic movies that everyone should watch at least once.
+</p>
+```
+
+Notice how each heading level creates a clear structure. The `<h1>` is the most important (there should typically be only one per page), and the others create a hierarchy of information.
+
+## Paragraphs and Line Breaks
+
+The `<p>` element wraps text into paragraphs:
+
+```html
+<p>This is a paragraph of text. The browser will automatically add spacing above and below this block of text.</p>
+
+<p>Here's another paragraph with a line break inside it.<br />
+See how the break tag creates a new line without starting a new paragraph?</p>
+```
+
+The `<br /> tag is a void element—it doesn't have a closing tag because it doesn't wrap any content. It simply inserts a line break where you place it.
+
+## Void Elements
+
+HTML has several void elements that don't require closing tags:
+
+- `<br />` - Line break
+- `<hr />` - Horizontal rule (a divider line)
+- `<img />` - Image (requires src attribute)
+- `<input />` - Input field
+
+The favorite movie project uses `<hr />` to create visual breaks between sections:
+
+```html
+<h1>Radu's Greatest Movies of All Time</h1>
+<h2>Top 10 best movies I've watched</h2>
+
+<hr />
+
+<h3>The Shawshank Redemption</h3>
+<p>Description of the movie...</p>
+```
+
+## Viewing Your HTML
+
+To see your HTML in action, you have several options:
+
+### Option 1: Open Directly in Browser
+Simply double-click the HTML file in your file explorer, or right-click and choose "Open with" → your browser.
+
+### Option 2: Use VS Code Live Server (Recommended)
+If you're using VS Code, install the "Live Server" extension:
+1. Open your HTML file in VS Code
+2. Right-click and select "Open with Live Server"
+3. Any changes you make will instantly refresh in the browser
+
+This is incredibly useful as you build—see your changes immediately without manually refreshing.
+
+## Semantic HTML: Why Structure Matters
+
+Modern HTML is about semantics—using the right element for the right job. Instead of just `<div>` everywhere, we use elements that describe their content:
+
+- `<header>` - Page or section header
+- `<nav>` - Navigation links
+- `<main>` - Main content area
+- `<article>` - Self-contained content
+- `<section>` - Thematic grouping
+- `<footer>` - Page or section footer
+
+While today's exercises use basic elements, keeping semantics in mind helps create maintainable code.
+
+## Try It Yourself
+
+Open `index_favorite_movie_project.html` in your browser. You'll see a list of great movies with headings and descriptions.
+
+Try modifying it:
+1. Change the main heading to your name
+2. Add your own favorite movies using `<h3>` for the title and `<p>` for the description
+3. Add `<hr />` elements between each movie
+4. Use `<br />` within paragraphs when you want a line break without extra spacing
+
+## How the Browser Parses HTML
+
+Understanding how browsers read HTML helps debug issues:
+
+1. The browser reads the document from top to bottom
+2. It constructs the Document Object Model (DOM)—a tree of all elements
+3. It applies default styles (every browser has built-in CSS)
+4. It renders the visual result
+
+If you forget a closing tag, the browser tries to guess what you meant. Sometimes it works; sometimes it creates unexpected results. This is why valid, well-structured HTML matters.
+
+## Moving Forward
+
+Today you learned the foundation. Tomorrow we'll add CSS to make things look beautiful. Later, we'll add JavaScript for interactivity. But it all starts here—with HTML telling the browser what content exists.
+
+## Try It Yourself
 
 ```bash
-open "index.html"
+open "index_favorite_movie_project.html"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Favorite Movie Project & Web Foundation - Introduction to HTML** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+Or if you're using VS Code with Live Server installed, right-click and select "Open with Live Server" to see changes update in real-time.

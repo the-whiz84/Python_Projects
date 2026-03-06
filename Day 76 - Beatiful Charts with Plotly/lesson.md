@@ -1,79 +1,151 @@
-# Day 76 - Beatiful Charts with Plotly
+# Day 76 - Interactive Analytics Dashboards with Plotly
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Beatiful Charts with Plotly** and avoids generic cross-day boilerplate.
+Today, we move from static charts to interactive ones, but the real lesson is still data preparation. Plotly can make a chart feel modern and responsive, but it cannot rescue a dataset full of missing ratings, duplicate apps, text-valued numbers, and outliers that flatten the scale.
 
-## Table of Contents
+The Play Store project works because the cleanup and the chart design support each other.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Clean the App Store Dataset
 
-## 1. What You Build
+The notebook starts by making the raw table easier to work with:
 
-You build **Beatiful Charts with Plotly** as a day-specific project using `notebook`.
-Primary entrypoint: `Google Play Store App Analytics.ipynb`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `notebook`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-Historical lesson signals recovered from git history:
-- Google Play Store Analytics
-- 1. Data Cleaning: Removing NaN Values and Duplicates
-- The first step as always is getting a better idea about what we're dealing with.
-
-## 3. Project Structure
-
-- `Google Play Store App Analytics.ipynb`: Primary analysis notebook.
-- `apps.csv`: Dataset/input data consumed by the day project.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Run notebook cells in order to preserve variable state and reproducible results.
-2. Inspect and clean data before plotting or statistical interpretation.
-3. Document conclusions directly beside code so insights remain auditable.
-
-## 5. Day Code Snippet
-
-Excerpt from `Google Play Store App Analytics.ipynb`:
 ```python
-# Show numeric output in decimal format e.g., 2.15
 pd.options.display.float_format = '{:,.2f}'.format
-# Solve error warning for future version when removing duplicates
 pd.options.mode.copy_on_write = True
+
+df_apps = pd.read_csv('apps.csv')
+df_apps.drop(columns=['Last_Updated', 'Android_Ver'], inplace=True)
 ```
 
-## 6. How to Run
+That early cleanup is useful for two reasons:
 
-```bash
-pip install -r requirements.txt
+- it removes fields that are not part of the analysis
+- it makes the remaining table easier to reason about
+
+The next step is handling incomplete rows:
+
+```python
+df_apps_clean = df_apps.dropna()
+df_apps_clean.isna()
 ```
-```bash
-jupyter notebook
+
+For an exploratory notebook, this is a reasonable trade. The goal is not perfect imputation. The goal is a dependable working set for the charts that come later.
+
+## 2. Remove Duplicates and Convert Text to Numbers
+
+Marketplace scrapes often include the same app more than once. If you ignore that, your category counts and install totals get inflated.
+
+```python
+df_apps_clean.drop_duplicates(subset='App', keep='first', inplace=True)
 ```
 
-## 7. Common Pitfalls and Debug Tips
+The key detail is `subset='App'`. A full-row duplicate check would miss many practical duplicates because two entries for the same app can differ in review count or other secondary fields.
 
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Reproduce failures with the smallest input first, then expand once stable.
+The notebook then fixes the numeric columns stored as strings. `Installs` arrives with commas:
 
-## 8. Practice Extensions
+```python
+df_apps_clean.Installs = df_apps_clean.Installs.astype(str).str.replace(',', "")
+df_apps_clean.Installs = pd.to_numeric(df_apps_clean.Installs)
+```
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+And `Price` arrives with currency formatting:
 
-## 9. Key Takeaways
+```python
+df_apps_clean.Price = df_apps_clean.Price.astype(str).str.replace('$', "")
+df_apps_clean.Price = pd.to_numeric(df_apps_clean.Price)
+df_apps_clean = df_apps_clean[df_apps_clean['Price'] < 250]
+```
 
-- **Beatiful Charts with Plotly** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+Filtering the extreme prices is a practical move. One novelty app with a huge price tag can distort the scale and make the real market hard to see.
+
+## 3. Choose Plotly Charts That Fit the Question
+
+The first Plotly chart is a donut chart for content ratings:
+
+```python
+ratings = df_apps_clean.Content_Rating.value_counts()
+
+fig = px.pie(labels=ratings.index,
+             values=ratings.values,
+             title="Content Rating",
+             names=ratings.index,
+             hole=0.6)
+
+fig.update_traces(textposition='inside', textinfo='percent', textfont_size=15)
+fig.show()
+```
+
+This works because the categories are mutually exclusive and the user benefits from hover-based exploration.
+
+The notebook then groups installs by category and moves to a horizontal bar chart:
+
+```python
+category_installs = df_apps_clean.groupby('Category').agg({'Installs': pd.Series.sum})
+category_installs.sort_values('Installs', ascending=True, inplace=True)
+
+h_bar = px.bar(x=category_installs.Installs,
+               y=category_installs.index,
+               orientation='h')
+h_bar.show()
+```
+
+The horizontal orientation is the right choice because category names are text-heavy. A vertical chart would spend too much of its visual budget on rotated labels.
+
+## 4. Build Better Category Comparisons with Aggregation and Merge
+
+One of the stronger ideas in the notebook is category concentration. Total installs alone do not tell the whole story. A category with huge installs and very few apps means something different from a category with huge installs spread across thousands of apps.
+
+To compare those two dimensions, the notebook combines app counts with install totals:
+
+```python
+cat_number = df_apps_clean.groupby('Category').agg({'App': pd.Series.count})
+cat_merged_df = pd.merge(left=cat_number, right=category_installs, on='Category', how="inner")
+
+scatter = px.scatter(data_frame=cat_merged_df,
+                     x='App',
+                     y='Installs',
+                     title='Category Concentration',
+                     size='App',
+                     hover_name=cat_merged_df.index,
+                     color='Installs')
+
+scatter.update_layout(xaxis_title="Number of Apps (Lower=More Concentrated)",
+                      yaxis_title="Installs",
+                      yaxis=dict(type='log'))
+scatter.show()
+```
+
+The log scale is a smart choice because app-store data is extremely uneven. Without it, a few giant categories would dominate the plot.
+
+The notebook also cleans multi-valued genres by splitting on semicolons and stacking the result:
+
+```python
+stack = df_apps_clean.Genres.str.split(';', expand=True).stack()
+num_genres = stack.value_counts()
+```
+
+That is a useful normalization pattern. A single cell should not quietly contain multiple categories if you plan to count categories later.
+
+Finally, the notebook compares free and paid apps by category:
+
+```python
+df_free_vs_paid = df_apps_clean.groupby(["Category", "Type"], as_index=False).agg({'App': pd.Series.count})
+```
+
+That grouped summary is a good example of how dashboard data is usually prepared: first build compact tables around one question, then feed those tables into the charting layer.
+
+## How to Run the Play Store Analytics Notebook
+
+1. Install the dependencies:
+   ```bash
+   pip install pandas plotly
+   ```
+2. Open `Google Play Store App Analytics.ipynb` from this folder.
+3. Run the cleanup cells first so `df_apps_clean` is ready before any visualizations.
+4. Check the main outputs:
+   - donut chart for content ratings
+   - horizontal bar chart for installs by category
+   - scatter plot for category concentration
+
+## Summary
+
+Today, you learned that interactive charts are only as good as the table behind them. You cleaned a scraped marketplace dataset, removed duplicates, converted text-valued numbers into numeric columns, and used Plotly to build charts that support comparison rather than just decoration. The notebook is a good example of how data cleaning and chart choice should work together.

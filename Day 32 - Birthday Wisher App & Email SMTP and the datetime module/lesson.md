@@ -1,81 +1,72 @@
-# Day 32 - Birthday Wisher App & Email SMTP and the datetime module
+# Day 32 - Birthday Wisher App, Email SMTP, and Datetime
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Birthday Wisher App & Email SMTP and the datetime module** and avoids generic cross-day boilerplate.
+Today we're building an automated birthday wisher. The program checks if anyone in your birthday list has a birthday today, picks a random congratulatory letter, personalizes it with their name, and emails it to them.
 
-## Table of Contents
+This introduces three new concepts: the datetime module for working with dates, SMTP for sending emails, and combining file I/O with external APIs.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Getting today's date
 
-## 1. What You Build
+The datetime module gives us access to the current date and time:
 
-You build **Birthday Wisher App & Email SMTP and the datetime module** as a day-specific project using `pandas`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `pandas`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `birthdays.csv`: Dataset/input data consumed by the day project.
-- `main_email_smtp_and_the_datetime_module.py`: Supporting module for project logic.
-
-## 4. Implementation Walkthrough
-
-1. Load tabular data, clean null/edge values, then compute the target metrics.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-my_email = os.environ.get("MY_EMAIL")
-email_password = os.environ.get("MY_EMAIL_PASSWD")
-email_server = "smtp.gmail.com"
+import datetime as dt
 
-
-def send_email(birthday_email, birthday_letter):
-	with smtplib.SMTP(host=email_server, port=587) as connection:
-		connection.starttls()
-		connection.login(user=my_email, password=email_password)
-		connection.sendmail(
-			from_addr=my_email,
-			to_addrs=birthday_email,
-			msg=f"Subject: HAPPY BIRTHDAY!!\n\n{birthday_letter}"
-		)
+today = dt.datetime.now()
+today_month = today.month
+today_day = today.day
 ```
 
-## 6. How to Run
+Now we have the current month and day as integers.
+
+## Matching birthdays
+
+We load the birthdays CSV and turn it into a dictionary where the key is the month-day tuple:
+
+```python
+data = pandas.read_csv("birthdays.csv")
+birthdays_dict = {(row.month, row.day): row for (index, row) in data.iterrows()}
+
+if (today_month, today_day) in birthdays_dict:
+    recipient_name = birthdays_dict[today_month, today_day]["name"]
+    recipient_email = birthdays_dict[today_month, today_day]["email"]
+```
+
+This makes lookup O(1) instead of scanning through the whole file each time the script runs.
+
+## Sending emails with SMTP
+
+SMTP (Simple Mail Transfer Protocol) is the standard way to send emails. Python's `smtplib` handles the connection:
+
+```python
+def send_email(birthday_email, birthday_letter):
+    with smtplib.SMTP(host="smtp.gmail.com", port=587) as connection:
+        connection.starttls()
+        connection.login(user=my_email, password=email_password)
+        connection.sendmail(
+            from_addr=my_email,
+            to_addrs=birthday_email,
+            msg=f"Subject: HAPPY BIRTHDAY!!\n\n{birthday_letter}"
+        )
+```
+
+`starttls()` upgrades the connection to encrypted mode. The email credentials come from environment variables—never hardcode passwords in your code.
+
+## Personalizing the letter
+
+We pick a random letter template and replace `[NAME]` with the actual recipient's name:
+
+```python
+random_choice = random.randint(1, 3)
+with open(f"letter_templates/letter_{random_choice}.txt") as file:
+    file_data = file.read()
+    new_text = file_data.replace("[NAME]", recipient_name)
+    send_email(recipient_email, new_text)
+```
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- Check nulls and dtypes before aggregations or charts to avoid misleading results.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Birthday Wisher App & Email SMTP and the datetime module** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Make sure to set `MY_EMAIL` and `MY_EMAIL_PASSWD` environment variables first. For testing, add a birthday entry matching today's date in `birthdays.csv`.

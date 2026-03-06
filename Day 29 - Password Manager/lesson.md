@@ -1,79 +1,70 @@
 # Day 29 - Password Manager
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Password Manager** and avoids generic cross-day boilerplate.
+Today we're building a password manager that generates secure passwords and saves them to a local file. This combines the GUI skills from Days 27-28 with file I/O from Day 24.
 
-## Table of Contents
+The app has three main jobs: generate a random password, let the user enter website and account details, and save everything to a text file.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Generating passwords
 
-## 1. What You Build
+The password generator creates a random mix of letters, numbers, and symbols:
 
-You build **Password Manager** as a day-specific project using `tkinter`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-
-## 4. Implementation Walkthrough
-
-1. Create UI widgets, bind callbacks, and keep state updates deterministic.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-WHITE = "#F6F5F5"
-BEIGE = "#F9E2AF"
-TEAL = "#009FBD"
-PURPLE = "#4A249D"
-
-# ---------------------------- PASSWORD GENERATOR ------------------------------- #
-
 def generate_password():
-	letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
-			   'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-	numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-	symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
+    letters = ['a', 'b', 'c', ..., 'z', 'A', ..., 'Z']
+    numbers = ['0', '1', ..., '9']
+    symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
 
-	password_list = [choice(letters) for _ in range(randint(10, 12))]
+    password_list = [choice(letters) for _ in range(randint(10, 12))]
+    password_list += [choice(symbols) for _ in range(randint(2, 4))]
+    password_list += [choice(numbers) for _ in range(randint(2, 4))]
+
+    shuffle(password_list)
+    password = "".join(password_list)
+
+    passwd_entry.delete(0, END)
+    passwd, f"{password_entry.insert(0}")
+    pyperclip.copy(password)
 ```
 
-## 6. How to Run
+We build a list of random characters, shuffle it so the types are mixed up, join them into a string, and then copy it to the clipboard with `pyperclip.copy()`. That last step saves the user from manually selecting and copying the password.
+
+## Saving data
+
+When the user clicks Add, we validate the input and append to the file:
+
+```python
+def save():
+    website = website_entry.get()
+    username = username_entry.get()
+    password = passwd_entry.get()
+
+    if len(website) == 0 or len(password) == 0:
+        messagebox.showinfo(title="Oops", message="Please make sure you haven't left any fields empty!")
+    else:
+        is_ok = messagebox.askokcancel(title=website, message=f"These are the details entered: \nEmail: {username}\nPassword: {password}\n Is it Ok to save?")
+        if is_ok:
+            with open("data.txt", "a") as file:
+                file.write(f"Website Name: {website} | Username: {username} | Password: {password}\n")
+            website_entry.delete(0, END)
+            passwd_entry.delete(0, END)
+```
+
+We use `messagebox.askokcancel()` to show a confirmation dialog. The "a" mode in `open()` appends to the file instead of overwriting it, so we keep a history of all saved passwords.
+
+## Environment variables
+
+Notice this line:
+
+```python
+username_entry.insert(0, os.environ.get("MY_EMAIL", ""))
+```
+
+We use an environment variable for the default email. If `MY_EMAIL` isn't set in your system, it defaults to an empty string instead of crashing.
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Password Manager** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+Generate a password, enter a website name, and click Add. Check the `data.txt` file afterward to see your saved credentials.

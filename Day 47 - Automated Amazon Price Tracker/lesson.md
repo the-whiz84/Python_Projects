@@ -1,79 +1,95 @@
-# Day 47 - Automated Amazon Price Tracker
+# Day 47 - Automated Amazon Price Tracker: Beating Bot Detection
 
-This lesson is manually reconstructed from this day’s real project files. It focuses specifically on **Automated Amazon Price Tracker** and avoids generic cross-day boilerplate.
+We've already learned how to scrape data with BeautifulSoup and how to push data to an API like Spotify. Today, we're building something truly practical: an automated price tracker that watches an Amazon product for you and sends you an email the second it drops below a certain threshold.
 
-## Table of Contents
+This project introduces a massive new hurdle in web scraping: **How do you scrape websites that actively deploy anti-bot countermeasures?**
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## The Anatomy of an HTTP Request: Dealing with Headers
 
-## 1. What You Build
+When you type a URL into your browser, it sends an HTTP `GET` request to the server. But it doesn't just ask for the HTML file; it sends a block of "meta-information" called **Headers**. These headers tell the server your IP address, your system language, what browser you are using, and even your operating system version.
 
-You build **Automated Amazon Price Tracker** as a day-specific project using `requests`, `beautifulsoup`, `bs4`.
-Primary entrypoint: `main.py`.
+Amazon's servers look at these headers to fingerprint the incoming request. If they determine you are a human, they serve the HTML. If they determine you are a bot, they flat-out reject your connection.
 
-## 2. Core Concepts
+If we just use a blank `requests.get()`, our script identifies itself as `"User-Agent": "python-requests/2.X.X"`. Amazon will instantly block us. We have to "dress up" our request to look like a real browser running on a real desktop:
 
-- Day-specific stack and techniques: `requests`, `beautifulsoup`, `bs4`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-
-## 4. Implementation Walkthrough
-
-1. Call external web/API resources and normalize returned data before use.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-URL = "https://www.amazon.de/-/en/dp/B0B7CQ2CHH/?coliid=I1HM1XKBV51B6&colid=20854P5NY1AMF&ref_=list_c_wl_lv_ov_lig_dp_it&th=1"
+headers = {
+    # The User-Agent is the single most important header for evading basic bot detection.
+    # It tells Amazon exactly what browser and OS we're using.
+    'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15...",
 
-DESIRED_PRICE = 200
+    # Accept-Language tells the server what languages our 'browser' prefers. A bot wouldn't usually send this.
+    'Accept-Language': "en-US,en;q=0.9",
 
-my_email = os.environ.get("MY_EMAIL")
-email_password = os.environ.get("MY_EMAIL_PASSWD")
+    # We can even pretend we just navigated away from a Google Search
+    'Referer': 'https://www.google.com'
+}
 
-
-# Set up your headers by using https://myhttpheader.com
-headers = { 
-    'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    'Accept-Encoding': "gzip, deflate",
-    'sec-fetch-mode': "navigate",
-    'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15",
+response = requests.get(URL, headers=headers)
 ```
 
-## 6. How to Run
+You can find what your personal headers are by visiting [myhttpheader.com](https://myhttpheader.com). Including these is often the difference between executing your script successfully and getting a "403 Forbidden" or "503 Service Unavailable" error.
 
-```bash
-python "main.py"
+## Advanced DOM Parsing with LXML
+
+You'll notice in `main.py` we're importing `lxml` and using it instead of the standard Python `html.parser`.
+
+```python
+import lxml
+soup = BeautifulSoup(html_data, "lxml")
 ```
 
-## 7. Common Pitfalls and Debug Tips
+**Why the switch?**
+The internet is messy. Massive legacy websites like Amazon are stitched together by hundreds of developers over decades. Their HTML is often malformed—missing closing tags, nested incorrectly, or polluted with tracking scripts.
 
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+The built-in `html.parser` is strict. If it hits broken HTML, it might fail or build the soup tree incorrectly. `lxml` is written in highly optimized C. It is not only significantly faster (vital if you are scraping thousands of products), but it is aggressively fault-tolerant. It will happily parse through broken DOM structures and still give you usable data. Ensure you have it installed: `pip install lxml`.
 
-## 8. Practice Extensions
+## Finding and Transforming the Price
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+Amazon changes its layout via A/B testing frequently, so the CSS "selector" (the class we look for) might change depending on the day or even the location you scrape from.
 
-## 9. Key Takeaways
+```python
+price_data = soup.find(name="span", class_="aok-offscreen")
+price_unformatted = (price_data.text).split("$")[1]
 
-- **Automated Amazon Price Tracker** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- This lesson was authored directly from day code and project artifacts where no prior lesson file existed.
+# We cast the text string to a floating-point number so we can perform comparative logic
+price = float(price_unformatted.split()[0])
+```
+
+## The Email Alert: SMTP Security
+
+When the price drops, we want to know immediately. We use `smtplib` to manage a secure connection to Google's mail servers.
+
+```python
+if price < DESIRED_PRICE:
+    message = f"Subject: Amazon Price Tracker Alert\n\n{product_name} is now ${price}!\n{URL}"
+
+    # 587 is the standard port for secure SMTP submission
+    connection = smtplib.SMTP(host="smtp.gmail.com", port=587)
+    with connection:
+        # Start TLS (Transport Layer Security) to encrypt our password before we send it
+        connection.starttls()
+        connection.login(user=my_email, password=email_password)
+        connection.sendmail(...)
+```
+
+**Watch out—** If you're using Gmail, Google disables basic username/password logins for Python scripts. You must go into your Google Account Security settings, enable 2-Step Verification, and generate a specific 16-character **"App Password"** for your script.
+
+## Running the Amazon Price Tracker
+
+1. Set your environment variables in your terminal:
+   ```bash
+   export MY_EMAIL='your_email@gmail.com'
+   export MY_EMAIL_PASSWD='your_16_char_app_password'
+   ```
+2. Open `main.py` and set your `URL` and `DESIRED_PRICE`.
+3. Run the script:
+   ```bash
+   python "main.py"
+   ```
+
+## Summary
+
+Today's architecture perfectly illustrates the "cat-and-mouse" game of web scraping. By crafting realistic HTTP headers, you bypassed server-side bot detection. By adopting `lxml`, you parsed fractured frontend code into usable data. And by implementing TLS-secured SMTP, you built an alert system that saves you actual money.
+
+Tomorrow, we cross a threshold. We're going to dive into **Selenium**—a tool that abandons `requests` entirely and physically takes control of a real Chrome browser!

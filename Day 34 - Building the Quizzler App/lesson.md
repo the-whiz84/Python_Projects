@@ -1,88 +1,91 @@
 # Day 34 - Building the Quizzler App
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Building the Quizzler App** and avoids generic cross-day boilerplate.
+Today we're building a graphical quiz app that fetches questions from an API and displays them one at a time. You answer True or False, get immediate feedback, and see your score update.
 
-## Table of Contents
+This brings together everything we've learned: class-based architecture, API calls, and GUI programming. We also introduce type hints as a way to document what kind of data functions expect.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Type hints
 
-## 1. What You Build
+Type hints let you specify what type of data a function expects:
 
-You build **Building the Quizzler App** as a day-specific project using `tkinter`, `requests`.
-Primary entrypoint: `main.py`.
-
-## 2. Core Concepts
-
-- Day-specific stack and techniques: `tkinter`, `requests`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-Historical lesson signals recovered from git history:
-- Python Typing - Type Hints and Arrows ->
-- 1. Type Hints
-- return "hello" + name
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `data.py`: Data model/constants or structured payload definitions.
-- `question_model.py`: Supporting module for project logic.
-- `quiz_brain.py`: Supporting module for project logic.
-- `ui.py`: Supporting module for project logic.
-
-## 4. Implementation Walkthrough
-
-1. Start from the main flow and trace how input becomes final output step by step.
-2. Split repeated logic into helper functions to keep orchestration readable.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-question_bank = []
-for question in question_data:
-    question_text = question["question"]
-    question_answer = question["correct_answer"]
-    new_question = Question(question_text, question_answer)
-    question_bank.append(new_question)
+def greeting(name: str) -> str:
+    return "hello" + name
 
-
-quiz = QuizBrain(question_bank)
-quiz_ui = QuizInterface(quiz)
-
-# while quiz.still_has_questions():
-#     quiz.next_question()
+def police_check(age: int) -> bool:
+    if age > 18:
+        return True
+    else:
+        return False
 ```
 
-## 6. How to Run
+The `: str` after `name` says we expect a string. The `-> str` after the parentheses says the function returns a string. These hints don't change how Python runs the code, but they make it easier to understand what a function does and help tools catch mistakes.
+
+## Fetching questions from an API
+
+The quiz pulls questions from the Open Trivia Database:
+
+```python
+response = requests.get(url="https://opentdb.com/api.php", params=parameters)
+question_data = response.json()["results"]
+```
+
+Each question comes as a dictionary with the question text, correct answer, and incorrect answers. We extract what we need and build Question objects.
+
+## The Question model
+
+The `Question` class stores one question and its answer:
+
+```python
+class Question:
+    def __init__(self, q_text, q_answer):
+        self.text = q_text
+        self.answer = q_answer
+```
+
+Simple data classes like this are the backbone of well-organized programs.
+
+## The QuizBrain
+
+The quiz logic lives in its own class:
+
+```python
+class QuizBrain:
+    def __init__(self, q_list):
+        self.question_number = 0
+        self.score = 0
+        self.question_list = q_list
+
+    def next_question(self):
+        self.current_question = self.question_list[self.question_number]
+        self.question_number += 1
+        q_text = html.unescape(self.current_question.text)
+        return f"Q.{self.question_number}: {q_text} (True/False): "
+
+    def check_answer(self, user_answer):
+        if user_answer == self.current_question.answer:
+            self.score += 1
+            return True
+        return False
+```
+
+We use `html.unescape()` because the API returns HTML-encoded characters (like `&quot;` for quotation marks).
+
+## Building the UI
+
+The UI class wraps Tkinter and connects buttons to the quiz brain:
+
+```python
+quiz = QuizBrain(question_bank)
+quiz_ui = QuizInterface(quiz)
+```
+
+When the user clicks True or False, the UI calls `quiz.check_answer()` and updates the display.
+
+## Try it yourself
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
-
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Keep state updates in one place; desynchronized UI/game state causes subtle bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
-
-## 8. Practice Extensions
-
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
-
-## 9. Key Takeaways
-
-- **Building the Quizzler App** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+Answer the questions by clicking the True or False buttons. The app fetches fresh questions each time it runs.

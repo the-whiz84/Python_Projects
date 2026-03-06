@@ -1,23 +1,23 @@
 # Day 24 - File I/O, Context Managers, and Mail Merge Automation
-Day 24 teaches how to read and write local files safely, then use string replacement to generate many personalized outputs from one template.
 
-## What You Learn
-- File reading patterns: `.read()` vs `.readlines()`.
-- Safe file handling with `with open(...)` context managers.
-- Cleaning raw text with `.strip()`.
-- Template substitution with `.replace()`.
-- Directory-aware output paths for generated files.
+Today we're stepping away from games and into file automation. The goal is simple: we have a list of names and a letter template, and we want to generate a personalized letter for every name in the list.
 
-## Day 24 in This Folder
-There are two learning tracks:
-- `main.py`: basic file I/O operations (`append` and `write`).
-- `main_mail_merge_project.py`: real automation pipeline for invitation letters.
+This is the first day where we read and write actual files on your hard drive, not just variables in memory.
 
-## Mail Merge Flow
-1. Load all names from `Input/Names/invited_names.txt`.
-2. Load template from `Input/Letters/starting_letter.txt`.
-3. Replace `[name]` with each cleaned name.
-4. Save one letter per person under `Output/ReadyToSend/`.
+## Reading files with context managers
+
+The safest way to open a file in Python is with a `with` block, also called a context manager. It makes sure the file gets closed properly even if something goes wrong:
+
+```python
+with open("Input/Names/invited_names.txt") as name_file:
+    names = name_file.readlines()
+```
+
+`readlines()` gives us a list where each line from the file becomes one string in the list. If the file has 5 names, we get a list of 5 strings.
+
+## The mail merge logic
+
+Here's the full flow in `main_mail_merge_project.py`:
 
 ```python
 PLACEHOLDER = "[name]"
@@ -30,31 +30,28 @@ with open("Input/Letters/starting_letter.txt") as letter_file:
     for name in names:
         stripped_name = name.strip()
         new_letter = letter_contents.replace(PLACEHOLDER, stripped_name)
-        with open(f"Output/ReadyToSend/letter_for_{name}.txt", mode="w") as completed_letter:
+        with open(f"Output/ReadyToSend/letter_for_{stripped_name}.txt", mode="w") as completed_letter:
             completed_letter.write(new_letter)
 ```
 
-## Practical Fix to Notice
-In the output filename, this day currently uses `{name}` (which still contains `\n`). Use `{stripped_name}` in the filename too, otherwise generated files can include awkward trailing characters.
+Notice the `.strip()` call. When you read lines from a file, each line includes a newline character `\n` at the end. If you use the name directly without stripping it, your output files would have awkward trailing newlines in their names. `.strip()` removes those extra whitespace characters.
 
-## Basic I/O Practice Snippet (`main.py`)
+The `.replace()` method does the actual work—it finds every `[name]` in the template and swaps it with the actual name.
 
-```python
-with open("my_file.txt", mode="a") as file:
-    file.write("\nNew text")
+## Writing to new files
 
-with open("new_file.txt", mode="w") as file:
-    file.write("\nNew text in a new file.")
-```
+The inner `with open(...)` block creates a brand new file for each letter. The `mode="w"` means we're opening it in write mode, which creates the file if it doesn't exist or overwrites it if it does.
 
-## Common Pitfalls
-- Wrong working directory: run from the Day 24 folder so relative `Input/...` paths resolve.
-- Extra blank characters in names: always call `.strip()` before replacement/output naming.
-- Accidentally overwriting outputs: `mode="w"` replaces file contents each run.
+Each letter gets saved as `letter_for_John.txt`, `letter_for_Sarah.txt`, and so on in the `Output/ReadyToSend/` directory.
 
-## Run
+## Directory awareness
+
+One thing to watch: these relative paths (`Input/Names/...`) only work if you run the script from the Day 24 folder. If you're in a different directory, Python won't find the files. This is why running scripts from their project folder matters.
+
+## Try it yourself
+
 ```bash
 python "main_mail_merge_project.py"
-# optional file I/O practice script
-python "main.py"
 ```
+
+Check the `Output/ReadyToSend/` folder afterward—you'll see a personalized letter for each name in the input file.

@@ -1,87 +1,94 @@
-# Day 45 - Scraping the Web with BeautifulSoup module
+# Day 45 - Web Scraping with BeautifulSoup
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Scraping the Web with BeautifulSoup module** and avoids generic cross-day boilerplate.
+Today we're leaving the world of local files and simple scripts behind and heading out onto the internet. We're going to learn how to "scrape" websites—which is basically just a fancy word for writing a program that can read a website, find the information we want, and pull it out for us.
 
-## Table of Contents
+Whether you want to track prices on Amazon, monitor news headlines, or create a list of the 100 best movies of all time, web scraping is the tool you'll use.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## Getting Started: Requests and BeautifulSoup
 
-## 1. What You Build
+To do this properly, we need two libraries:
 
-You build **Scraping the Web with BeautifulSoup module** as a day-specific project using `requests`, `beautifulsoup`, `bs4`, `html/css`.
-Primary entrypoint: `main.py`.
+1. **`requests`**: This is like your browser's delivery driver. It goes to a URL, asks for the HTML, and brings it back to your Python script.
+2. **`BeautifulSoup`**: This is your parser. HTML looks like a giant, messy pile of tags to humans, but BeautifulSoup treats it like a structured tree that we can search through easily.
 
-## 2. Core Concepts
+## First Steps: Scraping a Local File
 
-- Day-specific stack and techniques: `requests`, `beautifulsoup`, `bs4`, `html/css`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
+Before we hit the live web, it's easier to practice on a file we already have. Look at `website.html` in your folder. This is a simple personal site, and we can use BeautifulSoup to find specific parts of it.
 
-Historical lesson signals recovered from git history:
-- 100 Movies that You Must Watch
-- Scrape the top 100 movies of all time from a website. Generate a text file called `movies.txt` that lists the movie titles in ascending order (starting from 1).
-- The result should look something like this:
-- 1. Web Scraping
+```python
+from bs4 import BeautifulSoup
 
-## 3. Project Structure
+with open("./website.html") as file:
+    contents = file.read()
 
-- `main.py`: Entrypoint script coordinating the full flow.
-- `project.py`: Entrypoint script coordinating the full flow.
-- `website.html`: Static web page source.
+soup = BeautifulSoup(contents, "html.parser")
+```
 
-## 4. Implementation Walkthrough
+Once you've made your "soup" object, you can start digging. Want all the links?
 
-1. Call external web/API resources and normalize returned data before use.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
+```python
+all_anchor_tags = soup.find_all(name="a")
+for tag in all_anchor_tags:
+    print(tag.get("href"))
+```
 
-## 5. Day Code Snippet
+Want a specific heading with a specific ID?
 
-Excerpt from `main.py`:
+```python
+heading = soup.find(name="h1", id="name")
+```
+
+The dot notation is your best friend here. If you use CSS selectors in your day-to-day web browsing, you'll love `soup.select()`.
+
+## Scraping a Live Website: Hacker News
+
+Now let's do something more interesting. In `main.py`, we're scraping a live version of Hacker News to find which article is currently the most popular.
+
 ```python
 response = requests.get("https://appbrewery.github.io/news.ycombinator.com")
 yc_webpage = response.text
 soup = BeautifulSoup(yc_webpage, "html.parser")
 
-# article_tag = soup.find(name="a", class_="storylink")
-# article_text = article_tag.getText()
-# print(article_text)
-# <a class="storylink" href="https://www.aps.org/archives/publications/apsnews/202008/feynman.cfm">Joan Feynman 1927-2020</a>
-# Joan Feynman 1927-2020
-# article_link = article_tag.get("href")
-# article_upvote = soup.find(name="span", class_="score").text
-# print(article_link)
-# print(article_upvote)
-# https://www.aps.org/archives/publications/apsnews/202008/feynman.cfm
+articles = soup.find_all(name="a", class_="storylink")
+article_upvotes = [int(score.getText().split()[0]) for score in soup.find_all(name="span", class_="score")]
 ```
 
-## 6. How to Run
+Notice the `split()[0]` part. When we scrape the upvotes, we get a string like `"120 points"`. We split it by spaces and grab the first part (`"120"`) then turn it into an integer so we can find the maximum.
+
+```python
+max_upvotes = max(article_upvotes)
+max_upvotes_index = article_upvotes.index(max_upvotes)
+print(f"The most popular article is: {article_texts[max_upvotes_index]}")
+```
+
+## Project: The 100 Best Movies of All Time
+
+Finally, in `project.py`, we're tackling a big goal: scraping the 100 best movies of all time from Empire Online and saving them to a text file.
+
+**A quick heads-up:** Some modern websites use a lot of JavaScript to show their content. Standard `requests` might just get a blank page. In this project, we use `requests_html` to "render" the page first, which is like telling Python to wait for the JavaScript to finish loading before we start scraping.
+
+```python
+all_movies = soup.find_all(name="h3", class_="listicleItem_listicle-item__title__BfenH")
+
+with open("./data/movies.txt", "a") as file:
+    for movie in movies[::-1]: # We reverse it to start from #1
+        file.write(f"{movie}\n")
+```
+
+## Running the Project
 
 ```bash
 python "main.py"
 ```
 
-## 7. Common Pitfalls and Debug Tips
+Running this will show you the top story on Hacker News right now. If you want to build the full 100 movie list, run:
 
-- External sites/APIs change often; verify selectors/fields before assuming parser bugs.
-- Reproduce failures with the smallest input first, then expand once stable.
+```bash
+python "project.py"
+```
 
-## 8. Practice Extensions
+Check the `data/` folder after it finishes—you'll have a brand new `movies.txt` file waiting for you.
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+## Moving Forward
 
-## 9. Key Takeaways
-
-- **Scraping the Web with BeautifulSoup module** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+Web scraping is a superpower, but remember to use it responsibly. Always check a site's `robots.txt` file (just go to `website.com/robots.txt`) to see what their rules are for bots. Tomorrow, we'll take this a step further by learning how to scrape sites that require you to log in!

@@ -1,88 +1,80 @@
-# Day 69 - Capstone Blog Project - Adding Users
+# Day 69 - Capstone: The Relational Blog Architecture
 
-This lesson is manually reconstructed from this day’s real project files and historical lesson notes from git history. It focuses specifically on **Capstone Blog Project - Adding Users** and avoids generic cross-day boilerplate.
+Congratulations on reaching the summit of the Flask module! Over the last 15 days, you have transitioned from returning simple strings to building a collaborative, secure **Content Management System (CMS)**.
 
-## Table of Contents
+Today's Capstone project focuses on the final, most complex piece of the puzzle: **Relational Database Design**.
 
-- [1. What You Build](#1-what-you-build)
-- [2. Core Concepts](#2-core-concepts)
-- [3. Project Structure](#3-project-structure)
-- [4. Implementation Walkthrough](#4-implementation-walkthrough)
-- [5. Day Code Snippet](#5-day-code-snippet)
-- [6. How to Run](#6-how-to-run)
-- [7. Common Pitfalls and Debug Tips](#7-common-pitfalls-and-debug-tips)
-- [8. Practice Extensions](#8-practice-extensions)
-- [9. Key Takeaways](#9-key-takeaways)
+## 1. Relational Architecture: One-to-Many
 
-## 1. What You Build
+In our previous projects, our tables were independent "islands." Today, we built bridges between them. We implemented **One-to-Many Relationships** (also called 1:N):
 
-You build **Capstone Blog Project - Adding Users** as a day-specific project using `flask`, `sqlalchemy`, `wtforms`.
-Primary entrypoint: `main.py`.
+- **User <-> BlogPost**: One user (author) can write many posts.
+- **User <-> Comment**: One user can leave many comments.
+- **BlogPost <-> Comment**: One blog post can have many comments.
 
-## 2. Core Concepts
+In SQLAlchemy, we achieve this through **Foreign Keys** and **Back-Populates**:
 
-- Day-specific stack and techniques: `flask`, `sqlalchemy`, `wtforms`.
-- Converting raw inputs/events/data into deterministic outputs.
-- Organizing logic so the main flow stays readable and debuggable.
-
-Historical lesson signals recovered from git history:
-- 1. Creating Relational Databases
-- Given that the 1st user is the admin and the blog owner. It would make sense if we could link the blog posts they write to their user in the database.
-- In the future, maybe we will want to invite other users to write posts in the blog and grant them the admin privileges.
-
-## 3. Project Structure
-
-- `main.py`: Entrypoint script coordinating the full flow.
-- `forms.py`: Supporting module for project logic.
-- `requirements.txt`: Project resource used by this day.
-
-## 4. Implementation Walkthrough
-
-1. Define route handlers and keep request parsing separate from rendering logic.
-2. Add targeted checks for edge cases and invalid paths before final output.
-3. Add targeted checks for edge cases and invalid paths before final output.
-
-## 5. Day Code Snippet
-
-Excerpt from `main.py`:
 ```python
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("FLASK_KEY")
-ckeditor = CKEditor(app)
-Bootstrap5(app)
-
-
-# TODO: Configure Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db.get_or_404(User, user_id)
+class BlogPost(db.Model):
+    # This ID links specifically to the 'id' column in the 'users' table
+    author_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("users.id"))
+    # This allows us to call 'post.author' and get the full User object
+    author: Mapped["User"] = relationship(back_populates="posts")
 ```
 
-## 6. How to Run
+This relational design prevents data duplication. We don't save the author's name in the `blog_posts` table; we save their `author_id`. If the author changes their name in the `users` table, it is automatically updated across every single blog post they've ever written!
 
-```bash
-pip install -r requirements.txt
+## 2. Granular Authorization: Custom Admin Decorators
+
+Sometimes, `@login_required` is too broad. We need to differentiate between a **Member** and an **Admin**. We implemented **Role-Based Access Control (RBAC)** using custom Python decorators.
+
+```python
+from functools import wraps
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # We explicitly check for the 'Admin' ID (usually ID 1)
+        if not current_user.is_authenticated or current_user.id != 1:
+            return abort(403) # Return "Forbidden"
+        return f(*args, **kwargs)
+    return decorated_function
 ```
-```bash
-python "main.py"
+
+By stacking decorators (e.g., `@app.route` -> `@admin_only`), we create a "Guard" for our sensitive routes (Edit/Delete). The function inside only runs if the user passes the Admin check first.
+
+## 3. UI/UX Polishing: Gravatar and Context
+
+Professional applications shouldn't force users to upload profile pictures. We integrated **Gravatar**—a global service that provides profile pictures based on an MD5/SHA256 hash of a user's email address.
+
+This teaches a crucial lesson in **UI Logic**: Instead of storing images on our server (which is slow and expensive), we generate a dynamic URL on-the-fly in the template:
+
+```jinja
+<img src="{{ gravatar_url(comment.comment_author.email) }}">
 ```
 
-## 7. Common Pitfalls and Debug Tips
+## How to Run the Capstone Blog
 
-- Route and template variable mismatches are common; verify context keys end-to-end.
-- Reproduce failures with the smallest input first, then expand once stable.
+1.  **Dependencies**:
+    ```bash
+    pip install flask flask-sqlalchemy flask-login flask-ckeditor flask-bootstrap
+    ```
+2.  **Run**:
+    ```bash
+    python main.py
+    ```
+3.  **The Capstone Test**:
+    - **Step 1**: Register a new user. You are ID #2. Verify you can read posts and leave comments but **cannot** see "Edit" or "Delete" buttons.
+    - **Step 2**: Check `blog.db` with a viewer. Notice how the `posts` and `comments` tables now contain `author_id` and `post_id` links.
+    - **Step 3**: Verify that only the user with ID #1 (the first user registered) can access the `/new-post` route.
 
-## 8. Practice Extensions
+## Summary: The Flask Masterclass
 
-- Add one improvement that increases reliability (validation, retries, or explicit error handling).
-- Add one improvement that increases maintainability (refactor repeated logic into helpers/services).
-- Add one improvement that increases usability (clearer output, better UI feedback, or richer docs).
+You have successfully built a full-stack platform involving:
 
-## 9. Key Takeaways
+- **Relational Database Design** (Solving 1:N links).
+- **Custom Decorators** (Building a security middleware).
+- **External Integration** (Using Gravatar for automated avatars).
+- **Template Logic** (Dynamic UI based on user roles).
 
-- **Capstone Blog Project - Adding Users** is strongest when the main flow is simple and each helper has one clear job.
-- Real project snippets from this day should be your baseline when reviewing or extending the code.
-- Historical lesson notes were preserved and translated into the new structure for continuity.
+Tomorrow, we move from the Web to the Terminal to master **Git**—the version control system that will safeguard all the complex code you've written this month!
