@@ -1,4 +1,4 @@
-# Day 79 - Multi-Library EDA: Plotly, Matplotlib, and Seaborn
+# Day 79 - Nobel Prize EDA Across Three Libraries
 
 Today, we put several data skills together in one notebook: cleanup, feature engineering, grouped summaries, and chart selection across multiple libraries. The Nobel Prize dataset is a good capstone because it mixes people and organizations, countries and institutions, historical timelines, and demographic fields that are incomplete for reasons that actually matter.
 

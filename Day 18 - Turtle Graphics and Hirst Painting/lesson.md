@@ -1,4 +1,4 @@
-# Day 18 - Turtle Graphics, Color Systems, and Reusable Drawing Functions
+# Day 18 - Turtle Graphics and Hirst Painting
 
 Today the course moves from terminal output to graphics. Instead of printing text, the program controls a `turtle` cursor that draws on a canvas. This folder pairs short drawing exercises with a final Hirst-style dot painting, which makes it a good introduction to graphical coordinates, pen state, and reusable drawing helpers.
 

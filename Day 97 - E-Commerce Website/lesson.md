@@ -1,19 +1,12 @@
 # Day 97 - E-Commerce Website Structure and UI Composition
 
-This project is more about website structure than backend complexity. The Flask app is small, but it establishes the page layout of an e-commerce site: home, shop, about, and contact. That makes the lesson a good one about composition, routing, and frontend organization rather than data processing.
+This project is not an e-commerce backend yet. It is the storefront shell that a real store would grow from. That distinction matters, because the teaching value here is in information architecture, template composition, and layout consistency rather than in payments, carts, or inventory logic.
 
-The value here is building a believable site skeleton that can later support real products, carts, and checkout logic.
+The app is small, but it establishes the page map and shared UI structure a storefront needs before the data layer becomes complicated.
 
-## 1. Use Flask Routes to Define the Store Structure
+## 1. Start with the Route Map Before Business Logic
 
-The app starts with a very small route layer:
-
-```python
-app = Flask(__name__)
-bootstrap = Bootstrap5(app)
-```
-
-Then defines the main pages:
+The Flask app defines a clear set of pages:
 
 ```python
 @app.route("/", methods=["GET", "POST"])
@@ -26,7 +19,7 @@ def shop():
     return render_template("shop.html")
 ```
 
-Along with:
+Along with the supporting pages:
 
 ```python
 @app.route("/about")
@@ -39,48 +32,130 @@ def contact():
     return render_template("contact.html")
 ```
 
-This is the right level of complexity for a storefront scaffold. The app establishes the navigation model first. It does not prematurely add carts, databases, or payment flows before the page structure exists.
+This is the right way to start a storefront project. Before adding product models or checkout flows, you need to know what pages exist and how users move between them.
 
-## 2. Use Bootstrap to Accelerate Layout Work
+That gives the site a basic information architecture:
 
-The project enables Bootstrap immediately:
+- landing page
+- shopping page
+- supporting brand/about page
+- contact path
+
+Without that structure, later backend work has nowhere clean to plug in.
+
+## 2. Use Bootstrap as a Layout System, Not Just a Shortcut
+
+The app initializes Bootstrap immediately:
 
 ```python
+app = Flask(__name__)
 bootstrap = Bootstrap5(app)
 ```
 
-That is a practical choice for a site like this. E-commerce pages depend heavily on consistent spacing, cards, grids, navigation, and forms. Bootstrap gives the project a predictable visual system without forcing the app to invent all of that from scratch.
+That is a practical choice for an e-commerce UI. Storefront pages usually need repeated design patterns:
 
-This is one of those cases where a CSS framework is not just convenience. It is a way to keep the layout work proportional to the project scope.
+- navigation bars
+- cards
+- carousels
+- buttons
+- spacing utilities
+- responsive grid layouts
 
-## 3. Treat the App as a Frontend Foundation
+Using Bootstrap keeps those patterns consistent across the app and lets the project spend its effort on page composition rather than on rebuilding a CSS system from scratch.
 
-Right now the routes are simple because the point of the project is page composition. That is still valuable. A real storefront needs:
+For this kind of project, a framework is not just convenience. It keeps the visual foundation predictable while the site structure is still taking shape.
 
-- a landing page
-- a shop page
-- informational pages
-- a contact path
+## 3. Build the UI Around Reusable Template Pieces
 
-This project establishes those building blocks so later iterations could attach actual product data and business logic.
+The template folder shows the project structure clearly:
 
-In other words, the current app is intentionally more scaffold than engine. That is fine. Good software often grows from a solid information architecture rather than from premature backend complexity.
+- `base.html`
+- `header.html`
+- `footer.html`
+- page-specific templates such as `index.html` and `shop.html`
+
+That is an important architectural step. Shared layout pieces belong in shared templates.
+
+The home page extends a base layout and includes shared UI fragments:
+
+```html
+{% extends "base.html" %} {% include "header.html" %}
+{% block content %}
+...
+{% include "footer.html" %}{% endblock %}
+```
+
+This keeps repeated markup out of every page and makes the site easier to evolve. If the header or footer changes, you update one shared template instead of touching every route-specific page.
+
+That is the kind of structure that matters more as sites grow.
+
+## 4. The Home Page Is a Composition Exercise
+
+The `index.html` template is not just a placeholder. It is made of several typical storefront sections:
+
+- a hero carousel
+- category cards
+- featured product cards
+
+That is useful because it teaches how storefront pages are assembled from sections rather than built as one giant block of markup.
+
+Each section has its own role:
+
+- the hero section sets the brand tone
+- the categories guide browsing
+- the featured products simulate merchandising
+
+Even without a database, the page already behaves like a store homepage structurally.
+
+## 5. Static Assets Matter in a Frontend-Heavy Flask App
+
+This project depends heavily on static assets such as images, CSS, icons, and JavaScript behavior. In a frontend-oriented Flask site, those files are part of the application experience just as much as the route functions are.
+
+That is why this day pairs well with the earlier Flask templating lessons. The backend code is small because the real product here is the page layer:
+
+- templates define structure
+- static files define presentation
+- Flask routes connect URLs to those pages
+
+Once you see the project this way, it becomes clear that the app is deliberately a frontend foundation rather than an incomplete backend.
+
+## 6. Why This Counts as Real Progress Even Without Checkout Logic
+
+It is easy to dismiss a project like this because it does not yet process orders. That would be a mistake.
+
+A real e-commerce application needs a strong shell before deeper logic is added. This project already establishes:
+
+- the route structure
+- the navigation model
+- the shared template system
+- the visual language of the site
+
+Those are not filler steps. They are the groundwork later features depend on.
+
+Once the site shell is stable, it becomes much easier to add:
+
+- real product data
+- product detail pages
+- carts
+- checkout forms
+- payment integrations
 
 ## How to Run the E-Commerce Site
 
-1. Install the dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Run the Flask app:
-   ```bash
-   python main.py
-   ```
-3. Open the local site and verify:
-   - `/` renders the home page
-   - `/shop` renders the storefront page
-   - `/about` and `/contact` render the supporting pages
+Install the dependencies and start the Flask app:
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+Then verify:
+
+- `/` renders the storefront landing page
+- `/shop` renders the main shop page
+- `/about` and `/contact` render the supporting pages
+- the shared layout pieces are being reused across the templates
 
 ## Summary
 
-Today, you built the structural shell of an e-commerce site. The Flask routes define the page map, Bootstrap provides the layout system, and the app creates a foundation that future product, cart, and checkout features could plug into. The lesson is that site architecture comes first, even when the business logic is still minimal.
+Day 97 is about building the structural shell of a storefront before introducing business logic. You mapped the key site routes, used Bootstrap as a consistent layout system, organized the frontend around reusable base, header, and footer templates, and assembled the homepage from standard e-commerce sections like hero content, categories, and featured products. The real lesson is that strong page architecture comes before carts and checkout flows, not after.

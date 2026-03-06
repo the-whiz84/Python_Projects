@@ -1,4 +1,4 @@
-# Day 85 - Desktop Image Processing and Watermark Workflows
+# Day 85 - Watermarking Images with Desktop UI
 
 This project is a good example of desktop software that does one concrete job well: take an image, place a watermark in the bottom-right corner, and save the result. The folder even contains two UI implementations, one in PyQt and one in Tkinter, which makes the day more interesting than a single-script utility.
 

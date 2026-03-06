@@ -1,4 +1,4 @@
-# Day 19 - Event Listeners, Keyboard Bindings, and Multi-Object State
+# Day 19 - Event Listeners and Turtle State
 
 Day 19 makes turtle programs interactive. Instead of running top to bottom once and exiting, the app opens a window, waits for user input, and reacts to key presses in real time. The folder also introduces multi-object state through the turtle race, where several turtles are updated inside the same loop.
 

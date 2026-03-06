@@ -1,4 +1,4 @@
-# Day 100 - Capstone Data Analysis: Police Deaths in the USA
+# Day 100 - Police Deaths in the USA
 
 Day 100 is a capstone because it asks you to combine several public datasets into one social analysis. The notebook does not work with a single table. It brings together police fatalities, poverty rates, household income, graduation rates, and racial composition by city and state. That makes the challenge less about one chart and more about integrating multiple sources responsibly.
 

@@ -1,4 +1,4 @@
-# Day 77 - NumPy Arrays, Vectorized Computation, and Matrix Operations
+# Day 77 - NumPy Arrays and Vectorized Computation
 
 Today, we step underneath pandas and work directly with the structure that powers most numeric computing in Python: the **ndarray**. NumPy is less about table labels and more about shape, axes, and operations that apply to an entire block of numbers at once.
 
@@ -91,7 +91,71 @@ plt.show()
 
 That second example is a useful bridge into image thinking. A random RGB image is just a 3D array with height, width, and color channels.
 
-## 4. Treat Images as Arrays
+## 4. Vectorized Math Replaces Many Manual Loops
+
+One of the biggest differences between Python lists and NumPy arrays shows up when you try to do arithmetic.
+
+The notebook compares two vectors:
+
+```python
+v1 = np.array([4, 5, 2, 7])
+v2 = np.array([2, 1, 3, 3])
+
+v1 + v2
+v1 * v2
+```
+
+With NumPy, those operations apply element by element across the whole array. That is very different from normal Python lists:
+
+```python
+list1 = [4, 5, 2, 7]
+list2 = [2, 1, 3, 3]
+
+list1 + list2
+list1 * list2
+```
+
+Python lists concatenate or repeat. NumPy arrays perform numeric computation.
+
+The same idea appears when a scalar is added to a whole matrix:
+
+```python
+array_2d + 10
+```
+
+This is the beginning of broadcasting. NumPy understands that a single value can be applied across every position in the array without you writing a nested loop.
+
+That is why NumPy matters so much in scientific Python. You describe the operation once, and the library applies it across the full structure efficiently.
+
+## 5. Matrix Multiplication Depends on Shape
+
+The notebook also introduces matrix multiplication with two arrays whose inner dimensions match:
+
+```python
+a1 = np.array([[1, 3],
+               [0, 1],
+               [6, 2],
+               [9, 7]])
+
+b1 = np.array([[4, 1, 3],
+               [5, 8, 5]])
+
+np.matmul(a1, b1)
+# or
+a1 @ b1
+```
+
+This is a good place to slow down and notice the shape rule:
+
+- `a1` has shape `(4, 2)`
+- `b1` has shape `(2, 3)`
+- the result has shape `(4, 3)`
+
+Matrix multiplication is not just "multiply two arrays." It is a structured operation where the inner dimensions must align.
+
+That rule becomes important later in machine learning and numerical modeling, where data is often transformed through chains of matrix operations.
+
+## 6. Treat Images as Arrays
 
 The image section makes the NumPy model feel concrete. The notebook loads an image and converts it into an array:
 
@@ -121,6 +185,8 @@ That is the deeper lesson of the day. NumPy is powerful because it lets you thin
 - transform every value at once
 - work across multiple dimensions without nested loops
 
+Once that mental model clicks, arrays stop feeling abstract. A vector, a matrix, and an image all become different shapes of the same kind of object.
+
 ## How to Run the NumPy Notebook
 
 1. Install the libraries used in the notebook:
@@ -137,4 +203,4 @@ That is the deeper lesson of the day. NumPy is powerful because it lets you thin
 
 ## Summary
 
-Today, you learned that NumPy is built around structure. The shape of an array tells you how to index it, how to slice it, and which operations make sense. Once you start thinking in terms of axes and vectorized operations, arrays, matrices, and images all begin to look like the same kind of object.
+Today, you learned that NumPy is built around structure and whole-array computation. The shape of an array tells you how to index it, slice it, and multiply it with other arrays. Vectorized arithmetic and broadcasting let you apply operations across entire datasets without manual loops, and the image section shows that even pictures can be treated as numeric arrays. That perspective is what makes NumPy such a foundational tool in Python’s data stack.

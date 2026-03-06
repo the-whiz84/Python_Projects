@@ -1,64 +1,76 @@
-# 🐍 Python 100 Days of Code: The Complete Bootcamp
+# Python 100 Days of Code Projects
 
-Welcome to my personal journey through Dr. Angela Yu's [100 Days of Code: The Complete Python Pro Bootcamp](https://www.udemy.com/course/100-days-of-code/). This repository contains a collection of projects, scripts, and applications developed over 100 days of intensive learning.
+This repository collects my project work from Dr. Angela Yu's *100 Days of Code: The Complete Python Pro Bootcamp*. It now includes a full lesson pass across the repo, so each project folder has one canonical `lesson.md` written in a consistent instructor style.
 
-## 🚀 Key Highlights
+## Current Repo State
 
-This repository covers a wide range of Python applications:
-- **Web Development**: Flask, Bootstrap, RESTful APIs, and User Authentication.
-- **Data Science & Visualization**: Pandas, Matplotlib, Seaborn, Plotly, and NumPy.
-- **Automation & Web Scraping**: Beautiful Soup, Selenium, and API-driven automation.
-- **GUIs & Games**: Tkinter, Turtle, and classic games like Pong and Snake.
-- **Professional Skills**: OOP, Version Control (Git), and Exception Handling.
+- `94` day folders are present in this repository.
+- Each day folder keeps one canonical lesson file: `lesson.md`.
+- Folder names follow the `Day XX - ...` pattern and have been compacted where older names were too long.
+- Later lessons were expanded to match project complexity instead of collapsing into short summaries.
 
-## 📂 Project Structure
+## What the Repository Covers
 
-Folders are organized chronologically and by topic:
-- `Day 01 - 14`: Python Foundations (CLI tools, logic, and base syntax).
-- `Day 15 - 31`: Intermediate GUI and OOP (Games and Desktop apps).
-- `Day 32 - 40`: Intermediate+ Web APIs and JSON handling.
-- `Day 41 - 58`: Web Development Fundamentals (HTML, CSS, Flask).
-- `Day 59 - 71`: Advanced Web Development (Databases, REST, Auth).
-- `Day 72 - 81`: Data Science and Professional Analysis.
-- `Day 82 - 100`: Capstone Projects and Advanced Automation.
+The projects move through the same progression as the course:
 
-## ⚙️ How to Run These Projects
+- Python fundamentals, control flow, functions, and OOP
+- Turtle, Tkinter, PyQt, and game projects
+- APIs, JSON, scraping, Selenium, and automation
+- Flask apps with templates, forms, auth, and databases
+- Pandas, NumPy, Matplotlib, Seaborn, Plotly, and data analysis
+- Capstones that combine several skills in one project
 
-### Prerequisites
-- **Python 3.x**: [Download here](https://www.python.org/downloads/)
-- **Virtual Environment** (Recommended):
-  ```bash
-  python -m venv .venv
-  source .venv/bin/activate  # MacOS/Linux
-  .venv\Scripts\activate     # Windows
-  ```
+## Repository Layout
 
-### Installation
-Cloning the repository and installing dependencies (where applicable):
+Each project lives in its own day folder, for example:
+
+- `Day 01 - Band Name`
+- `Day 37 - HTTP Methods and Auth Headers`
+- `Day 67 - Flask Blog CMS with Editing`
+- `Day 77 - NumPy Arrays and Vectorized Computation`
+- `Day 100 - Police Deaths in the USA`
+
+Most folders contain some combination of:
+
+- `main.py` or another entry script
+- notebooks such as `.ipynb`
+- local datasets or static assets
+- `requirements.txt`
+- `lesson.md`
+
+## How to Use the Repo
+
+### Read a lesson
+
+Open the `lesson.md` inside any day folder first. It explains the project structure, the main concepts, and how to run that specific day.
+
+### Run a project
+
+Many folders can be run directly from their own directory:
+
 ```bash
-git clone https://github.com/the-whiz84/Python_100_Days_of_Code.git
-cd Python_100_Days_of_Code
-# Check individual day folders for specific requirements.txt files
+cd "Day XX - Project Name"
+python main.py
 ```
 
-### Running a Project
-Most projects can be launched from the terminal:
+Some days use notebooks instead of a single script. For those, open the `.ipynb` file in Jupyter, VS Code, or Google Colab.
+
+### Install dependencies
+
+Some day folders include their own `requirements.txt`. Install dependencies from inside the project folder when needed:
+
 ```bash
-python "Day XX - Project Title/main.py"
+pip install -r requirements.txt
 ```
 
----
+## Notes
 
-## 📝 Learning Journey Notes
+- Not every numbered course day appears as a separate folder. Some projects were combined, and the repo reflects the actual project set rather than a placeholder folder for every calendar day.
+- Some projects require external services or credentials such as AWS, third-party APIs, or browser automation tooling. Those setup details are documented in the relevant day folder and lesson.
+- The repo includes both script-based projects and notebook-based analysis work, so the correct run path depends on the day.
 
-- **Multi-OS Development**: Started on Linux (Fedora), transitioned to MacOS from Day 15.
-- **IDE Evolution**: Utilized both VS Code and PyCharm throughout the course.
-- **Consolidated Progress**: Multi-part projects have been merged into single "Day" folders for better organization.
+## External Project Repos
 
-## 🔗 Project Links
 - [Capstone Blog Project](https://github.com/the-whiz84/Capstone_Blog_Project)
 - [Flask ToDo App](https://github.com/the-whiz84/Flask-ToDo-App)
 - [E-Shop Demo](https://github.com/the-whiz84/E-Shop-demo)
-
----
-*Built with ❤️ while learning Python.*
