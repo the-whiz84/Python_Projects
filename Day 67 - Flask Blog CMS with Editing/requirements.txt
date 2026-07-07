@@ -4,5 +4,5 @@ SQLAlchemy==2.0.50
 Bootstrap-Flask==2.5.0
 WTForms==3.2.1
 Flask-WTF==1.2.2
-Werkzeug==3.1.6
+Werkzeug==3.1.8
 Flask-CKEditor==1.0.0
